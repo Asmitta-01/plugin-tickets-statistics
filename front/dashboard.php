@@ -52,7 +52,7 @@ Html::header(__('Tickets Statistics', 'ticketsstatistics'), '', 'helpdesk', 'tic
             </div>
         </form>
 
-        <button id='ticketsstatisticsDownloadPdfBtn' class='btn btn-outline-secondary btn-sm'>
+        <button id='ticketsstatisticsDownloadPdfBtn' class='btn btn-primary btn-sm'>
             <i class='ti ti-download'></i> <?= __('Download PDF', 'ticketsstatistics') ?>
         </button>
     </div>
@@ -101,21 +101,22 @@ Html::header(__('Tickets Statistics', 'ticketsstatistics'), '', 'helpdesk', 'tic
     </div>
 
     <!-- Charts row 2 -->
-    <div class="row g-3">
+    <div class="row g-3 mb-3">
         <div class="col-12">
             <div class="card shadow-sm">
-                <div class="card-header">
-                    <?= __('Tickets opened per day', 'ticketsstatistics') . ' (' . GlpiPlugin\Ticketsstatistics\TicketsStatistics::getPeriodLabel($period) . ')' ?>
+                <div class="card-header d-flex align-items-center justify-content-between">
+                    <span>
+                        <?= __('Tickets opened per day', 'ticketsstatistics') . ' (' . GlpiPlugin\Ticketsstatistics\TicketsStatistics::getPeriodLabel($period) . ')' ?>
+                    </span>
+                    <button class="btn btn-sm btn-outline-secondary ts-reset-chart" data-canvas="chart-perday"><?= __('Reset', 'ticketsstatistics') ?></button>
                 </div>
                 <div class="card-body">
-                    <canvas id="chart-perday" style="max-height:260px"></canvas>
+                    <canvas id="chart-perday" style="height:260px"></canvas>
                 </div>
             </div>
         </div>
     </div>
 </div>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
 
 <?php
 Html::footer();

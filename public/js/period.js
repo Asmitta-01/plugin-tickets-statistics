@@ -37,6 +37,12 @@ document.addEventListener('DOMContentLoaded', function () {
         console.log('Download complete');
     });
 
+    Array.from(document.getElementsByClassName('ts-reset-chart')).forEach(el => el.addEventListener('click', function () {
+        const canvas = document.getElementById(this.dataset.canvas);
+        const chart = Chart.getChart(canvas);
+        chart.resetZoom();
+    }));
+
     try {
         loadCharts();
     } catch (error) {
@@ -113,14 +119,37 @@ function loadCharts() {
                         borderColor: '#10b981',
                         backgroundColor: 'rgba(16,185,129,.15)',
                         fill: true,
-                        tension: 0.3
+                        tension: data.perday.values.length > 60 ? 0.1 : 0.3
                     }]
                 },
                 options: {
                     plugins: {
                         legend: {
                             display: false
+                        },
+                        zoom: {
+                            pan: {
+                                enabled: true,
+                                mode: 'xy',
+                            },
+                            zoom: {
+                                wheel: {
+                                    enabled: true,
+                                },
+                                pinch: {
+                                    enabled: true
+                                },
+                                mode: 'xy',
+                            },
+                            limits: {
+                                y: { min: 0, max: Math.max(...data.perday.values) * 1.15 },
+                            },
                         }
+                    },
+                    scales: {
+                        y: {
+                            min: 0,
+                        },
                     },
                     maintainAspectRatio: false
                 }
