@@ -92,17 +92,49 @@ function loadCharts() {
                 data: {
                     labels: data.category.labels,
                     datasets: [{
-                        label: __('Tickets'),
-                        data: data.category.values,
-                        backgroundColor: '#3b82f6'
+                        label: __('New Tickets', 'ticketsstatistics'),
+                        data: data.category.values.new,
+                        backgroundColor: '#3bc519'
+                    },
+                    {
+                        label: __('Resolved/Closed tickers', 'ticketsstatistics'),
+                        data: data.category.values.resolved,
+                        backgroundColor: '#C00000'
+                    },
+                    {
+                        label: __('In progress', 'ticketsstatistics'),
+                        data: data.category.values.in_progress,
+                        backgroundColor: '#f1cd29'
                     }]
                 },
                 options: {
-                    indexAxis: 'y',
                     plugins: {
                         legend: {
                             display: false
+                        },
+                        zoom: {
+                            pan: {
+                                enabled: true,
+                                mode: 'xy',
+                            },
+                            zoom: {
+                                wheel: {
+                                    enabled: true,
+                                },
+                                pinch: {
+                                    enabled: true
+                                },
+                                mode: 'xy',
+                            },
+                            limits: {
+                                y: { min: 0, max: 2000 },
+                            },
                         }
+                    },
+                    scales: {
+                        y: {
+                            min: 0,
+                        },
                     },
                     maintainAspectRatio: false
                 }

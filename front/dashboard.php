@@ -82,7 +82,7 @@ Html::header(__('Tickets Statistics', 'ticketsstatistics'), '', 'helpdesk', 'tic
 
     <!-- Charts row 1 -->
     <div class="row g-3 mb-3">
-        <div class="col-md-5">
+        <div class="col-md-4">
             <div class="card shadow-sm h-100">
                 <div class="card-header"><?= __('Tickets by priority', 'ticketsstatistics') ?></div>
                 <div class="card-body d-flex align-items-center justify-content-center">
@@ -90,9 +90,14 @@ Html::header(__('Tickets Statistics', 'ticketsstatistics'), '', 'helpdesk', 'tic
                 </div>
             </div>
         </div>
-        <div class="col-md-7">
+        <div class="col-md-8">
             <div class="card shadow-sm h-100">
-                <div class="card-header"><?= __('Tickets by category (top 10)', 'ticketsstatistics') ?></div>
+                <div class="card-header d-flex align-items-center justify-content-between">
+                    <span><?= __('Tickets by category (top 10)', 'ticketsstatistics') ?></span>
+                    <button data-bs-toggle="tooltip" title="<?= __('Reset the zoom', 'ticketsstatistics') ?>" class="btn btn-sm btn-outline-secondary ts-reset-chart" data-canvas="chart-category">
+                        <?= __('Reset', 'ticketsstatistics') ?>
+                    </button>
+                </div>
                 <div class="card-body">
                     <canvas id="chart-category" style="max-height:280px"></canvas>
                 </div>
@@ -108,7 +113,9 @@ Html::header(__('Tickets Statistics', 'ticketsstatistics'), '', 'helpdesk', 'tic
                     <span>
                         <?= __('Tickets opened per day', 'ticketsstatistics') . ' (' . GlpiPlugin\Ticketsstatistics\TicketsStatistics::getPeriodLabel($period) . ')' ?>
                     </span>
-                    <button class="btn btn-sm btn-outline-secondary ts-reset-chart" data-canvas="chart-perday"><?= __('Reset', 'ticketsstatistics') ?></button>
+                    <button data-bs-toggle="tooltip" title="<?= __('Reset the zoom', 'ticketsstatistics') ?>" class="btn btn-sm btn-outline-secondary ts-reset-chart" data-canvas="chart-perday">
+                        <?= __('Reset', 'ticketsstatistics') ?>
+                    </button>
                 </div>
                 <div class="card-body">
                     <canvas id="chart-perday" style="height:260px"></canvas>

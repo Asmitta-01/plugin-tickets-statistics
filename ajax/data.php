@@ -83,30 +83,71 @@ foreach (
         'ORDER'   => "$table.priority ASC",
     ]) as $row
 ) {
-    $priority['labels'][] = Ticket::getPriorityName($row['priority']);
+    $priority['labels'][] = \Ticket::getPriorityName($row['priority']);
     $priority['values'][] = (int) $row['cpt'];
 }
 
 // --- By category (top 10) ---
 $category = ['labels' => [], 'values' => []];
+$categoryStats = [];
 $catTable = 'glpi_itilcategories';
+
+// Regroupement des statuts en 3 groupes
+$statusGroups = [
+    'new'        => [\Ticket::INCOMING],
+    'resolved'   => [\Ticket::SOLVED, \Ticket::CLOSED],
+    'in_progress' => [\Ticket::ASSIGNED, \Ticket::WAITING, \Ticket::ACCEPTED, \Ticket::OBSERVED],
+];
+
 foreach (
     $DB->request([
         'SELECT'    => [
-            'COUNT DISTINCT' => "$table.id AS cpt",
             "$catTable.completename AS cat_name",
+            "$table.status AS status",
+            'COUNT'  => ["$table.id AS cpt"],
         ],
         'FROM'      => $table,
-        'LEFT JOIN' => [$catTable => ['ON' => [$catTable => 'id', $table => 'itilcategories_id']]],
+        'LEFT JOIN' => [
+            $catTable => ['ON' => [$catTable => 'id', $table => 'itilcategories_id']]
+        ],
         'WHERE'     => $where,
-        'GROUPBY'   => "$catTable.id",
-        'ORDER'     => 'cpt DESC',
-        'LIMIT'     => 10,
+        'GROUPBY'   => ["$catTable.id", "$table.status"],
+        'ORDER'     => ['cpt DESC'],
     ]) as $row
 ) {
-    $category['labels'][] = $row['cat_name'] ?? __('None');
-    $category['values'][] = (int) $row['cpt'];
+    $catName = $row['cat_name'] ?? __('None');
+    $status  = (int) $row['status'];
+    $count   = (int) $row['cpt'];
+
+    // Résout le groupe
+    $group = 'in_progress'; // fallback
+    foreach ($statusGroups as $groupName => $statuses) {
+        if (in_array($status, $statuses, true)) {
+            $group = $groupName;
+            break;
+        }
+    }
+
+    if (!isset($categoryStats[$catName])) {
+        $categoryStats[$catName] = [
+            'new'         => 0,
+            'resolved'    => 0,
+            'in_progress' => 0,
+        ];
+    }
+
+    $categoryStats[$catName][$group] += $count;
 }
+
+// Trie par total décroissant, garde top 10 et supprime les catégories à 0
+uasort($categoryStats, fn($a, $b) => array_sum($b) - array_sum($a));
+$categoryStats = array_slice(array_filter($categoryStats, fn($v) => array_sum($v) > 0), 0, 10, true);
+
+// Formate pour Chart.js
+$category['labels']     = array_keys($categoryStats);
+$category['values']['new']        = array_column($categoryStats, 'new');
+$category['values']['resolved']   = array_column($categoryStats, 'resolved');
+$category['values']['in_progress'] = array_column($categoryStats, 'in_progress');
 
 // --- Per day ---
 $perday = ['labels' => [], 'values' => []];
