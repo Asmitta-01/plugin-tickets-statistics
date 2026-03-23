@@ -25,6 +25,38 @@ Html::header(__('Tickets Statistics', 'ticketsstatistics'), '', 'helpdesk', 'tic
         </div>
     </div>
 
+    <!-- Filter row -->
+    <?php
+    $period = $_GET['period'] ?? 'last30';
+    ?>
+    <div class="d-flex align-items-center justify-content-between mb-3 alert alert-secondary">
+        <form class="row align-items-end" method="get" id="ts-filter-form">
+            <div class="col-auto row gx-2 align-items-center">
+                <label for="ts-period" class="form-label mb-1 fw-semibold"><?= __('Period', 'ticketsstatistics') ?></label>
+                <select class="form-select form-select-sm" id="ts-period" name="period">
+                    <?php foreach (GlpiPlugin\Ticketsstatistics\TicketsStatistics::getAvailablePeriods() as $value => $label): ?>
+                        <option value="<?= $value ?>" <?= $period === $value ? ' selected' : '' ?>><?= htmlspecialchars($label) ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div class="col-md-5 align-items-center" id="ts-custom-period-fields" style="display:<?= $period === 'custom' ? 'block' : 'none' ?>;">
+                <label class="form-label mb-1 fw-semibold"><?= __('Custom range', 'ticketsstatistics') ?></label>
+                <div class="input-group input-group-sm">
+                    <input type="date" class="form-control" id="ts-date-from" name="date_from" value="<?= isset($_GET['date_from']) ? htmlspecialchars($_GET['date_from']) : '' ?>">
+                    <span class="input-group-text">to</span>
+                    <input type="date" class="form-control form" id="ts-date-to" name="date_to" value="<?= isset($_GET['date_to']) ? htmlspecialchars($_GET['date_to']) : '' ?>">
+                </div>
+            </div>
+            <div class="col-md-2 align-self-center" <?= $period === 'custom' ? '' : ' style="display:none;"' ?> id="ts-apply-btn-col">
+                <button type="submit" class="btn btn-primary btn-sm"><?= __('Apply', 'ticketsstatistics') ?></button>
+            </div>
+        </form>
+
+        <button id='ticketsstatisticsDownloadPdfBtn' class='btn btn-outline-secondary btn-sm'>
+            <i class='ti ti-download'></i> <?= __('Download PDF', 'ticketsstatistics') ?>
+        </button>
+    </div>
+
     <!-- Big numbers row -->
     <div class="row g-3 mb-4" id="ts-counters">
         <?php foreach (
@@ -51,7 +83,7 @@ Html::header(__('Tickets Statistics', 'ticketsstatistics'), '', 'helpdesk', 'tic
     <!-- Charts row 1 -->
     <div class="row g-3 mb-3">
         <div class="col-md-5">
-            <div class="card h-100">
+            <div class="card shadow-sm h-100">
                 <div class="card-header"><?= __('Tickets by priority', 'ticketsstatistics') ?></div>
                 <div class="card-body d-flex align-items-center justify-content-center">
                     <canvas id="chart-priority" style="max-height:280px"></canvas>
@@ -59,7 +91,7 @@ Html::header(__('Tickets Statistics', 'ticketsstatistics'), '', 'helpdesk', 'tic
             </div>
         </div>
         <div class="col-md-7">
-            <div class="card h-100">
+            <div class="card shadow-sm h-100">
                 <div class="card-header"><?= __('Tickets by category (top 10)', 'ticketsstatistics') ?></div>
                 <div class="card-body">
                     <canvas id="chart-category" style="max-height:280px"></canvas>
@@ -71,8 +103,10 @@ Html::header(__('Tickets Statistics', 'ticketsstatistics'), '', 'helpdesk', 'tic
     <!-- Charts row 2 -->
     <div class="row g-3">
         <div class="col-12">
-            <div class="card">
-                <div class="card-header"><?= __('Tickets opened per day (last 30 days)', 'ticketsstatistics') ?></div>
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <?= __('Tickets opened per day', 'ticketsstatistics') . ' (' . GlpiPlugin\Ticketsstatistics\TicketsStatistics::getPeriodLabel($period) . ')' ?>
+                </div>
                 <div class="card-body">
                     <canvas id="chart-perday" style="max-height:260px"></canvas>
                 </div>
@@ -82,90 +116,6 @@ Html::header(__('Tickets Statistics', 'ticketsstatistics'), '', 'helpdesk', 'tic
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
-<script>
-    (function() {
-        const root = CFG_GLPI.root_doc;
-        const url = root + '/plugins/ticketsstatistics/ajax/data.php';
-
-        fetch(url)
-            .then(r => r.json())
-            .then(data => {
-                // Big number counters
-                document.querySelectorAll('.ts-count').forEach(el => {
-                    const status = el.dataset.status;
-                    el.textContent = data.counters[status] ?? 0;
-                });
-
-                // Priority donut
-                new Chart(document.getElementById('chart-priority'), {
-                    type: 'doughnut',
-                    data: {
-                        labels: data.priority.labels,
-                        datasets: [{
-                            data: data.priority.values,
-                            backgroundColor: [
-                                '#e74c3c', '#e67e22', '#f1c40f', '#2ecc71', '#3498db', '#9b59b6'
-                            ]
-                        }]
-                    },
-                    options: {
-                        plugins: {
-                            legend: {
-                                position: 'right'
-                            }
-                        },
-                        maintainAspectRatio: false
-                    }
-                });
-
-                // Category bar
-                new Chart(document.getElementById('chart-category'), {
-                    type: 'bar',
-                    data: {
-                        labels: data.category.labels,
-                        datasets: [{
-                            label: '<?= __('Tickets') ?>',
-                            data: data.category.values,
-                            backgroundColor: '#3b82f6'
-                        }]
-                    },
-                    options: {
-                        indexAxis: 'y',
-                        plugins: {
-                            legend: {
-                                display: false
-                            }
-                        },
-                        maintainAspectRatio: false
-                    }
-                });
-
-                // Per-day line
-                new Chart(document.getElementById('chart-perday'), {
-                    type: 'line',
-                    data: {
-                        labels: data.perday.labels,
-                        datasets: [{
-                            label: '<?= __('Tickets opened') ?>',
-                            data: data.perday.values,
-                            borderColor: '#10b981',
-                            backgroundColor: 'rgba(16,185,129,.15)',
-                            fill: true,
-                            tension: 0.3
-                        }]
-                    },
-                    options: {
-                        plugins: {
-                            legend: {
-                                display: false
-                            }
-                        },
-                        maintainAspectRatio: false
-                    }
-                });
-            });
-    }());
-</script>
 
 <?php
 Html::footer();

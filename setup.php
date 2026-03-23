@@ -53,6 +53,14 @@ function plugin_init_ticketsstatistics(): void
     $PLUGIN_HOOKS[\Glpi\Plugin\Hooks::MENU_TOADD]['ticketsstatistics'] = [
         'helpdesk' => ['GlpiPlugin\\Ticketsstatistics\\TicketsStatistics'],
     ];
+
+    if (
+        strpos($_SERVER['REQUEST_URI'], "plugins/ticketsstatistics/front/dashboard.php") !== false
+    ) {
+        $PLUGIN_HOOKS[\Glpi\Plugin\Hooks::ADD_JAVASCRIPT]['ticketsstatistics'][] = 'js/period.js';
+        $PLUGIN_HOOKS[\Glpi\Plugin\Hooks::ADD_JAVASCRIPT]['ticketsstatistics'][] = 'js/jspdf.umd.min.js';
+        // $PLUGIN_HOOKS[\Glpi\Plugin\Hooks::ADD_CSS]['hotlinespace'][] = 'css/hotlinespace.css';
+    }
 }
 
 /**

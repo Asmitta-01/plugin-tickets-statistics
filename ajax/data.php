@@ -18,6 +18,41 @@ $DB    = DBConnection::getReadConnection();
 $table = Ticket::getTable();
 $where = ["$table.is_deleted" => 0] + getEntitiesRestrictCriteria($table);
 
+
+// Get the period filter from the request
+$period = $_GET['period'] ?? 'last30';
+switch ($period) {
+    case 'last7':
+        $where += [new \Glpi\DBAL\QueryExpression("$table.`date` >= DATE_SUB(NOW(), INTERVAL 7 DAY)")];
+        break;
+    case 'last30':
+        $where += [new \Glpi\DBAL\QueryExpression("$table.`date` >= DATE_SUB(NOW(), INTERVAL 30 DAY)")];
+        break;
+    case 'last90':
+        $where += [new \Glpi\DBAL\QueryExpression("$table.`date` >= DATE_SUB(NOW(), INTERVAL 90 DAY)")];
+        break;
+    case 'thisyear':
+        $where += [new \Glpi\DBAL\QueryExpression("YEAR($table.`date`) = YEAR(CURDATE())")];
+        break;
+    case 'lastyear':
+        $where += [new \Glpi\DBAL\QueryExpression("YEAR($table.`date`) = YEAR(CURDATE()) - 1")];
+        break;
+    case 'custom':
+        $dateFrom = $_GET['date_from'] ?? null;
+        $dateTo   = $_GET['date_to'] ?? null;
+        if ($dateFrom) {
+            $where += [new \Glpi\DBAL\QueryExpression("$table.`date` >= :date_from")];
+        }
+        if ($dateTo) {
+            $where += [new \Glpi\DBAL\QueryExpression("$table.`date` <= :date_to")];
+        }
+        break;
+    default:
+        // Default to last 30 days if an unknown period is provided
+        $where += [new \Glpi\DBAL\QueryExpression("$table.`date` >= DATE_SUB(NOW(), INTERVAL 30 DAY)")];
+        break;
+}
+
 // --- Counters by status ---
 $counters = [];
 foreach (
@@ -73,7 +108,7 @@ foreach (
     $category['values'][] = (int) $row['cpt'];
 }
 
-// --- Per day (last 30 days) ---
+// --- Per day ---
 $perday = ['labels' => [], 'values' => []];
 foreach (
     $DB->request([
@@ -82,9 +117,7 @@ foreach (
             new \Glpi\DBAL\QueryExpression("DATE($table.`date`) AS `day`"),
         ],
         'FROM'    => $table,
-        'WHERE'   => $where + [
-            new \Glpi\DBAL\QueryExpression("$table.`date` >= DATE_SUB(NOW(), INTERVAL 30 DAY)"),
-        ],
+        'WHERE'   => $where,
         'GROUPBY' => new \Glpi\DBAL\QueryExpression('`day`'),
         'ORDER'   => new \Glpi\DBAL\QueryExpression('`day` ASC'),
     ]) as $row
