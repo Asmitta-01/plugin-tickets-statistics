@@ -36,7 +36,7 @@ define('PLUGIN_TICKETSSTATISTICS_VERSION', '0.0.1');
 
 // Minimal GLPI version, inclusive
 /** @phpstan-ignore theCodingMachineSafe.function (safe to assume this isn't already defined) */
-define("PLUGIN_TICKETSSTATISTICS_MIN_GLPI_VERSION", "11.0.0");
+define("PLUGIN_TICKETSSTATISTICS_MIN_GLPI_VERSION", "10.0.16");
 
 // Maximum GLPI version, exclusive
 /** @phpstan-ignore theCodingMachineSafe.function (safe to assume this isn't already defined) */
@@ -46,7 +46,14 @@ define("PLUGIN_TICKETSSTATISTICS_MAX_GLPI_VERSION", "11.0.99");
  * Init hooks of the plugin.
  * REQUIRED
  */
-function plugin_init_ticketsstatistics(): void {}
+function plugin_init_ticketsstatistics(): void
+{
+    global $PLUGIN_HOOKS;
+
+    $PLUGIN_HOOKS[\Glpi\Plugin\Hooks::MENU_TOADD]['ticketsstatistics'] = [
+        'helpdesk' => ['GlpiPlugin\\Ticketsstatistics\\TicketsStatistics'],
+    ];
+}
 
 /**
  * Get the name and the version of the plugin
@@ -71,8 +78,8 @@ function plugin_version_ticketsstatistics(): array
     return [
         'name'           => 'TicketsStatistics',
         'version'        => PLUGIN_TICKETSSTATISTICS_VERSION,
-        'author'         => '<a href="http://www.teclib.com">Teclib\'</a>',
-        'license'        => '',
+        'author'         => 'Brayan Tiwa',
+        'license'        => 'GPLv2+',
         'homepage'       => '',
         'requirements'   => [
             'glpi' => [

@@ -9,9 +9,14 @@
         },
         "sort-packages": true
     },
+    "autoload": {
+        "psr-4": {
+            "GlpiPlugin\\Ticketsstatistics\\": "src/"
+        }
+    },
     "autoload-dev": {
         "psr-4": {
-            "GlpiPlugin\\TicketsStatistics\\Tests\\": "tests/"
+            "GlpiPlugin\\Ticketsstatistics\\Tests\\": "tests/"
         }
     }
 }
