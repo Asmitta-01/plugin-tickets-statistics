@@ -40,10 +40,10 @@ switch ($period) {
         $dateFrom = $_GET['date_from'] ?? null;
         $dateTo   = $_GET['date_to'] ?? null;
         if ($dateFrom && \DateTime::createFromFormat('Y-m-d', $dateFrom) !== false) {
-            $where += [new \Glpi\DBAL\QueryExpression("$table.`date` >= '$dateFrom'")];
+            $where[] = new \Glpi\DBAL\QueryExpression("$table.`date` >= '$dateFrom'");
         }
         if ($dateTo && \DateTime::createFromFormat('Y-m-d', $dateTo) !== false) {
-            $where += [new \Glpi\DBAL\QueryExpression("$table.`date` <= '$dateTo'")];
+            $where[] = new \Glpi\DBAL\QueryExpression("$table.`date` <= '$dateTo 23:59:59'");
         }
         break;
     default:
