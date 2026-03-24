@@ -46,3 +46,14 @@ function plugin_ticketsstatistics_uninstall(): bool
 {
     return true;
 }
+
+function plugin_ticketsstatistics_change_profile()
+{
+    // Only redirect if no explicit redirect parameter exists
+    if (($user_id = \Session::getLoginUserID()) !== false) {
+        $has_dashboard_right = \Profile::haveUserRight($user_id, 'dashboard', READ, 0);
+        if ($has_dashboard_right) {
+            $_SESSION['plugin_redirect'] = '/plugins/ticketsstatistics/front/dashboard.php';
+        }
+    }
+}

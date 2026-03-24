@@ -50,20 +50,31 @@ function plugin_init_ticketsstatistics(): void
 {
     global $PLUGIN_HOOKS;
 
-    $PLUGIN_HOOKS[\Glpi\Plugin\Hooks::MENU_TOADD]['ticketsstatistics'] = [
-        'helpdesk' => ['GlpiPlugin\\Ticketsstatistics\\TicketsStatistics'],
-    ];
+    $PLUGIN_HOOKS[\Glpi\Plugin\Hooks::CHANGE_PROFILE]['ticketsstatistics'] = 'plugin_ticketsstatistics_change_profile';
+    if (\Session::haveRight("dashboard", READ)) {
+        $PLUGIN_HOOKS[\Glpi\Plugin\Hooks::MENU_TOADD]['ticketsstatistics'] = [
+            'helpdesk' => ['GlpiPlugin\\Ticketsstatistics\\TicketsStatistics'],
+        ];
+    }
 
     if (
         strpos($_SERVER['REQUEST_URI'], "plugins/ticketsstatistics/front/dashboard.php") !== false
     ) {
         $PLUGIN_HOOKS[\Glpi\Plugin\Hooks::ADD_JAVASCRIPT]['ticketsstatistics'][] = 'js/jspdf.umd.min.js';
-        $PLUGIN_HOOKS[\Glpi\Plugin\Hooks::ADD_JAVASCRIPT]['ticketsstatistics'][] = 'js/html2canvas.min.js';
+        $PLUGIN_HOOKS[\Glpi\Plugin\Hooks::ADD_JAVASCRIPT]['ticketsstatistics'][] = 'js/html2canvas-pro.min.js';
         $PLUGIN_HOOKS[\Glpi\Plugin\Hooks::ADD_JAVASCRIPT]['ticketsstatistics'][] = 'js/chart.umd.min.js';
         $PLUGIN_HOOKS[\Glpi\Plugin\Hooks::ADD_JAVASCRIPT]['ticketsstatistics'][] = 'js/hammerjs@2.0.8.js';
         $PLUGIN_HOOKS[\Glpi\Plugin\Hooks::ADD_JAVASCRIPT]['ticketsstatistics'][] = 'js/chartjs-plugin-zoom.min.js';
         $PLUGIN_HOOKS[\Glpi\Plugin\Hooks::ADD_JAVASCRIPT]['ticketsstatistics'][] = 'js/chartjs-plugin-datalabels.min.js';
         $PLUGIN_HOOKS[\Glpi\Plugin\Hooks::ADD_JAVASCRIPT]['ticketsstatistics'][] = 'js/period.js';
+    }
+
+    // Check for pending redirect after session is ready  
+    if (isset($_SESSION['plugin_redirect'])) {
+        $redirect = $_SESSION['plugin_redirect'];
+        unset($_SESSION['plugin_redirect']);
+        header("Location: " . $redirect);
+        exit;
     }
 }
 
