@@ -84,9 +84,12 @@ Html::header(__('Tickets Statistics', 'ticketsstatistics'), '', 'helpdesk', 'tic
     <div class="row g-3 mb-3">
         <div class="col-md-4">
             <div class="card shadow-sm h-100">
-                <div class="card-header"><?= __('Tickets by priority', 'ticketsstatistics') ?></div>
+                <div class="card-header d-flex align-items-center justify-content-between">
+                    <?= __('Tickets by priority', 'ticketsstatistics') ?>
+                </div>
                 <div class="card-body d-flex align-items-center justify-content-center">
-                    <canvas id="chart-priority" style="max-height:280px"></canvas>
+                    <canvas id="chart-priority" style="max-height:280px">
+                    </canvas>
                 </div>
             </div>
         </div>
@@ -106,6 +109,52 @@ Html::header(__('Tickets Statistics', 'ticketsstatistics'), '', 'helpdesk', 'tic
     </div>
 
     <!-- Charts row 2 -->
+    <div class="w-100 mb-3">
+        <div class="card shadow-sm h-100">
+            <div class="card-header d-flex align-items-center justify-content-between">
+                <span><?= __('Tickets by town', 'ticketsstatistics') ?></span>
+                <div class="w-md-50">
+                    <div class="btn-group btn-group-sm" role="group" aria-label="" id="ts-category-status-group">
+                        <div class="btn"><?= __('Status', 'ticketsstatistics') ?></div>
+                        <div class="btn">
+                            <span class="badge bg-success me-1"></span>
+                            <?= __('New', 'ticketsstatistics') ?>
+                        </div>
+                        <div class="btn">
+                            <span class="badge bg-danger me-1"></span>
+                            <?= __('Resolved', 'ticketsstatistics') ?>
+                        </div>
+                        <div class="btn">
+                            <span class="badge bg-warning me-1"></span>
+                            <?= __('In progress', 'ticketsstatistics') ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body d-flex align-items-center justify-content-center">
+                <div class="row g-3 mb-3">
+                    <div class="col-md-3">
+                        <canvas id="chart-city" style="max-height:280px">
+                        </canvas>
+                    </div>
+                    <div class="col-md-3">
+                        <canvas id="chart-city-new" style="max-height:280px">
+                        </canvas>
+                    </div>
+                    <div class="col-md-3">
+                        <canvas id="chart-city-resolved" style="max-height:280px">
+                        </canvas>
+                    </div>
+                    <div class="col-md-3">
+                        <canvas id="chart-city-progress" style="max-height:280px">
+                        </canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts row 3 -->
     <div class="row g-3 mb-3">
         <div class="col-12">
             <div class="card shadow-sm">

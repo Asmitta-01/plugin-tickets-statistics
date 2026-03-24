@@ -18,7 +18,6 @@ $DB    = DBConnection::getReadConnection();
 $table = Ticket::getTable();
 $where = ["$table.is_deleted" => 0] + getEntitiesRestrictCriteria($table);
 
-
 // Get the period filter from the request
 $period = $_GET['period'] ?? 'last30';
 switch ($period) {
@@ -40,11 +39,11 @@ switch ($period) {
     case 'custom':
         $dateFrom = $_GET['date_from'] ?? null;
         $dateTo   = $_GET['date_to'] ?? null;
-        if ($dateFrom) {
-            $where += [new \Glpi\DBAL\QueryExpression("$table.`date` >= :date_from")];
+        if ($dateFrom && \DateTime::createFromFormat('Y-m-d', $dateFrom) !== false) {
+            $where += [new \Glpi\DBAL\QueryExpression("$table.`date` >= '$dateFrom'")];
         }
-        if ($dateTo) {
-            $where += [new \Glpi\DBAL\QueryExpression("$table.`date` <= :date_to")];
+        if ($dateTo && \DateTime::createFromFormat('Y-m-d', $dateTo) !== false) {
+            $where += [new \Glpi\DBAL\QueryExpression("$table.`date` <= '$dateTo'")];
         }
         break;
     default:
@@ -149,6 +148,64 @@ $category['values']['new']        = array_column($categoryStats, 'new');
 $category['values']['resolved']   = array_column($categoryStats, 'resolved');
 $category['values']['in_progress'] = array_column($categoryStats, 'in_progress');
 
+
+// -- Per town ---
+$cityData = ['labels' => [], 'values' => []];
+$cityStats = [];
+$locTable  = 'glpi_locations';
+
+// Fetch ticket counts grouped by status and city
+foreach (
+    $DB->request([
+        'SELECT'    => [
+            "$locTable.town AS city",
+            "$table.status AS status",
+            'COUNT'  => ["$table.id AS cpt"],
+        ],
+        'FROM'      => $table,
+        'LEFT JOIN' => [
+            $locTable => ['ON' => [$locTable => 'id', $table => 'locations_id']]
+        ],
+        'WHERE'     => array_merge($where, [
+            'NOT' => ["$locTable.town" => null],
+            ["$locTable.town" => ['!=', '']],
+        ]),
+        'GROUPBY'   => ["$locTable.town", "$table.status"],
+        'ORDER'     => ['cpt DESC'],
+    ]) as $row
+) {
+    $city   = $row['city'];
+    $status = (int) $row['status'];
+    $count  = (int) $row['cpt'];
+
+    // Resolve status group
+    if (in_array($status, [\Ticket::INCOMING], true)) {
+        $group = 'new';
+    } elseif (in_array($status, [\Ticket::SOLVED, \Ticket::CLOSED], true)) {
+        $group = 'resolved';
+    } else {
+        $group = 'in_progress';
+    }
+
+    if (!isset($cityStats[$city])) {
+        $cityStats[$city] = ['new' => 0, 'resolved' => 0, 'in_progress' => 0];
+    }
+
+    $cityStats[$city][$group] += $count;
+}
+
+// Sort by total desc, keep top 10
+uasort($cityStats, fn($a, $b) => array_sum($b) - array_sum($a));
+$cityStats = array_slice($cityStats, 0, 10, true);
+
+// Format for Chart.js polar area
+// One dataset per status group, value = total tickets for that city+group
+$cityData['labels']          = array_keys($cityStats);
+$cityData['values']['new']        = array_column($cityStats, 'new');
+$cityData['values']['resolved']   = array_column($cityStats, 'resolved');
+$cityData['values']['in_progress'] = array_column($cityStats, 'in_progress');
+
+
 // --- Per day ---
 $perday = ['labels' => [], 'values' => []];
 foreach (
@@ -167,4 +224,4 @@ foreach (
     $perday['values'][] = (int) $row['cpt'];
 }
 
-echo json_encode(compact('counters', 'priority', 'category', 'perday'));
+echo json_encode(compact('counters', 'priority', 'category', 'cityData', 'perday'));

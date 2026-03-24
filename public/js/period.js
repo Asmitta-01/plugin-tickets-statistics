@@ -140,6 +140,109 @@ function loadCharts() {
                 }
             });
 
+            // City Pie charts
+            new Chart(document.getElementById('chart-city'), {
+                type: 'pie',
+                data: {
+                    labels: data.cityData.labels,
+                    datasets: [
+                        {
+                            label: __('Resolved / Closed'),
+                            data: data.cityData.values.resolved,
+                            backgroundColor: '#C00000',
+                            hoverOffset: 16,
+                        },
+                        {
+                            label: __('New'),
+                            data: data.cityData.values.new,
+                            backgroundColor: '#3bc519',
+                            hoverOffset: 8,
+                        },
+                        {
+                            label: __('In progress'),
+                            data: data.cityData.values.in_progress,
+                            backgroundColor: '#f1cd29',
+                            hoverOffset: 4,
+                        },
+                    ]
+                },
+                options: {
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            display: false,
+                        },
+                    },
+                }
+            });
+            new Chart(document.getElementById('chart-city-new'), {
+                type: 'pie',
+                data: {
+                    labels: data.cityData.labels,
+                    datasets: [
+                        {
+                            label: __('New'),
+                            data: data.cityData.values.new,
+                            backgroundColor: generateColorVariations(108, 78, 44, data.cityData.labels.length),
+                            hoverOffset: 16,
+                        },
+                    ]
+                },
+                options: {
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                        },
+                    },
+                }
+            });
+            new Chart(document.getElementById('chart-city-resolved'), {
+                type: 'pie',
+                data: {
+                    labels: data.cityData.labels,
+                    datasets: [
+                        {
+                            label: __('Resolved / Closed'),
+                            data: data.cityData.values.resolved,
+                            // backgroundColor: 'hsl(0, 100%, 38%)',
+                            backgroundColor: generateColorVariations(0, 100, 38, data.cityData.labels.length),
+                            hoverOffset: 16,
+                        },
+                    ]
+                },
+                options: {
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                        },
+                    },
+                }
+            });
+            new Chart(document.getElementById('chart-city-progress'), {
+                type: 'pie',
+                data: {
+                    labels: data.cityData.labels,
+                    datasets: [
+                        {
+                            label: __('In progress'),
+                            data: data.cityData.values.in_progress,
+                            backgroundColor: generateColorVariations(49, 88, 55, data.cityData.labels.length),
+                            hoverOffset: 16,
+                        },
+                    ]
+                },
+                options: {
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                        },
+                    },
+                }
+            });
+
             // Per-day line
             new Chart(document.getElementById('chart-perday'), {
                 type: 'line',
@@ -187,4 +290,25 @@ function loadCharts() {
                 }
             });
         });
+}
+
+/**
+ * Generate variations of a base color in HSL format
+ * @param {number} h - Hue (0-360)
+ * @param {number} s - Saturation (0-100)
+ * @param {number} l - Lightness (0-100)
+ * @param {number} count - Number of variations
+ * @returns {string[]} Array of HSL color strings
+ */
+function generateColorVariations(h, s, l, count) {
+    const variations = [];
+
+    for (let i = 0; i < count; i++) {
+        // Adjust lightness and saturation for variation
+        const lightness = Math.min(100, Math.max(0, l + (i - Math.floor(count / 2)) * 10));
+        const saturation = Math.min(100, Math.max(0, s + (i - Math.floor(count / 2)) * 5));
+        variations.push(`hsl(${h}, ${saturation}%, ${lightness}%)`);
+    }
+
+    return variations;
 }
