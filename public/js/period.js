@@ -23,121 +23,66 @@ document.addEventListener('DOMContentLoaded', function () {
         btn.innerHTML = '<i class="ti ti-loader ti-spin"></i> ' + __('Generating...', 'ticketsstatistics');
 
         const { jsPDF } = window.jspdf;
+
+        const content = document.getElementById('ts-content');
+
+        // Crée un bandeau "Generated on..." visible uniquement dans le clone
+        const banner = document.createElement('div');
+        banner.id = 'ts-pdf-banner';
+        banner.style.cssText = 'padding:8px 12px;background:#f8f9fa;border-bottom:1px solid #dee2e6;font-size:13px;color:#555;';
+        banner.innerHTML = `<i>Generated on ${new Date().toLocaleString()}</i>`;
+
+        const canvas = await html2canvas(content, {
+            scale: 2,
+            backgroundColor: '#ffffff',
+            useCORS: true,
+            logging: false,
+            onclone: (clonedDoc) => {
+                // Insère le bandeau en haut du contenu cloné
+                const clonedContent = clonedDoc.getElementById('ts-content');
+                clonedContent.insertBefore(banner, clonedContent.firstChild);
+
+                // Cache le bouton dans le clone
+                const clonedBtn = clonedDoc.getElementById('ticketsstatisticsDownloadPdfBtn');
+                if (clonedBtn) clonedBtn.style.display = 'none';
+            }
+        });
+
         const pdf = new jsPDF('p', 'mm', 'a4');
         const pageW = pdf.internal.pageSize.getWidth();
         const pageH = pdf.internal.pageSize.getHeight();
         const margin = 10;
         const usableW = pageW - margin * 2;
 
-        // Titre + date
-        pdf.setFontSize(16);
-        pdf.setFont('helvetica', 'bold');
-        pdf.text(__('Tickets Statistics', 'ticketsstatistics'), margin, margin + 6);
-        pdf.setFontSize(9);
-        pdf.setFont('helvetica', 'normal');
-        pdf.setTextColor(120);
-        pdf.text(__('Generated on ', 'ticketsstatistics') + new Date().toLocaleString(), margin, margin + 12);
-        pdf.setTextColor(0);
+        // Découpe l'image en pages si le contenu est plus grand qu'une page A4
+        const imgW = canvas.width;
+        const imgH = canvas.height;
+        const ratio = imgW / usableW;
+        const sliceH = pageH - margin * 2; // hauteur d'une page en mm
+        const sliceHpx = sliceH * ratio;     // même hauteur en pixels
+        let offsetY = 0;
 
-        let cursorY = margin + 18;
+        while (offsetY < imgH) {
+            if (offsetY > 0) pdf.addPage();
 
-        const singleCanvases = [
-            { id: 'chart-priority', label: 'Tickets by priority' },
-            { id: 'chart-category', label: 'Tickets by category (top 10)' },
-            { id: 'chart-perday', label: 'Tickets opened per day' },
-        ];
+            // Crée un canvas temporaire pour la tranche
+            const sliceCanvas = document.createElement('canvas');
+            sliceCanvas.width = imgW;
+            sliceCanvas.height = Math.min(sliceHpx, imgH - offsetY);
 
-        const cityCanvases = [
-            { id: 'chart-city', label: 'All' },
-            { id: 'chart-city-new', label: 'New' },
-            { id: 'chart-city-resolved', label: 'Resolved' },
-            { id: 'chart-city-progress', label: 'In progress' },
-        ];
+            const ctx = sliceCanvas.getContext('2d');
+            ctx.drawImage(canvas, 0, -offsetY);
 
-        // Charts individuels
-        for (const item of singleCanvases) {
-            const canvas = document.getElementById(item.id);
-            if (!canvas) continue;
+            pdf.addImage(
+                sliceCanvas.toDataURL('image/png'),
+                'PNG',
+                margin,
+                margin,
+                usableW,
+                sliceCanvas.height / ratio
+            );
 
-            const imgData = canvas.toDataURL('image/png', 1.0);
-            const ratio = canvas.height / canvas.width;
-            const imgH = usableW * ratio;
-
-            if (cursorY + imgH + 8 > pageH - margin) {
-                pdf.addPage();
-                cursorY = margin;
-            }
-
-            pdf.setFontSize(10);
-            pdf.setFont('helvetica', 'bold');
-            pdf.text(item.label, margin, cursorY);
-            cursorY += 5;
-
-            pdf.addImage(imgData, 'PNG', margin, cursorY, usableW, imgH);
-            cursorY += imgH + 8;
-        }
-
-        // Charts city — 4 sur une même ligne
-        const cityImgs = [];
-        const cityColW = usableW / 4;
-        let maxCityH = 0;
-
-        for (const item of cityCanvases) {
-            const canvas = document.getElementById(item.id);
-            if (!canvas) continue;
-            const ratio = canvas.height / canvas.width;
-            const imgH = cityColW * ratio;
-            cityImgs.push({ imgData: canvas.toDataURL('image/png', 1.0), label: item.label, imgH });
-            if (imgH > maxCityH) maxCityH = imgH;
-        }
-
-        if (cityImgs.length > 0) {
-            if (cursorY + maxCityH + 10 > pageH - margin) {
-                pdf.addPage();
-                cursorY = margin;
-            }
-
-            // Titre de la section
-            pdf.setFontSize(10);
-            pdf.setFont('helvetica', 'bold');
-            pdf.text(__('Tickets by town', 'ticketsstatistics'), margin, cursorY);
-            cursorY += 5;
-
-            // Labels
-            pdf.setFontSize(8);
-            pdf.setFont('helvetica', 'normal');
-            cityImgs.forEach((c, i) => {
-                pdf.text(c.label, margin + i * cityColW + cityColW / 2, cursorY, { align: 'center' });
-            });
-            cursorY += 4;
-
-            // Images côte à côte
-            cityImgs.forEach((c, i) => {
-                pdf.addImage(c.imgData, 'PNG', margin + i * cityColW, cursorY, cityColW, c.imgH);
-            });
-
-            cursorY += maxCityH + 8;
-        }
-
-        // Capture les compteurs (big numbers) avec html2canvas
-        const counters = document.getElementById('ts-counters');
-        if (counters) {
-            if (cursorY + 30 > pageH - margin) {
-                pdf.addPage();
-                cursorY = margin;
-            }
-
-            const counterCanvas = await html2canvas(counters, { scale: 2, backgroundColor: '#ffffff' });
-            const counterImg = counterCanvas.toDataURL('image/png');
-            const counterRatio = counterCanvas.height / counterCanvas.width;
-            const counterH = usableW * counterRatio;
-
-            pdf.setFontSize(10);
-            pdf.setFont('helvetica', 'bold');
-            pdf.text('Summary', margin, cursorY);
-            cursorY += 5;
-
-            pdf.addImage(counterImg, 'PNG', margin, cursorY, usableW, counterH);
+            offsetY += sliceHpx;
         }
 
         pdf.save('tickets_statistics.pdf');
@@ -352,10 +297,10 @@ function loadCharts() {
                     ]
                 },
                 options: {
-                    maintainAspectRatio: true,
+                    maintainAspectRatio: false,
                     plugins: {
                         legend: {
-                            position: 'bottom',
+                            position: 'right',
                         },
                         datalabels: {
                             font: {
@@ -385,10 +330,10 @@ function loadCharts() {
                     ]
                 },
                 options: {
-                    maintainAspectRatio: true,
+                    maintainAspectRatio: false,
                     plugins: {
                         legend: {
-                            position: 'bottom',
+                            position: 'right',
                         },
                         datalabels: {
                             font: {
@@ -417,10 +362,10 @@ function loadCharts() {
                     ]
                 },
                 options: {
-                    maintainAspectRatio: true,
+                    maintainAspectRatio: false,
                     plugins: {
                         legend: {
-                            position: 'bottom',
+                            position: 'right',
                         },
                         datalabels: {
                             font: {
