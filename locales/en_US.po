@@ -1,0 +1,127 @@
+﻿msgid ""
+msgstr ""
+"Project-Id-Version: TicketsStatistics\n"
+"PO-Revision-Date: 2026-03-24 00:00+0100\n"
+"Last-Translator: Codex\n"
+"Language-Team: English\n"
+"Language: en_US\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: front/dashboard.php:12 front/dashboard.php:20 src/TicketsStatistics.php:14 src/TicketsStatistics.php:24 public/js/period.js:28
+msgid "Tickets Statistics"
+msgstr "Tickets Statistics"
+
+#: front/dashboard.php:31
+msgid "Period"
+msgstr "Period"
+
+#: front/dashboard.php:38
+msgid "Custom range"
+msgstr "Custom range"
+
+#: front/dashboard.php:41
+msgid "to"
+msgstr "to"
+
+#: front/dashboard.php:45
+msgid "Apply"
+msgstr "Apply"
+
+#: front/dashboard.php:49
+msgid "Download PDF"
+msgstr "Download PDF"
+
+#: front/dashboard.php:57
+msgid "New"
+msgstr "New"
+
+#: front/dashboard.php:58
+msgid "Assigned"
+msgstr "Assigned"
+
+#: front/dashboard.php:59
+msgid "Pending"
+msgstr "Pending"
+
+#: front/dashboard.php:60
+msgid "Solved"
+msgstr "Solved"
+
+#: front/dashboard.php:61
+msgid "Closed"
+msgstr "Closed"
+
+#: front/dashboard.php:79
+msgid "Tickets by priority"
+msgstr "Tickets by priority"
+
+#: front/dashboard.php:88
+msgid "Tickets by category (top 10)"
+msgstr "Tickets by category (top 10)"
+
+#: front/dashboard.php:89 front/dashboard.php:108
+msgid "Reset the zoom"
+msgstr "Reset the zoom"
+
+#: front/dashboard.php:90 front/dashboard.php:109
+msgid "Reset"
+msgstr "Reset"
+
+#: front/dashboard.php:106
+msgid "Tickets opened per day"
+msgstr "Tickets opened per day"
+
+#: src/TicketsStatistics.php:31
+msgid "Last 7 days"
+msgstr "Last 7 days"
+
+#: src/TicketsStatistics.php:32
+msgid "Last 30 days"
+msgstr "Last 30 days"
+
+#: src/TicketsStatistics.php:33
+msgid "Last 90 days"
+msgstr "Last 90 days"
+
+#: src/TicketsStatistics.php:34
+msgid "This year"
+msgstr "This year"
+
+#: src/TicketsStatistics.php:35
+msgid "Last year"
+msgstr "Last year"
+
+#: src/TicketsStatistics.php:36
+msgid "Custom period"
+msgstr "Custom period"
+
+#: public/js/period.js:23
+msgid "Downloading Tickets charts..."
+msgstr "Downloading Tickets charts..."
+
+#: public/js/period.js:33
+msgid "Download complete"
+msgstr "Download complete"
+
+#: public/js/period.js:44
+msgid "Failed to load charts."
+msgstr "Failed to load charts."
+
+#: public/js/period.js:81
+msgid "New Tickets"
+msgstr "New Tickets"
+
+#: public/js/period.js:86
+msgid "Resolved/Closed tickers"
+msgstr "Resolved/Closed tickets"
+
+#: public/js/period.js:91
+msgid "In progress"
+msgstr "In progress"
+
+#: public/js/period.js:134
+msgid "Tickets opened"
+msgstr "Tickets opened"

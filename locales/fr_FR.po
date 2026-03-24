@@ -1,0 +1,127 @@
+﻿msgid ""
+msgstr ""
+"Project-Id-Version: TicketsStatistics\n"
+"PO-Revision-Date: 2026-03-24 00:00+0100\n"
+"Last-Translator: Codex\n"
+"Language-Team: French\n"
+"Language: fr_FR\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#: front/dashboard.php:12 front/dashboard.php:20 src/TicketsStatistics.php:14 src/TicketsStatistics.php:24 public/js/period.js:28
+msgid "Tickets Statistics"
+msgstr "Statistiques des tickets"
+
+#: front/dashboard.php:31
+msgid "Period"
+msgstr "Période"
+
+#: front/dashboard.php:38
+msgid "Custom range"
+msgstr "Plage personnalisée"
+
+#: front/dashboard.php:41
+msgid "to"
+msgstr "au"
+
+#: front/dashboard.php:45
+msgid "Apply"
+msgstr "Appliquer"
+
+#: front/dashboard.php:49
+msgid "Download PDF"
+msgstr "Télécharger le PDF"
+
+#: front/dashboard.php:57
+msgid "New"
+msgstr "Nouveau"
+
+#: front/dashboard.php:58
+msgid "Assigned"
+msgstr "Assigne"
+
+#: front/dashboard.php:59
+msgid "Pending"
+msgstr "En attente"
+
+#: front/dashboard.php:60
+msgid "Solved"
+msgstr "Résolus"
+
+#: front/dashboard.php:61
+msgid "Closed"
+msgstr "Clos"
+
+#: front/dashboard.php:79
+msgid "Tickets by priority"
+msgstr "Tickets par priorité"
+
+#: front/dashboard.php:88
+msgid "Tickets by category (top 10)"
+msgstr "Tickets par catégorie (top 10)"
+
+#: front/dashboard.php:89 front/dashboard.php:108
+msgid "Reset the zoom"
+msgstr "Réinitialiser le zoom"
+
+#: front/dashboard.php:90 front/dashboard.php:109
+msgid "Reset"
+msgstr "Réinitialiser"
+
+#: front/dashboard.php:106
+msgid "Tickets opened per day"
+msgstr "Tickets ouverts par jour"
+
+#: src/TicketsStatistics.php:31
+msgid "Last 7 days"
+msgstr "7 derniers jours"
+
+#: src/TicketsStatistics.php:32
+msgid "Last 30 days"
+msgstr "30 derniers jours"
+
+#: src/TicketsStatistics.php:33
+msgid "Last 90 days"
+msgstr "90 derniers jours"
+
+#: src/TicketsStatistics.php:34
+msgid "This year"
+msgstr "Cette année"
+
+#: src/TicketsStatistics.php:35
+msgid "Last year"
+msgstr "Année dernière"
+
+#: src/TicketsStatistics.php:36
+msgid "Custom period"
+msgstr "Période personnalisée"
+
+#: public/js/period.js:23
+msgid "Downloading Tickets charts..."
+msgstr "Téléchargement des graphiques des tickets..."
+
+#: public/js/period.js:33
+msgid "Download complete"
+msgstr "Téléchargement terminé"
+
+#: public/js/period.js:44
+msgid "Failed to load charts."
+msgstr "Échec du chargement des graphiques."
+
+#: public/js/period.js:81
+msgid "New Tickets"
+msgstr "Nouveaux tickets"
+
+#: public/js/period.js:86
+msgid "Resolved/Closed tickers"
+msgstr "Tickets résolus/fermés"
+
+#: public/js/period.js:91
+msgid "In progress"
+msgstr "En cours"
+
+#: public/js/period.js:134
+msgid "Tickets opened"
+msgstr "Tickets ouverts"
