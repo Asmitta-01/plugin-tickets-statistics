@@ -1,7 +1,9 @@
-﻿msgid ""
+msgid ""
 msgstr ""
 "Project-Id-Version: TicketsStatistics\n"
-"PO-Revision-Date: 2026-03-24 00:00+0100\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-03-24 15:53+0100\n"
+"PO-Revision-Date: 2026-03-24 16:02+0100\n"
 "Last-Translator: Codex\n"
 "Language-Team: English\n"
 "Language: en_US\n"
@@ -9,8 +11,10 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 3.9\n"
 
-#: front/dashboard.php:12 front/dashboard.php:20 src/TicketsStatistics.php:14 src/TicketsStatistics.php:24 public/js/period.js:28
+#: front/dashboard.php:12 front/dashboard.php:20 src/TicketsStatistics.php:14
+#: src/TicketsStatistics.php:24 public/js/period.js:28
 msgid "Tickets Statistics"
 msgstr "Tickets Statistics"
 
@@ -34,7 +38,7 @@ msgstr "Apply"
 msgid "Download PDF"
 msgstr "Download PDF"
 
-#: front/dashboard.php:57
+#: front/dashboard.php:57 public/js/period.js:232 public/js/period.js:299
 msgid "New"
 msgstr "New"
 
@@ -110,18 +114,31 @@ msgstr "Download complete"
 msgid "Failed to load charts."
 msgstr "Failed to load charts."
 
-#: public/js/period.js:81
+#: public/js/period.js:81 public/js/period.js:154
 msgid "New Tickets"
 msgstr "New Tickets"
 
-#: public/js/period.js:86
+#: public/js/period.js:86 public/js/period.js:159
 msgid "Resolved/Closed tickers"
 msgstr "Resolved/Closed tickets"
 
-#: public/js/period.js:91
+#: public/js/period.js:91 public/js/period.js:164 public/js/period.js:238
+#: public/js/period.js:364
 msgid "In progress"
 msgstr "In progress"
 
-#: public/js/period.js:134
+#: public/js/period.js:134 public/js/period.js:397
 msgid "Tickets opened"
 msgstr "Tickets opened"
+
+#: ajax/data.php:117
+msgid "None"
+msgstr "None"
+
+#: public/js/period.js:23
+msgid "Generating..."
+msgstr "Generating..."
+
+#: public/js/period.js:226 public/js/period.js:331
+msgid "Resolved / Closed"
+msgstr "Resolved/Closed"

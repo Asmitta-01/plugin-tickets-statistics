@@ -446,7 +446,7 @@ function fillTownsTable(data) {
             <td class="text-center">${town.count}</td>
         </tr>
     `).join('');
-    tbody.innerHTML = rows + rows + rows;
+    tbody.innerHTML = rows;
 }
 
 /**
