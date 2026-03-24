@@ -210,6 +210,13 @@ function loadCharts() {
             });
 
             // City charts
+            const townsData = data.cityData.labels.map((name, i) => ({
+                name,
+                count: (data.cityData.values.new[i] || 0) +
+                    (data.cityData.values.resolved[i] || 0) +
+                    (data.cityData.values.in_progress[i] || 0)
+            }));
+            fillTownsTable(townsData)
             new Chart(document.getElementById('chart-city'), {
                 type: 'bar',
                 data: {
@@ -429,6 +436,17 @@ function loadCharts() {
                 }
             });
         });
+}
+
+function fillTownsTable(data) {
+    const tbody = document.getElementById('ts-towns-table');
+    const rows = data.map(town => `
+        <tr>
+            <td class="text-center">${town.name}</td>
+            <td class="text-center">${town.count}</td>
+        </tr>
+    `).join('');
+    tbody.innerHTML = rows + rows + rows;
 }
 
 /**
