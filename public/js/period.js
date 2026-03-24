@@ -251,7 +251,7 @@ function loadCharts() {
 
             // City Pie charts
             new Chart(document.getElementById('chart-city'), {
-                type: 'pie',
+                type: 'bar',
                 data: {
                     labels: data.cityData.labels,
                     datasets: [
@@ -276,11 +276,38 @@ function loadCharts() {
                     ]
                 },
                 options: {
-                    maintainAspectRatio: true,
+                    maintainAspectRatio: false,
                     plugins: {
                         legend: {
                             display: false,
                         },
+                        zoom: {
+                            pan: {
+                                enabled: true,
+                                mode: 'xy',
+                            },
+                            zoom: {
+                                wheel: {
+                                    enabled: true,
+                                },
+                                pinch: {
+                                    enabled: true
+                                },
+                                mode: 'xy',
+                            },
+                            limits: {
+                                y: { min: 0, max: Math.max(...data.cityData.values.resolved) * 2 },
+                            },
+                        }
+                    },
+                    scales: {
+                        x: {
+                            stacked: true,
+                        },
+                        y: {
+                            stacked: true,
+                            min: 0,
+                        }
                     },
                 }
             });

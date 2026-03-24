@@ -129,6 +129,9 @@ Html::header(__('Tickets Statistics', 'ticketsstatistics'), '', 'helpdesk', 'tic
                             <?= __('In progress', 'ticketsstatistics') ?>
                         </div>
                     </div>
+                    <button data-bs-toggle="tooltip" title="<?= __('Reset the city bar chart zoom', 'ticketsstatistics') ?>" class="ms-md-2 btn btn-sm btn-outline-secondary ts-reset-chart" data-canvas="chart-city">
+                        <?= __('Reset', 'ticketsstatistics') ?>
+                    </button>
                 </div>
             </div>
             <div class="card-body d-flex align-items-center justify-content-center">
