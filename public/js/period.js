@@ -173,6 +173,8 @@ function loadCharts() {
                 el.textContent = data.counters[status] ?? 0;
             });
 
+            Chart.register(ChartDataLabels);
+
             // Priority donut
             new Chart(document.getElementById('chart-priority'), {
                 type: 'doughnut',
@@ -189,6 +191,9 @@ function loadCharts() {
                     plugins: {
                         legend: {
                             position: 'right'
+                        },
+                        datalabels: {
+                            color: '#fff',
                         }
                     },
                     maintainAspectRatio: false
@@ -238,6 +243,16 @@ function loadCharts() {
                             limits: {
                                 y: { min: 0, max: 2000 },
                             },
+                        },
+                        datalabels: {
+                            font: {
+                                // weight: 'bold',
+                                size: 13,
+                            },
+                            anchor: 'end',
+                            align: 'end',
+                            color: '#333',
+                            formatter: (value) => value > 0 ? value : '',
                         }
                     },
                     scales: {
@@ -249,7 +264,7 @@ function loadCharts() {
                 }
             });
 
-            // City Pie charts
+            // City charts
             new Chart(document.getElementById('chart-city'), {
                 type: 'bar',
                 data: {
@@ -298,6 +313,18 @@ function loadCharts() {
                             limits: {
                                 y: { min: 0, max: Math.max(...data.cityData.values.resolved) * 2 },
                             },
+                        },
+                        datalabels: {
+                            font: {
+                                size: 13,
+                            },
+                            anchor: 'center',
+                            align: 'center',
+                            color: '#fff',
+                            formatter: (value, ctx) => {
+                                // Affiche la valeur brute
+                                return value > 0 ? value : '';
+                            },
                         }
                     },
                     scales: {
@@ -330,6 +357,16 @@ function loadCharts() {
                         legend: {
                             position: 'bottom',
                         },
+                        datalabels: {
+                            font: {
+                                weight: 'bold',
+                                size: 13,
+                            },
+                            anchor: 'center',
+                            align: 'center',
+                            color: '#fff',
+                            formatter: (value) => value > 0 ? value : '',
+                        }
                     },
                 }
             });
@@ -353,6 +390,16 @@ function loadCharts() {
                         legend: {
                             position: 'bottom',
                         },
+                        datalabels: {
+                            font: {
+                                weight: 'bold',
+                                size: 13,
+                            },
+                            anchor: 'center',
+                            align: 'center',
+                            color: '#fff',
+                            formatter: (value) => value > 0 ? value : '',
+                        }
                     },
                 }
             });
@@ -375,6 +422,16 @@ function loadCharts() {
                         legend: {
                             position: 'bottom',
                         },
+                        datalabels: {
+                            font: {
+                                weight: 'bold',
+                                size: 13,
+                            },
+                            anchor: 'center',
+                            align: 'center',
+                            color: '#fff',
+                            formatter: (value) => value > 0 ? value : '',
+                        }
                     },
                 }
             });
@@ -415,7 +472,8 @@ function loadCharts() {
                             limits: {
                                 y: { min: 0, max: Math.max(...data.perday.values) * 1.15 },
                             },
-                        }
+                        },
+                        datalabels: { display: false }
                     },
                     scales: {
                         y: {
