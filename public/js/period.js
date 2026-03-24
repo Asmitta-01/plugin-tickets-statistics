@@ -16,25 +16,134 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     const downloadPdfButton = document.getElementById('ticketsstatisticsDownloadPdfBtn');
-    downloadPdfButton.addEventListener('click', function () {
-        console.log('Downloading Tickets charts...');
-        // chart.options.animation = false; chart.update();
-        const categoryCanvas = document.getElementById('chart-category');
-        const priorityCanvas = document.getElementById('chart-priority');
-        const perDayCanvas = document.getElementById('chart-perday');
-
-        const categoryImgData = categoryCanvas.toDataURL('image/png');
-        const priorityImgData = priorityCanvas.toDataURL('image/png');
-        const perDayImgData = perDayCanvas.toDataURL('image/png');
+    downloadPdfButton.addEventListener('click', async function () {
+        const btn = this;
+        const btnContent = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="ti ti-loader ti-spin"></i> ' + __('Generating...', 'ticketsstatistics');
 
         const { jsPDF } = window.jspdf;
-        const pdf = new jsPDF();
-        pdf.text('Tickets Statistics', 10, 10);
-        pdf.addImage(categoryImgData, 'PNG', 10, 20, 110, 50);
-        pdf.addImage(priorityImgData, 'PNG', 10, 80, 120, 60);
-        pdf.addImage(perDayImgData, 'PNG', 10, 150, 185, 50);
-        pdf.save('tickets_stats.pdf');
-        console.log('Download complete');
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        const pageW = pdf.internal.pageSize.getWidth();
+        const pageH = pdf.internal.pageSize.getHeight();
+        const margin = 10;
+        const usableW = pageW - margin * 2;
+
+        // Titre + date
+        pdf.setFontSize(16);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text(__('Tickets Statistics', 'ticketsstatistics'), margin, margin + 6);
+        pdf.setFontSize(9);
+        pdf.setFont('helvetica', 'normal');
+        pdf.setTextColor(120);
+        pdf.text(__('Generated on ', 'ticketsstatistics') + new Date().toLocaleString(), margin, margin + 12);
+        pdf.setTextColor(0);
+
+        let cursorY = margin + 18;
+
+        const singleCanvases = [
+            { id: 'chart-priority', label: 'Tickets by priority' },
+            { id: 'chart-category', label: 'Tickets by category (top 10)' },
+            { id: 'chart-perday', label: 'Tickets opened per day' },
+        ];
+
+        const cityCanvases = [
+            { id: 'chart-city', label: 'All' },
+            { id: 'chart-city-new', label: 'New' },
+            { id: 'chart-city-resolved', label: 'Resolved' },
+            { id: 'chart-city-progress', label: 'In progress' },
+        ];
+
+        // Charts individuels
+        for (const item of singleCanvases) {
+            const canvas = document.getElementById(item.id);
+            if (!canvas) continue;
+
+            const imgData = canvas.toDataURL('image/png', 1.0);
+            const ratio = canvas.height / canvas.width;
+            const imgH = usableW * ratio;
+
+            if (cursorY + imgH + 8 > pageH - margin) {
+                pdf.addPage();
+                cursorY = margin;
+            }
+
+            pdf.setFontSize(10);
+            pdf.setFont('helvetica', 'bold');
+            pdf.text(item.label, margin, cursorY);
+            cursorY += 5;
+
+            pdf.addImage(imgData, 'PNG', margin, cursorY, usableW, imgH);
+            cursorY += imgH + 8;
+        }
+
+        // Charts city — 4 sur une même ligne
+        const cityImgs = [];
+        const cityColW = usableW / 4;
+        let maxCityH = 0;
+
+        for (const item of cityCanvases) {
+            const canvas = document.getElementById(item.id);
+            if (!canvas) continue;
+            const ratio = canvas.height / canvas.width;
+            const imgH = cityColW * ratio;
+            cityImgs.push({ imgData: canvas.toDataURL('image/png', 1.0), label: item.label, imgH });
+            if (imgH > maxCityH) maxCityH = imgH;
+        }
+
+        if (cityImgs.length > 0) {
+            if (cursorY + maxCityH + 10 > pageH - margin) {
+                pdf.addPage();
+                cursorY = margin;
+            }
+
+            // Titre de la section
+            pdf.setFontSize(10);
+            pdf.setFont('helvetica', 'bold');
+            pdf.text(__('Tickets by town', 'ticketsstatistics'), margin, cursorY);
+            cursorY += 5;
+
+            // Labels
+            pdf.setFontSize(8);
+            pdf.setFont('helvetica', 'normal');
+            cityImgs.forEach((c, i) => {
+                pdf.text(c.label, margin + i * cityColW + cityColW / 2, cursorY, { align: 'center' });
+            });
+            cursorY += 4;
+
+            // Images côte à côte
+            cityImgs.forEach((c, i) => {
+                pdf.addImage(c.imgData, 'PNG', margin + i * cityColW, cursorY, cityColW, c.imgH);
+            });
+
+            cursorY += maxCityH + 8;
+        }
+
+        // Capture les compteurs (big numbers) avec html2canvas
+        const counters = document.getElementById('ts-counters');
+        if (counters) {
+            if (cursorY + 30 > pageH - margin) {
+                pdf.addPage();
+                cursorY = margin;
+            }
+
+            const counterCanvas = await html2canvas(counters, { scale: 2, backgroundColor: '#ffffff' });
+            const counterImg = counterCanvas.toDataURL('image/png');
+            const counterRatio = counterCanvas.height / counterCanvas.width;
+            const counterH = usableW * counterRatio;
+
+            pdf.setFontSize(10);
+            pdf.setFont('helvetica', 'bold');
+            pdf.text('Summary', margin, cursorY);
+            cursorY += 5;
+
+            pdf.addImage(counterImg, 'PNG', margin, cursorY, usableW, counterH);
+        }
+
+        pdf.save('tickets_statistics.pdf');
+
+        btn.disabled = false;
+        btn.innerHTML = btnContent;
     });
 
     Array.from(document.getElementsByClassName('ts-reset-chart')).forEach(el => el.addEventListener('click', function () {

@@ -58,6 +58,7 @@ function plugin_init_ticketsstatistics(): void
         strpos($_SERVER['REQUEST_URI'], "plugins/ticketsstatistics/front/dashboard.php") !== false
     ) {
         $PLUGIN_HOOKS[\Glpi\Plugin\Hooks::ADD_JAVASCRIPT]['ticketsstatistics'][] = 'js/jspdf.umd.min.js';
+        $PLUGIN_HOOKS[\Glpi\Plugin\Hooks::ADD_JAVASCRIPT]['ticketsstatistics'][] = 'js/html2canvas.min.js';
         $PLUGIN_HOOKS[\Glpi\Plugin\Hooks::ADD_JAVASCRIPT]['ticketsstatistics'][] = 'js/chart.umd.min.js';
         $PLUGIN_HOOKS[\Glpi\Plugin\Hooks::ADD_JAVASCRIPT]['ticketsstatistics'][] = 'js/hammerjs@2.0.8.js';
         $PLUGIN_HOOKS[\Glpi\Plugin\Hooks::ADD_JAVASCRIPT]['ticketsstatistics'][] = 'js/chartjs-plugin-zoom.min.js';

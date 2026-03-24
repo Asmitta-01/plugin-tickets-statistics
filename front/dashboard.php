@@ -15,7 +15,7 @@ Session::checkCentralAccess();
 Html::header(__('Tickets Statistics', 'ticketsstatistics'), '', 'helpdesk', 'ticketsstatistics');
 ?>
 
-<div class="container-fluid mt-3">
+<div class="container-fluid mt-3" id="ts-content">
     <div class="row g-3 mb-3">
         <div class="col-12">
             <h2 class="page-title">
