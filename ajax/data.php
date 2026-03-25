@@ -20,37 +20,11 @@ $where = ["$table.is_deleted" => 0] + getEntitiesRestrictCriteria($table);
 
 // Get the period filter from the request
 $period = $_GET['period'] ?? 'last30';
-switch ($period) {
-    case 'last7':
-        $where += [new \Glpi\DBAL\QueryExpression("$table.`date` >= DATE_SUB(NOW(), INTERVAL 7 DAY)")];
-        break;
-    case 'last30':
-        $where += [new \Glpi\DBAL\QueryExpression("$table.`date` >= DATE_SUB(NOW(), INTERVAL 30 DAY)")];
-        break;
-    case 'last90':
-        $where += [new \Glpi\DBAL\QueryExpression("$table.`date` >= DATE_SUB(NOW(), INTERVAL 90 DAY)")];
-        break;
-    case 'thisyear':
-        $where += [new \Glpi\DBAL\QueryExpression("YEAR($table.`date`) = YEAR(CURDATE())")];
-        break;
-    case 'lastyear':
-        $where += [new \Glpi\DBAL\QueryExpression("YEAR($table.`date`) = YEAR(CURDATE()) - 1")];
-        break;
-    case 'custom':
-        $dateFrom = $_GET['date_from'] ?? null;
-        $dateTo   = $_GET['date_to'] ?? null;
-        if ($dateFrom && \DateTime::createFromFormat('Y-m-d', $dateFrom) !== false) {
-            $where[] = new \Glpi\DBAL\QueryExpression("$table.`date` >= '$dateFrom'");
-        }
-        if ($dateTo && \DateTime::createFromFormat('Y-m-d', $dateTo) !== false) {
-            $where[] = new \Glpi\DBAL\QueryExpression("$table.`date` <= '$dateTo 23:59:59'");
-        }
-        break;
-    default:
-        // Default to last 30 days if an unknown period is provided
-        $where += [new \Glpi\DBAL\QueryExpression("$table.`date` >= DATE_SUB(NOW(), INTERVAL 30 DAY)")];
-        break;
-}
+
+$dateFrom = $_GET['date_from'] ?? null;
+$dateTo   = $_GET['date_to']   ?? null;
+
+\GlpiPlugin\Ticketsstatistics\PeriodFilter::apply($where, $table, $period, $dateFrom, $dateTo);
 
 // --- Counters by status ---
 $counters = [];
@@ -212,12 +186,12 @@ foreach (
     $DB->request([
         'SELECT'  => [
             'COUNT DISTINCT' => "$table.id AS cpt",
-            new \Glpi\DBAL\QueryExpression("DATE($table.`date`) AS `day`"),
+            new \QueryExpression("DATE($table.`date`) AS `day`"),
         ],
         'FROM'    => $table,
         'WHERE'   => $where,
-        'GROUPBY' => new \Glpi\DBAL\QueryExpression('`day`'),
-        'ORDER'   => new \Glpi\DBAL\QueryExpression('`day` ASC'),
+        'GROUPBY' => new \QueryExpression('`day`'),
+        'ORDER'   => new \QueryExpression('`day` ASC'),
     ]) as $row
 ) {
     $perday['labels'][] = $row['day'];

@@ -73,7 +73,7 @@ require_once(__DIR__ . '/../../../inc/includes.php');
                     <div class="card-body py-3">
                         <i class="ti <?= $c['icon'] ?> fs-1 mb-1" style="color:<?= $c['color'] ?>"></i>
                         <div class="display-6 fw-bold ts-count" data-status="<?= $c['id'] ?>">—</div>
-                        <div class="text-muted small"><?= $c['label'] ?></div>
+                        <div class="text-muted small w-auto"><?= $c['label'] ?></div>
                     </div>
                 </div>
             </div>

@@ -16,48 +16,6 @@ header('Content-Type: application/json');
 
 const TICKETSSTATISTICS_MODAL_LIMIT = 100;
 
-/**
- * Build the shared time filter used by the dashboard.
- */
-function ticketsstatistics_get_period_where(string $table): array
-{
-    $where = ["$table.is_deleted" => 0] + getEntitiesRestrictCriteria($table);
-    $period = $_GET['period'] ?? 'last30';
-
-    switch ($period) {
-        case 'last7':
-            $where[] = new \Glpi\DBAL\QueryExpression("$table.`date` >= DATE_SUB(NOW(), INTERVAL 7 DAY)");
-            break;
-        case 'last30':
-            $where[] = new \Glpi\DBAL\QueryExpression("$table.`date` >= DATE_SUB(NOW(), INTERVAL 30 DAY)");
-            break;
-        case 'last90':
-            $where[] = new \Glpi\DBAL\QueryExpression("$table.`date` >= DATE_SUB(NOW(), INTERVAL 90 DAY)");
-            break;
-        case 'thisyear':
-            $where[] = new \Glpi\DBAL\QueryExpression("YEAR($table.`date`) = YEAR(CURDATE())");
-            break;
-        case 'lastyear':
-            $where[] = new \Glpi\DBAL\QueryExpression("YEAR($table.`date`) = YEAR(CURDATE()) - 1");
-            break;
-        case 'custom':
-            $date_from = $_GET['date_from'] ?? null;
-            $date_to = $_GET['date_to'] ?? null;
-
-            if ($date_from && \DateTime::createFromFormat('Y-m-d', $date_from) !== false) {
-                $where[] = new \Glpi\DBAL\QueryExpression("$table.`date` >= " . $GLOBALS['DB']->quoteValue($date_from));
-            }
-            if ($date_to && \DateTime::createFromFormat('Y-m-d', $date_to) !== false) {
-                $where[] = new \Glpi\DBAL\QueryExpression("$table.`date` <= " . $GLOBALS['DB']->quoteValue($date_to . ' 23:59:59'));
-            }
-            break;
-        default:
-            $where[] = new \Glpi\DBAL\QueryExpression("$table.`date` >= DATE_SUB(NOW(), INTERVAL 30 DAY)");
-            break;
-    }
-
-    return $where;
-}
 
 function ticketsstatistics_get_status_groups(): array
 {
@@ -132,7 +90,13 @@ $type = (string) ($_GET['type'] ?? '');
 $label = trim((string) ($_GET['label'] ?? ''));
 $status_group = (string) ($_GET['status_group'] ?? '');
 
-$where = ticketsstatistics_get_period_where($table);
+$where = ["$table.is_deleted" => 0] + getEntitiesRestrictCriteria($table);
+$period = $_GET['period'] ?? 'last30';
+$dateFrom = $_GET['date_from'] ?? null;
+$dateTo   = $_GET['date_to']   ?? null;
+
+\GlpiPlugin\Ticketsstatistics\PeriodFilter::apply($where, $table, $period, $dateFrom, $dateTo);
+
 $joins = [
     $cat_table => ['ON' => [$cat_table => 'id', $table => 'itilcategories_id']],
     $loc_table => ['ON' => [$loc_table => 'id', $table => 'locations_id']],
@@ -175,7 +139,7 @@ switch ($type) {
 
     case 'perday':
         if (\DateTime::createFromFormat('Y-m-d', $label) !== false) {
-            $where[] = new \Glpi\DBAL\QueryExpression("DATE($table.`date`) = " . $DB->quoteValue($label));
+            $where[] = new \QueryExpression("DATE($table.`date`) = " . $DB->quoteValue($label));
         }
         break;
 

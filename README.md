@@ -16,7 +16,12 @@ The plugin provides:
 This plugin targets:
 
 - GLPI 10.0.16 and newer in the 10.x series
-- GLPI 11.x
+- GLPI 11.0.6 or older in the 11.x series
+
+### Notes & versions specificities
+
+- The plugin use `\Glpi\DBAL\QueryExpression` for building database queries if available (GLPI 11.0.0+), otherwise it falls back to `\QueryExpression`.
+- The plugin assets(javascript) are loaded with the `public/` prefix for GLPI 10.x and without it for GLPI 11.x.
 
 ## Usage
 

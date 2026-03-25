@@ -40,7 +40,7 @@ define("PLUGIN_TICKETSSTATISTICS_MIN_GLPI_VERSION", "10.0.16");
 
 // Maximum GLPI version, exclusive
 /** @phpstan-ignore theCodingMachineSafe.function (safe to assume this isn't already defined) */
-define("PLUGIN_TICKETSSTATISTICS_MAX_GLPI_VERSION", "11.0.99");
+define("PLUGIN_TICKETSSTATISTICS_MAX_GLPI_VERSION", "11.0.7");
 
 /**
  * Init hooks of the plugin.
@@ -50,9 +50,11 @@ function plugin_init_ticketsstatistics(): void
 {
     global $PLUGIN_HOOKS;
 
+    $PLUGIN_HOOKS[Glpi\Plugin\Hooks::CSRF_COMPLIANT]['ticketsstatistics'] = true;
+
     $PLUGIN_HOOKS[\Glpi\Plugin\Hooks::CHANGE_PROFILE]['ticketsstatistics'] = 'plugin_ticketsstatistics_change_profile';
     if (\Session::haveRight("dashboard", READ)) {
-        $PLUGIN_HOOKS[\Glpi\Plugin\Hooks::MENU_TOADD]['ticketsstatistics'] = [
+        $PLUGIN_HOOKS['menu_toadd']['ticketsstatistics'] = [
             'helpdesk' => ['GlpiPlugin\\Ticketsstatistics\\TicketsStatistics'],
         ];
     }
@@ -60,13 +62,16 @@ function plugin_init_ticketsstatistics(): void
     if (
         strpos($_SERVER['REQUEST_URI'], "plugins/ticketsstatistics/front/dashboard.php") !== false
     ) {
-        $PLUGIN_HOOKS[\Glpi\Plugin\Hooks::ADD_JAVASCRIPT]['ticketsstatistics'][] = 'js/jspdf.umd.min.js';
-        $PLUGIN_HOOKS[\Glpi\Plugin\Hooks::ADD_JAVASCRIPT]['ticketsstatistics'][] = 'js/html2canvas-pro.min.js';
-        $PLUGIN_HOOKS[\Glpi\Plugin\Hooks::ADD_JAVASCRIPT]['ticketsstatistics'][] = 'js/chart.umd.min.js';
-        $PLUGIN_HOOKS[\Glpi\Plugin\Hooks::ADD_JAVASCRIPT]['ticketsstatistics'][] = 'js/hammerjs@2.0.8.js';
-        $PLUGIN_HOOKS[\Glpi\Plugin\Hooks::ADD_JAVASCRIPT]['ticketsstatistics'][] = 'js/chartjs-plugin-zoom.min.js';
-        $PLUGIN_HOOKS[\Glpi\Plugin\Hooks::ADD_JAVASCRIPT]['ticketsstatistics'][] = 'js/chartjs-plugin-datalabels.min.js';
-        $PLUGIN_HOOKS[\Glpi\Plugin\Hooks::ADD_JAVASCRIPT]['ticketsstatistics'][] = 'js/period.js';
+        $isGLPI11 = version_compare(GLPI_VERSION, '11.0.0', '>=');
+        $pluginAssetsRoot = $isGLPI11 ? '' : 'public/';
+
+        $PLUGIN_HOOKS[\Glpi\Plugin\Hooks::ADD_JAVASCRIPT]['ticketsstatistics'][] = $pluginAssetsRoot . 'js/jspdf.umd.min.js';
+        $PLUGIN_HOOKS[\Glpi\Plugin\Hooks::ADD_JAVASCRIPT]['ticketsstatistics'][] = $pluginAssetsRoot . 'js/html2canvas-pro.min.js';
+        $PLUGIN_HOOKS[\Glpi\Plugin\Hooks::ADD_JAVASCRIPT]['ticketsstatistics'][] = $pluginAssetsRoot . 'js/chart.umd.min.js';
+        $PLUGIN_HOOKS[\Glpi\Plugin\Hooks::ADD_JAVASCRIPT]['ticketsstatistics'][] = $pluginAssetsRoot . 'js/hammerjs@2.0.8.js';
+        $PLUGIN_HOOKS[\Glpi\Plugin\Hooks::ADD_JAVASCRIPT]['ticketsstatistics'][] = $pluginAssetsRoot . 'js/chartjs-plugin-zoom.min.js';
+        $PLUGIN_HOOKS[\Glpi\Plugin\Hooks::ADD_JAVASCRIPT]['ticketsstatistics'][] = $pluginAssetsRoot . 'js/chartjs-plugin-datalabels.min.js';
+        $PLUGIN_HOOKS[\Glpi\Plugin\Hooks::ADD_JAVASCRIPT]['ticketsstatistics'][] = $pluginAssetsRoot . 'js/period.js';
     }
 
     // Check for pending redirect after session is ready  
