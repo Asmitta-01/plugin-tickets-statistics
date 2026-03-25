@@ -518,13 +518,25 @@ function loadCharts() {
 }
 
 function fillTownsTable(data) {
+    const root = CFG_GLPI.root_doc;
+
     const tbody = document.getElementById('ts-towns-table');
-    const rows = data.map(town => `
+    const rows = data.map(town => {
+        const params = (new URLSearchParams(document.location.search));
+        params.append('city', town.name)
+        const url = root + '/plugins/ticketsstatistics/front/ticketcityexport.php?' + params.toString();
+        return `
         <tr>
             <td class="text-center">${escapeHtml(town.name)}</td>
             <td class="text-center">${town.count}</td>
+            <td class="text-center">
+                <a class="text-decoration-none" href="${url}" title="${__('Download tickets in CSV', 'ticketsstatistics')}" target="_blank">
+                    <i class="ti ti-file-spreadsheet me-1"></i>
+                </a>
+            </td>
         </tr>
-    `).join('');
+    `;
+    }).join('');
     tbody.innerHTML = rows;
 }
 

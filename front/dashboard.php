@@ -155,16 +155,19 @@ require_once(__DIR__ . '/../../../inc/includes.php');
                                 <tr>
                                     <th class="text-center" scope="col"><?= __('Name', 'ticketsstatistics') ?></th>
                                     <th class="text-center" scope="col"><?= __('Total tickets', 'ticketsstatistics') ?></th>
+                                    <th class="text-center" scope="col"><?= __('Actions', 'ticketsstatistics') ?></th>
                                 </tr>
                             </thead>
                             <tbody id="ts-towns-table" class="overflow-y-auto">
-                                <tr class="">
-                                    <td><i class="ti ti-loader"></i></td>
-                                    <td><i class="ti ti-loader"></i></td>
+                                <tr>
+                                    <td class="text-center"><i class="ti ti-loader"></i></td>
+                                    <td class="text-center"><i class="ti ti-loader"></i></td>
+                                    <td class="text-center"><i class="ti ti-loader"></i></td>
                                 </tr>
-                                <tr class="">
-                                    <td><i class="ti ti-loader"></i></td>
-                                    <td><i class="ti ti-loader"></i></td>
+                                <tr>
+                                    <td class="text-center"><i class="ti ti-loader"></i></td>
+                                    <td class="text-center"><i class="ti ti-loader"></i></td>
+                                    <td class="text-center"><i class="ti ti-loader"></i></td>
                                 </tr>
                             </tbody>
                         </table>
