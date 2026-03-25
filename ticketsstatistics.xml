@@ -29,12 +29,13 @@
       <version>
          <num>0.0.1</num>
          <!-- Add as many compatibility tag you want -->
+         <compatibility>~10.0.16</compatibility>
          <compatibility>~11.0.0</compatibility>
       </version>
    </versions>
    <langs>
       <!-- Add as many lang tag you want -->
-      <lang>en_GB</lang>
+      <lang>en_US</lang>
       <lang>fr_FR</lang>
    </langs>
    <license>MIT</license>
