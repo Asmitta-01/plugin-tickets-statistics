@@ -10,9 +10,9 @@
 
 require_once(__DIR__ . '/../../../inc/includes.php');
 
-Session::checkCentralAccess();
+\Session::checkCentralAccess();
 
-Html::header(__('Tickets Statistics', 'ticketsstatistics'), '', 'helpdesk', 'ticketsstatistics');
+\Html::header(__('Tickets Statistics', 'ticketsstatistics'), '', 'helpdesk', 'ticketsstatistics');
 ?>
 
 <div class="container-fluid mt-3" id="ts-content">
@@ -243,10 +243,14 @@ Html::header(__('Tickets Statistics', 'ticketsstatistics'), '', 'helpdesk', 'tic
     <div class="modal-dialog modal-xl modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header">
-                <div>
+                <div class="py-md-3">
                     <h5 class="modal-title mb-0" id="ts-tickets-modal-title"><?= __('Tickets', 'ticketsstatistics') ?></h5>
                     <div class="text-muted small" id="ts-tickets-modal-count"></div>
                 </div>
+                <button class="btn btn-secondary btn-sm ms-auto" disabled id="ts-tickets-download-btn" data-bs-toggle="tooltip" title="<?= __('Download as CSV', 'ticketsstatistics') ?>">
+                    <i class="ti ti-file-spreadsheet me-1"></i>
+                    <?= __('Download', 'ticketsstatistics') ?>
+                </button>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="<?= __('Close') ?>"></button>
             </div>
             <div class="modal-body">
@@ -258,4 +262,4 @@ Html::header(__('Tickets Statistics', 'ticketsstatistics'), '', 'helpdesk', 'tic
 </div>
 
 <?php
-Html::footer();
+\Html::footer();

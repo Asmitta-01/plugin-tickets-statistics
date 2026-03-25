@@ -1,4 +1,5 @@
 let ticketsStatisticsModal;
+window.tsModalTickets = [];
 
 // Show/hide custom period fields
 document.addEventListener('DOMContentLoaded', function () {
@@ -560,6 +561,42 @@ function openTicketsModal(filters) {
                 alertBox.classList.remove('d-none');
             }
 
+            window.tsModalTickets = payload.tickets;
+            const downloadBtn = document.getElementById('ts-tickets-download-btn');
+            downloadBtn.disabled = !payload.tickets.length;
+            downloadBtn.onclick = function () {
+                if (!window.tsModalTickets.length) return;
+                const headers = ['ID', __('Title'), __('Status'), __('Last update'), __('Creation', 'ticketsstatistics'), __('Category'), __('Town', 'ticketsstatistics')];
+                const escape = v => '"' + String(v ?? '').replace(/"/g, '""') + '"';
+
+                const rows = window.tsModalTickets.map(t =>
+                    [t.id, t.name, t.status, t.last_update, t.creation, t.category, t.town]
+                        .map(escape)
+                        .join(';')
+                );
+
+                const csv = [headers.map(escape).join(';'), ...rows].join('\r\n');
+
+                // Encode en Latin-1
+                const latin1 = new Uint8Array(
+                    csv.split('').map(c => {
+                        const code = c.charCodeAt(0);
+                        return code > 255 ? '?'.charCodeAt(0) : code;
+                    })
+                );
+
+                const blob = new Blob([latin1], { type: 'text/csv;charset=iso-8859-1;' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+
+                a.href = url;
+                a.download = 'Tickets.csv';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            };
+
             body.innerHTML = payload.tickets.length
                 ? renderTicketsTable(payload.tickets)
                 : `<div class="col-12"><div class="alert alert-secondary mb-0">${__('No tickets found for this selection.', 'ticketsstatistics')}</div></div>`;
@@ -618,7 +655,7 @@ function renderTicketsTable(tickets) {
         <tr>
             <td>${ticket.id}</td>
             <td>
-                <a href="${ticket.url}" class="fw-semibold">
+                <a href="${ticket.url}" class="fw-semibold" target="_blank">
                     ${escapeHtml(ticket.name)}
                 </a>
             </td>

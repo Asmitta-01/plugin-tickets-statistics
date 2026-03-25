@@ -201,30 +201,33 @@ $count_iterator = $DB->request([
 
 $count = (int) ($count_iterator->current()['cpt'] ?? 0);
 $tickets = [];
+global $CFG_GLPI;
 
-foreach ($DB->request([
-    'SELECT' => [
-        "$table.id",
-        "$table.name",
-        "$table.status",
-        "$table.date",
-        "$table.date_mod",
-        "$cat_table.completename AS category_name",
-        "$loc_table.town AS town_name",
-    ],
-    'FROM' => $table,
-    'LEFT JOIN' => $joins,
-    'WHERE' => $where,
-    'ORDER' => ["$table.date DESC"],
-    'LIMIT' => TICKETSSTATISTICS_MODAL_LIMIT,
-]) as $row) {
+foreach (
+    $DB->request([
+        'SELECT' => [
+            "$table.id",
+            "$table.name",
+            "$table.status",
+            "$table.date",
+            "$table.date_mod",
+            "$cat_table.completename AS category_name",
+            "$loc_table.town AS town_name",
+        ],
+        'FROM' => $table,
+        'LEFT JOIN' => $joins,
+        'WHERE' => $where,
+        'ORDER' => ["$table.date DESC"],
+        'LIMIT' => TICKETSSTATISTICS_MODAL_LIMIT,
+    ]) as $row
+) {
     $ticket_id = (int) $row['id'];
     $tickets[] = [
         'id' => $ticket_id,
         'name' => $row['name'] ?: sprintf(__('Ticket #%d', 'ticketsstatistics'), $ticket_id),
         'status' => \Ticket::getStatus((int) $row['status']),
-        'creation' => Html::convDateTime($row['date']),
-        'last_update' => Html::convDateTime($row['date_mod']),
+        'creation' => \Html::convDateTime($row['date']),
+        'last_update' => \Html::convDateTime($row['date_mod']),
         'category' => $row['category_name'] ?: __('None'),
         'town' => $row['town_name'] ?: __('Unknown', 'ticketsstatistics'),
         'url' => $CFG_GLPI['root_doc'] . '/front/ticket.form.php?id=' . $ticket_id,
