@@ -7,13 +7,13 @@
    <description>
       <short>
          <!-- Add as many lang tag you want -->
-         <en>TicketsStatistics GLPI plugin</en>
-         <fr>Plugin GLPI TicketsStatistics</fr>
+         <en>Helpdesk ticket statistics dashboard for GLPI</en>
+         <fr>Tableau de bord de statistiques des tickets pour GLPI</fr>
       </short>
       <long>
          <!-- Add as many lang tag you want -->
-         <en>A long description for TicketsStatistics GLPI plugin.</en>
-         <fr>Une description longue pour le plugin GLPI TicketsStatistics.</fr>
+         <en>Provides a dashboard with ticket counters, charts by priority and category, town-based statistics, daily trends, period filters, and PDF export for GLPI helpdesk activity.</en>
+         <fr>Fournit un tableau de bord avec compteurs de tickets, graphiques par priorite et categorie, statistiques par ville, tendances quotidiennes, filtres par periode et export PDF pour l'activite helpdesk de GLPI.</fr>
       </long>
    </description>
    <homepage>https://github.com/pluginsGLPI/ticketsstatistics</homepage>
@@ -22,7 +22,8 @@
    <readme>https://github.com/pluginsGLPI/ticketsstatistics/blob/main/README.md</readme>
    <authors>
       <!-- Add as many author tag you want -->
-      <author>Teclib'</author>
+      <author>Brayan Tiwa</author>
+      <author>CFAO</author>
    </authors>
    <versions>
       <!-- Add as many version tag you want -->
