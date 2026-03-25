@@ -47,6 +47,19 @@ function plugin_ticketsstatistics_uninstall(): bool
     return true;
 }
 
+function plugin_ticketsstatistics_redefine_menus($menu)
+{
+    // Hide specific helpdesk menu items  
+    // if (isset($menu['create_ticket'])) {
+    //     unset($menu['create_ticket']);
+    // }
+
+    // Redirect default dashboard to our custom one
+    $menu['helpdesk']['default_dashboard'] = '/plugins/ticketsstatistics/front/dashboard.php';
+
+    return $menu;
+}
+
 function plugin_ticketsstatistics_change_profile()
 {
     // Only redirect if no explicit redirect parameter exists

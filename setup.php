@@ -50,19 +50,24 @@ function plugin_init_ticketsstatistics(): void
 {
     global $PLUGIN_HOOKS;
 
-    $PLUGIN_HOOKS[Glpi\Plugin\Hooks::CSRF_COMPLIANT]['ticketsstatistics'] = true;
+    $isGLPI11 = version_compare(GLPI_VERSION, '11.0.0', '>=');
+    if (!$isGLPI11) {
+        // For GLPI 10, we need to explicitly declare CSRF compliance
+        // @phpstan-ignore-next-line
+        $PLUGIN_HOOKS[Glpi\Plugin\Hooks::CSRF_COMPLIANT]['ticketsstatistics'] = true;
+    }
 
     $PLUGIN_HOOKS[\Glpi\Plugin\Hooks::CHANGE_PROFILE]['ticketsstatistics'] = 'plugin_ticketsstatistics_change_profile';
     if (\Session::haveRight("dashboard", READ)) {
-        $PLUGIN_HOOKS['menu_toadd']['ticketsstatistics'] = [
-            'helpdesk' => ['GlpiPlugin\\Ticketsstatistics\\TicketsStatistics'],
-        ];
+        $PLUGIN_HOOKS[\Glpi\Plugin\Hooks::REDEFINE_MENUS]['ticketsstatistics'] = 'plugin_ticketsstatistics_redefine_menus';
+        // $PLUGIN_HOOKS['menu_toadd']['ticketsstatistics'] = [
+        //     'helpdesk' => ['GlpiPlugin\\Ticketsstatistics\\TicketsStatistics'],
+        // ];
     }
 
     if (
         strpos($_SERVER['REQUEST_URI'], "plugins/ticketsstatistics/front/dashboard.php") !== false
     ) {
-        $isGLPI11 = version_compare(GLPI_VERSION, '11.0.0', '>=');
         $pluginAssetsRoot = $isGLPI11 ? '' : 'public/';
 
         $PLUGIN_HOOKS[\Glpi\Plugin\Hooks::ADD_JAVASCRIPT]['ticketsstatistics'][] = $pluginAssetsRoot . 'js/jspdf.umd.min.js';
