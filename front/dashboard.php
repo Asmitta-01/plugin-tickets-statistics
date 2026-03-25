@@ -239,5 +239,23 @@ Html::header(__('Tickets Statistics', 'ticketsstatistics'), '', 'helpdesk', 'tic
     </div>
 </div>
 
+<div class="modal fade" id="ts-tickets-modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>
+                    <h5 class="modal-title mb-0" id="ts-tickets-modal-title"><?= __('Tickets', 'ticketsstatistics') ?></h5>
+                    <div class="text-muted small" id="ts-tickets-modal-count"></div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="<?= __('Close') ?>"></button>
+            </div>
+            <div class="modal-body">
+                <div id="ts-tickets-modal-alert" class="alert alert-info d-none mb-3"></div>
+                <div id="ts-tickets-modal-body"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <?php
 Html::footer();

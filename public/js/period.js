@@ -1,8 +1,11 @@
+let ticketsStatisticsModal;
+
 // Show/hide custom period fields
 document.addEventListener('DOMContentLoaded', function () {
     var periodSelect = document.getElementById('ts-period');
     var customFields = document.getElementById('ts-custom-period-fields');
     var applyBtnCol = document.getElementById('ts-apply-btn-col');
+    ticketsStatisticsModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('ts-tickets-modal'));
     periodSelect.addEventListener('change', function () {
         if (this.value === 'custom') {
             customFields.style.display = 'block';
@@ -133,6 +136,16 @@ function loadCharts() {
                     }]
                 },
                 options: {
+                    onClick: function (_, elements) {
+                        if (!elements.length) {
+                            return;
+                        }
+
+                        openTicketsModal({
+                            type: 'priority',
+                            label: data.priority.labels[elements[0].index]
+                        });
+                    },
                     plugins: {
                         legend: {
                             position: 'right'
@@ -167,6 +180,17 @@ function loadCharts() {
                     }]
                 },
                 options: {
+                    onClick: function (_, elements) {
+                        if (!elements.length) {
+                            return;
+                        }
+
+                        openTicketsModal({
+                            type: 'category',
+                            label: data.category.labels[elements[0].index],
+                            status_group: ['new', 'resolved', 'in_progress'][elements[0].datasetIndex]
+                        });
+                    },
                     plugins: {
                         legend: {
                             display: false
@@ -243,6 +267,17 @@ function loadCharts() {
                     ]
                 },
                 options: {
+                    onClick: function (_, elements) {
+                        if (!elements.length) {
+                            return;
+                        }
+
+                        openTicketsModal({
+                            type: 'city',
+                            label: data.cityData.labels[elements[0].index],
+                            status_group: ['resolved', 'new', 'in_progress'][elements[0].datasetIndex]
+                        });
+                    },
                     maintainAspectRatio: false,
                     plugins: {
                         legend: {
@@ -304,6 +339,17 @@ function loadCharts() {
                     ]
                 },
                 options: {
+                    onClick: function (_, elements) {
+                        if (!elements.length) {
+                            return;
+                        }
+
+                        openTicketsModal({
+                            type: 'city',
+                            label: data.cityData.labels[elements[0].index],
+                            status_group: 'new'
+                        });
+                    },
                     maintainAspectRatio: false,
                     plugins: {
                         legend: {
@@ -337,6 +383,17 @@ function loadCharts() {
                     ]
                 },
                 options: {
+                    onClick: function (_, elements) {
+                        if (!elements.length) {
+                            return;
+                        }
+
+                        openTicketsModal({
+                            type: 'city',
+                            label: data.cityData.labels[elements[0].index],
+                            status_group: 'resolved'
+                        });
+                    },
                     maintainAspectRatio: false,
                     plugins: {
                         legend: {
@@ -369,6 +426,17 @@ function loadCharts() {
                     ]
                 },
                 options: {
+                    onClick: function (_, elements) {
+                        if (!elements.length) {
+                            return;
+                        }
+
+                        openTicketsModal({
+                            type: 'city',
+                            label: data.cityData.labels[elements[0].index],
+                            status_group: 'in_progress'
+                        });
+                    },
                     maintainAspectRatio: false,
                     plugins: {
                         legend: {
@@ -403,6 +471,16 @@ function loadCharts() {
                     }]
                 },
                 options: {
+                    onClick: function (_, elements) {
+                        if (!elements.length) {
+                            return;
+                        }
+
+                        openTicketsModal({
+                            type: 'perday',
+                            label: data.perday.labels[elements[0].index]
+                        });
+                    },
                     plugins: {
                         legend: {
                             display: false
@@ -442,11 +520,143 @@ function fillTownsTable(data) {
     const tbody = document.getElementById('ts-towns-table');
     const rows = data.map(town => `
         <tr>
-            <td class="text-center">${town.name}</td>
+            <td class="text-center">${escapeHtml(town.name)}</td>
             <td class="text-center">${town.count}</td>
         </tr>
     `).join('');
     tbody.innerHTML = rows;
+}
+
+function openTicketsModal(filters) {
+    const root = CFG_GLPI.root_doc;
+    const params = new URLSearchParams(document.location.search);
+    const title = document.getElementById('ts-tickets-modal-title');
+    const count = document.getElementById('ts-tickets-modal-count');
+    const alertBox = document.getElementById('ts-tickets-modal-alert');
+    const body = document.getElementById('ts-tickets-modal-body');
+
+    params.set('type', filters.type);
+    params.set('label', filters.label || '');
+
+    if (filters.status_group) {
+        params.set('status_group', filters.status_group);
+    }
+
+    title.textContent = __('Loading tickets...', 'ticketsstatistics');
+    count.textContent = '';
+    alertBox.textContent = '';
+    alertBox.classList.add('d-none');
+    body.innerHTML = renderLoaderCards();
+    ticketsStatisticsModal.show();
+
+    fetch(root + '/plugins/ticketsstatistics/ajax/tickets.php?' + params.toString())
+        .then(response => response.json())
+        .then(payload => {
+            title.textContent = payload.title;
+            count.textContent = formatTicketsCount(payload.count);
+
+            if (payload.truncated) {
+                alertBox.textContent = __('Showing the first 100 tickets only.', 'ticketsstatistics');
+                alertBox.classList.remove('d-none');
+            }
+
+            body.innerHTML = payload.tickets.length
+                ? renderTicketsTable(payload.tickets)
+                : `<div class="col-12"><div class="alert alert-secondary mb-0">${__('No tickets found for this selection.', 'ticketsstatistics')}</div></div>`;
+        })
+        .catch(() => {
+            title.textContent = __('Tickets', 'ticketsstatistics');
+            count.textContent = '';
+            alertBox.classList.add('d-none');
+            body.innerHTML = `<div class="col-12"><div class="alert alert-danger mb-0">${__('Unable to load tickets.', 'ticketsstatistics')}</div></div>`;
+        });
+}
+
+function formatTicketsCount(count) {
+    if (count === 1) {
+        return __('1 ticket', 'ticketsstatistics');
+    }
+
+    return count + ' ' + __('tickets', 'ticketsstatistics');
+}
+
+function renderLoaderCards() {
+    return `
+        <div class="table-responsive">
+            <table class="table table-sm table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>${__('ID', 'ticketsstatistics')}</th>
+                        <th>${__('Title', 'ticketsstatistics')}</th>
+                        <th>${__('Status', 'ticketsstatistics')}</th>
+                        <th>${__('Last update', 'ticketsstatistics')}</th>
+                        <th>${__('Creation', 'ticketsstatistics')}</th>
+                        <th>${__('Category', 'ticketsstatistics')}</th>
+                        <th>${__('Town', 'ticketsstatistics')}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${new Array(3).fill(`
+                        <tr>
+                            <td><span class="placeholder col-8"></span></td>
+                            <td><span class="placeholder col-10"></span></td>
+                            <td><span class="placeholder col-8"></span></td>
+                            <td><span class="placeholder col-9"></span></td>
+                            <td><span class="placeholder col-9"></span></td>
+                            <td><span class="placeholder col-8"></span></td>
+                            <td><span class="placeholder col-8"></span></td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        </div>
+    `;
+}
+
+function renderTicketsTable(tickets) {
+    const rows = tickets.map(ticket => `
+        <tr>
+            <td>${ticket.id}</td>
+            <td>
+                <a href="${ticket.url}" class="fw-semibold">
+                    ${escapeHtml(ticket.name)}
+                </a>
+            </td>
+            <td>${escapeHtml(ticket.status)}</td>
+            <td>${escapeHtml(ticket.last_update)}</td>
+            <td>${escapeHtml(ticket.creation)}</td>
+            <td>${escapeHtml(ticket.category)}</td>
+            <td>${escapeHtml(ticket.town)}</td>
+        </tr>
+    `).join('');
+
+    return `
+        <div class="table-responsive">
+            <table class="table table-sm table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>${__('ID', 'ticketsstatistics')}</th>
+                        <th>${__('Title', 'ticketsstatistics')}</th>
+                        <th>${__('Status', 'ticketsstatistics')}</th>
+                        <th>${__('Last update', 'ticketsstatistics')}</th>
+                        <th>${__('Creation', 'ticketsstatistics')}</th>
+                        <th>${__('Category', 'ticketsstatistics')}</th>
+                        <th>${__('Town', 'ticketsstatistics')}</th>
+                    </tr>
+                </thead>
+                <tbody>${rows}</tbody>
+            </table>
+        </div>
+    `;
+}
+
+function escapeHtml(value) {
+    return String(value ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
 }
 
 /**
