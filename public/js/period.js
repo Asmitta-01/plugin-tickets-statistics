@@ -248,7 +248,7 @@ function loadCharts() {
                     labels: data.cityData.labels,
                     datasets: [
                         {
-                            label: __('Resolved / Closed'),
+                            label: __('Resolved / Closed', 'ticketsstatistics'),
                             data: data.cityData.values.resolved,
                             backgroundColor: '#C00000',
                             hoverOffset: 16,
@@ -375,7 +375,7 @@ function loadCharts() {
                     labels: data.cityData.labels,
                     datasets: [
                         {
-                            label: __('Resolved / Closed'),
+                            label: __('Resolved / Closed', 'ticketsstatistics'),
                             data: data.cityData.values.resolved,
                             // backgroundColor: 'hsl(0, 100%, 38%)',
                             backgroundColor: generateColorVariations(0, 100, 38, data.cityData.labels.length),

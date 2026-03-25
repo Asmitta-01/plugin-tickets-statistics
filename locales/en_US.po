@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: TicketsStatistics\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-24 15:53+0100\n"
-"PO-Revision-Date: 2026-03-24 16:02+0100\n"
+"POT-Creation-Date: 2026-03-25 10:24+0100\n"
+"PO-Revision-Date: 2026-03-25 10:35+0100\n"
 "Last-Translator: Codex\n"
 "Language-Team: English\n"
 "Language: en_US\n"
@@ -14,15 +14,17 @@ msgstr ""
 "X-Generator: Poedit 3.9\n"
 
 #: front/dashboard.php:12 front/dashboard.php:20 src/TicketsStatistics.php:14
-#: src/TicketsStatistics.php:24 public/js/period.js:28
+#: src/TicketsStatistics.php:24 public/js/period.js:28 front/dashboard.php:15
+#: front/dashboard.php:23 src/TicketsStatistics.php:18
+#: src/TicketsStatistics.php:27
 msgid "Tickets Statistics"
 msgstr "Tickets Statistics"
 
-#: front/dashboard.php:31
+#: front/dashboard.php:31 front/dashboard.php:35
 msgid "Period"
 msgstr "Period"
 
-#: front/dashboard.php:38
+#: front/dashboard.php:38 front/dashboard.php:43
 msgid "Custom range"
 msgstr "Custom range"
 
@@ -30,75 +32,80 @@ msgstr "Custom range"
 msgid "to"
 msgstr "to"
 
-#: front/dashboard.php:45
+#: front/dashboard.php:45 front/dashboard.php:51
 msgid "Apply"
 msgstr "Apply"
 
-#: front/dashboard.php:49
+#: front/dashboard.php:49 front/dashboard.php:56
 msgid "Download PDF"
 msgstr "Download PDF"
 
 #: front/dashboard.php:57 public/js/period.js:232 public/js/period.js:299
+#: ajax/tickets.php:111 public/js/period.js:257 public/js/period.js:335
+#: front/dashboard.php:64 front/dashboard.php:122 front/dashboard.php:190
+#: src/TicketCityExport.php:45
 msgid "New"
 msgstr "New"
 
-#: front/dashboard.php:58
+#: front/dashboard.php:58 front/dashboard.php:65 src/TicketCityExport.php:46
 msgid "Assigned"
 msgstr "Assigned"
 
-#: front/dashboard.php:59
+#: front/dashboard.php:59 front/dashboard.php:66 src/TicketCityExport.php:47
 msgid "Pending"
 msgstr "Pending"
 
-#: front/dashboard.php:60
+#: front/dashboard.php:60 front/dashboard.php:67 src/TicketCityExport.php:48
 msgid "Solved"
 msgstr "Solved"
 
-#: front/dashboard.php:61
+#: front/dashboard.php:61 front/dashboard.php:68 src/TicketCityExport.php:49
 msgid "Closed"
 msgstr "Closed"
 
-#: front/dashboard.php:79
+#: front/dashboard.php:79 front/dashboard.php:88
 msgid "Tickets by priority"
 msgstr "Tickets by priority"
 
-#: front/dashboard.php:88
+#: front/dashboard.php:88 front/dashboard.php:99
 msgid "Tickets by category (top 10)"
 msgstr "Tickets by category (top 10)"
 
-#: front/dashboard.php:89 front/dashboard.php:108
+#: front/dashboard.php:89 front/dashboard.php:108 front/dashboard.php:100
+#: front/dashboard.php:133 front/dashboard.php:233
 msgid "Reset the zoom"
 msgstr "Reset the zoom"
 
-#: front/dashboard.php:90 front/dashboard.php:109
+#: front/dashboard.php:90 front/dashboard.php:109 front/dashboard.php:101
+#: front/dashboard.php:134 front/dashboard.php:234
 msgid "Reset"
 msgstr "Reset"
 
-#: front/dashboard.php:106
+#: front/dashboard.php:106 front/dashboard.php:231
 msgid "Tickets opened per day"
 msgstr "Tickets opened per day"
 
-#: src/TicketsStatistics.php:31
+#: src/TicketsStatistics.php:31 src/TicketsStatistics.php:38
 msgid "Last 7 days"
 msgstr "Last 7 days"
 
-#: src/TicketsStatistics.php:32
+#: src/TicketsStatistics.php:32 src/TicketsStatistics.php:39
 msgid "Last 30 days"
 msgstr "Last 30 days"
 
-#: src/TicketsStatistics.php:33
+#: src/TicketsStatistics.php:33 src/TicketsStatistics.php:40
 msgid "Last 90 days"
 msgstr "Last 90 days"
 
-#: src/TicketsStatistics.php:34
+#: src/TicketsStatistics.php:34 src/TicketsStatistics.php:41
 msgid "This year"
 msgstr "This year"
 
-#: src/TicketsStatistics.php:35
+#: src/TicketsStatistics.php:35 src/TicketsStatistics.php:42
 msgid "Last year"
 msgstr "Last year"
 
-#: src/TicketsStatistics.php:36
+#: src/TicketsStatistics.php:36 src/TicketsStatistics.php:43
 msgid "Custom period"
 msgstr "Custom period"
 
@@ -114,31 +121,208 @@ msgstr "Download complete"
 msgid "Failed to load charts."
 msgstr "Failed to load charts."
 
-#: public/js/period.js:81 public/js/period.js:154
+#: public/js/period.js:81 public/js/period.js:154 public/js/period.js:168
 msgid "New Tickets"
 msgstr "New Tickets"
 
-#: public/js/period.js:86 public/js/period.js:159
+#: public/js/period.js:86 public/js/period.js:159 public/js/period.js:173
 msgid "Resolved/Closed tickers"
 msgstr "Resolved/Closed tickets"
 
 #: public/js/period.js:91 public/js/period.js:164 public/js/period.js:238
-#: public/js/period.js:364
+#: public/js/period.js:364 ajax/tickets.php:113 public/js/period.js:178
+#: public/js/period.js:263 public/js/period.js:422 front/dashboard.php:130
+#: front/dashboard.php:198
 msgid "In progress"
 msgstr "In progress"
 
-#: public/js/period.js:134 public/js/period.js:397
+#: public/js/period.js:134 public/js/period.js:397 public/js/period.js:466
 msgid "Tickets opened"
 msgstr "Tickets opened"
 
-#: ajax/data.php:117
+#: ajax/data.php:117 ajax/tickets.php:156 ajax/tickets.php:231
 msgid "None"
 msgstr "None"
 
-#: public/js/period.js:23
+#: public/js/period.js:23 public/js/period.js:27
 msgid "Generating..."
 msgstr "Generating..."
 
-#: public/js/period.js:226 public/js/period.js:331
+#: public/js/period.js:226 public/js/period.js:331 public/js/period.js:251
+#: public/js/period.js:378
 msgid "Resolved / Closed"
 msgstr "Resolved/Closed"
+
+#: ajax/tickets.php:88 ajax/tickets.php:184 public/js/period.js:617
+#: front/dashboard.php:250
+msgid "Tickets"
+msgstr "Tickets"
+
+#: ajax/tickets.php:92 src/TicketCityExport.php:31
+msgid "Priority"
+msgstr "Priority"
+
+#: ajax/tickets.php:95 public/js/period.js:581 public/js/period.js:643
+#: public/js/period.js:692 src/TicketCityExport.php:32
+msgid "Category"
+msgstr "Category"
+
+#: ajax/tickets.php:98 public/js/period.js:581 public/js/period.js:644
+#: public/js/period.js:693 src/TicketCityExport.php:33
+msgid "Town"
+msgstr "Town"
+
+#: ajax/tickets.php:101
+msgid "Date"
+msgstr "Date"
+
+#: ajax/tickets.php:112 front/dashboard.php:126 front/dashboard.php:194
+#| msgid "Solved"
+msgid "Resolved"
+msgstr "Resolved"
+
+#: ajax/tickets.php:164 ajax/tickets.php:232
+msgid "Unknown"
+msgstr "Unknown"
+
+#: ajax/tickets.php:227
+#, javascript-format, php-format
+#| msgid "Tickets opened"
+msgid "Ticket #%d"
+msgstr "Ticket #%d"
+
+#: public/js/period.js:533
+#| msgid "Downloading Tickets charts..."
+msgid "Download tickets in CSV"
+msgstr "Download tickets in CSV"
+
+#: public/js/period.js:558
+#| msgid "Downloading Tickets charts..."
+msgid "Loading tickets..."
+msgstr "Loading tickets..."
+
+#: public/js/period.js:572
+msgid "Showing the first 100 tickets only."
+msgstr "Showing the first 100 tickets only."
+
+#: public/js/period.js:581 public/js/period.js:639 public/js/period.js:688
+#: src/TicketCityExport.php:29
+msgid "Title"
+msgstr "Title"
+
+#: public/js/period.js:581 public/js/period.js:640 public/js/period.js:689
+#: front/dashboard.php:119 front/dashboard.php:187 src/TicketCityExport.php:30
+msgid "Status"
+msgstr "Status"
+
+#: public/js/period.js:581 public/js/period.js:641 public/js/period.js:690
+#: src/TicketCityExport.php:36
+#| msgid "Last 7 days"
+msgid "Last update"
+msgstr "Last update"
+
+#: public/js/period.js:581 public/js/period.js:642 public/js/period.js:691
+msgid "Creation"
+msgstr "Creation"
+
+#: public/js/period.js:614
+msgid "No tickets found for this selection."
+msgstr "No tickets found for this selection."
+
+#: public/js/period.js:620
+#| msgid "Failed to load charts."
+msgid "Unable to load tickets."
+msgstr "Unable to load tickets."
+
+#: public/js/period.js:626
+#| msgid "New Tickets"
+msgid "1 ticket"
+msgstr "1 ticket"
+
+#: public/js/period.js:629
+#| msgid "New Tickets"
+msgid "tickets"
+msgstr "tickets"
+
+#: public/js/period.js:638 public/js/period.js:687 src/TicketCityExport.php:28
+msgid "ID"
+msgstr "ID"
+
+#: front/dashboard.php:116
+#| msgid "Tickets by priority"
+msgid "Tickets by town"
+msgstr "Tickets by town"
+
+#: front/dashboard.php:147
+#| msgid "Tickets opened"
+msgid "Total tickets per town"
+msgstr "Total tickets per town"
+
+#: front/dashboard.php:156
+msgid "Name"
+msgstr "Name"
+
+#: front/dashboard.php:157
+msgid "Total tickets"
+msgstr "Total tickets"
+
+#: front/dashboard.php:158
+msgid "Actions"
+msgstr "Actions"
+
+#: front/dashboard.php:184
+#| msgid "Tickets by category (top 10)"
+msgid "Tickets by town (splitted)"
+msgstr "Tickets by town (splitted)"
+
+#: front/dashboard.php:253
+#| msgid "Download PDF"
+msgid "Download as CSV"
+msgstr "Download as CSV"
+
+#: front/dashboard.php:255
+#| msgid "Download PDF"
+msgid "Download"
+msgstr "Download"
+
+#: front/dashboard.php:257
+#| msgid "Closed"
+msgid "Close"
+msgstr "Close"
+
+#: src/TicketCityExport.php:34
+#| msgid "Assigned"
+msgid "Assigned to"
+msgstr "Assigned to"
+
+#: src/TicketCityExport.php:35
+msgid "Opening date"
+msgstr "Opening date"
+
+#: src/TicketCityExport.php:37
+msgid "Resolution date"
+msgstr "Resolution date"
+
+#: src/TicketCityExport.php:38
+msgid "Closing date"
+msgstr "Closing date"
+
+#: src/TicketCityExport.php:53
+msgid "Very low"
+msgstr "Very low"
+
+#: src/TicketCityExport.php:54
+msgid "Low"
+msgstr "Low"
+
+#: src/TicketCityExport.php:55
+msgid "Medium"
+msgstr "Medium"
+
+#: src/TicketCityExport.php:56
+msgid "High"
+msgstr "High"
+
+#: src/TicketCityExport.php:57
+msgid "Very high"
+msgstr "Very high"
