@@ -51,7 +51,17 @@ class TicketsStatisticsQuickActions
      */
     public static function parseLines(string $value): array
     {
-        return array_values(array_filter(array_map('trim', preg_split('/\r\n|\r|\n/', $value) ?: [])));
+        // Décode les séquences échappées littérales
+        $value = stripcslashes($value);
+
+        // Normalise tous les types de sauts de ligne
+        $value = str_replace(["\r\n", "\r"], "\n", $value);
+
+        return array_values(
+            array_filter(
+                array_map('trim', explode("\n", $value))
+            )
+        );
     }
 
     /**
@@ -63,9 +73,11 @@ class TicketsStatisticsQuickActions
             return [];
         }
 
+        $value = stripcslashes($value);
+
         $decoded = json_decode($value, true);
         if (json_last_error() !== JSON_ERROR_NONE || !is_array($decoded)) {
-            $errors[] = sprintf(__('%s must be valid JSON.', 'ticketsstatistics'), $label);
+            $errors[] = sprintf(__('%s must be valid JSON.', 'ticketsstatistics'), $label) . ' (' . json_last_error_msg() . ')';
             return [];
         }
 

@@ -21,6 +21,11 @@ function ticketsstatistics_request_fingerprint(array $request): string
     return hash('sha256', json_encode($request));
 }
 
+function sanitize_html(string $input): string
+{
+    return stripcslashes(htmlspecialchars($input, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'));
+}
+
 /**
  * @param array<int, array<string, mixed>> $rows
  */
@@ -187,37 +192,37 @@ Html::header(__('Tickets Statistics Quick Actions', 'ticketsstatistics'), $_SERV
 
                 <div class="col-12">
                     <label class="form-label" for="select_fields"><?= __('SELECT fields', 'ticketsstatistics') ?></label>
-                    <textarea class="form-control" id="select_fields" name="select_fields" rows="5" placeholder="glpi_tickets.id&#10;glpi_tickets.name&#10;glpi_tickets.status"><?= htmlspecialchars($data['select_fields']) ?></textarea>
+                    <textarea class="form-control" id="select_fields" name="select_fields" rows="5" placeholder="glpi_tickets.id&#10;glpi_tickets.name&#10;glpi_tickets.status"><?= sanitize_html($data['select_fields']) ?></textarea>
                     <div class="form-text"><?= __('One field per line.', 'ticketsstatistics') ?></div>
                 </div>
 
                 <div class="col-12">
                     <label class="form-label" for="update_values"><?= __('UPDATE values', 'ticketsstatistics') ?></label>
-                    <textarea class="form-control" id="update_values" name="update_values" rows="4" placeholder='{"status": 2}'><?= htmlspecialchars($data['update_values']) ?></textarea>
+                    <textarea class="form-control" id="update_values" name="update_values" rows="4" placeholder='{"status": 2}'><?= sanitize_html($data['update_values']) ?></textarea>
                     <div class="form-text"><?= __('JSON object used only for UPDATE requests.', 'ticketsstatistics') ?></div>
                 </div>
 
                 <div class="col-12">
                     <label class="form-label" for="where_clause"><?= __('WHERE clause', 'ticketsstatistics') ?></label>
-                    <textarea class="form-control" id="where_clause" name="where_clause" rows="6" placeholder='{"glpi_tickets.is_deleted": 0, "glpi_tickets.status": 1}'><?= htmlspecialchars($data['where_clause']) ?></textarea>
+                    <textarea class="form-control" id="where_clause" name="where_clause" rows="6" placeholder='{"glpi_tickets.is_deleted": 0, "glpi_tickets.status": 1}'><?= sanitize_html($data['where_clause']) ?></textarea>
                     <div class="form-text"><?= __('Use JSON matching the GLPI DB abstraction array format.', 'ticketsstatistics') ?></div>
                 </div>
 
                 <div class="col-12">
                     <label class="form-label" for="left_join"><?= __('LEFT JOIN', 'ticketsstatistics') ?></label>
-                    <textarea class="form-control" id="left_join" name="left_join" rows="6" placeholder='{"glpi_itilcategories": {"ON": {"glpi_itilcategories": "id", "glpi_tickets": "itilcategories_id"}}}'><?= htmlspecialchars($data['left_join']) ?></textarea>
+                    <textarea class="form-control" id="left_join" name="left_join" rows="6" placeholder='{"glpi_itilcategories": {"ON": {"glpi_itilcategories": "id", "glpi_tickets": "itilcategories_id"}}}'><?= sanitize_html($data['left_join']) ?></textarea>
                     <div class="form-text"><?= __('Optional JSON join definition. SELECT only.', 'ticketsstatistics') ?></div>
                 </div>
 
                 <div class="col-md-6">
                     <label class="form-label" for="groupby"><?= __('GROUP BY', 'ticketsstatistics') ?></label>
-                    <textarea class="form-control" id="groupby" name="groupby" rows="4" placeholder="glpi_tickets.status"><?= htmlspecialchars($data['groupby']) ?></textarea>
+                    <textarea class="form-control" id="groupby" name="groupby" rows="4" placeholder="glpi_tickets.status"><?= sanitize_html($data['groupby']) ?></textarea>
                     <div class="form-text"><?= __('One field per line. SELECT only.', 'ticketsstatistics') ?></div>
                 </div>
 
                 <div class="col-md-6">
                     <label class="form-label" for="order"><?= __('ORDER', 'ticketsstatistics') ?></label>
-                    <textarea class="form-control" id="order" name="order" rows="4" placeholder="glpi_tickets.date DESC"><?= htmlspecialchars($data['order']) ?></textarea>
+                    <textarea class="form-control" id="order" name="order" rows="4" placeholder="glpi_tickets.date DESC"><?= sanitize_html($data['order']) ?></textarea>
                     <div class="form-text"><?= __('One field per line. SELECT only.', 'ticketsstatistics') ?></div>
                 </div>
 
