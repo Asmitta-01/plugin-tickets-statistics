@@ -326,3 +326,145 @@ msgstr "High"
 #: src/TicketCityExport.php:57
 msgid "Very high"
 msgstr "Very high"
+
+#: src/TicketsStatisticsQuickActions.php:15 front/quickactions.php:237
+#: front/quickactions.php:242
+msgid "Tickets Statistics Quick Actions"
+msgstr "Tickets Statistics Quick Actions"
+
+#: front/quickactions.php:46
+#, php-format
+msgid "%s must be valid JSON."
+msgstr "%s must be valid JSON."
+
+#: front/quickactions.php:61 front/quickactions.php:287
+msgid "Table is required."
+msgstr "Table is required."
+
+#: front/quickactions.php:64 front/quickactions.php:315
+msgid "Where clause"
+msgstr "Where clause"
+
+#: front/quickactions.php:65
+msgid "Left join"
+msgstr "Left join"
+
+#: front/quickactions.php:70
+msgid "At least one SELECT field is required."
+msgstr "At least one SELECT field is required."
+
+#: front/quickactions.php:107 front/quickactions.php:309
+msgid "Update values"
+msgstr "Update values"
+
+#: front/quickactions.php:109
+msgid "At least one UPDATE value is required."
+msgstr "At least one UPDATE value is required."
+
+#: front/quickactions.php:112
+msgid "UPDATE requires a WHERE clause."
+msgstr "UPDATE requires a WHERE clause."
+
+#: front/quickactions.php:115
+msgid "UPDATE does not support LEFT JOIN in this tool."
+msgstr "UPDATE does not support LEFT JOIN in this tool."
+
+#: front/quickactions.php:118
+msgid "GROUP BY and ORDER are only available for SELECT."
+msgstr "GROUP BY and ORDER are only available for SELECT."
+
+#: front/quickactions.php:148
+msgid "No result returned."
+msgstr "No result returned."
+
+#: front/quickactions.php:191
+msgid "all"
+msgstr "all"
+
+#: front/quickactions.php:194
+#, php-format
+msgid "This command will run a SELECT on %s and fetch up to %s row(s)."
+msgstr "This command will run a SELECT on %s and fetch up to %s row(s)."
+
+#: front/quickactions.php:201 front/quickactions.php:223
+msgid "Please preview the request before executing it."
+msgstr "Please preview the request before executing it."
+
+#: front/quickactions.php:207
+#, php-format
+msgid "SELECT completed with %d row(s)."
+msgstr "SELECT completed with %d row(s)."
+
+#: front/quickactions.php:219
+#, php-format
+msgid "This command will update %d row(s) in %s."
+msgstr "This command will update %d row(s) in %s."
+
+#: front/quickactions.php:227
+#, php-format
+msgid "UPDATE completed. %d row(s) affected."
+msgstr "UPDATE completed. %d row(s) affected."
+
+#: front/quickactions.php:246
+msgid "This tool only supports SELECT and UPDATE requests built from form inputs. Raw PHP, DELETE, INSERT, and other SQL statements are not allowed."
+msgstr "This tool only supports SELECT and UPDATE requests built from form inputs. Raw PHP, DELETE, INSERT, and other SQL statements are not allowed."
+
+#: front/quickactions.php:281
+msgid "Request type"
+msgstr "Request type"
+
+#: front/quickactions.php:300
+msgid "SELECT fields"
+msgstr "SELECT fields"
+
+#: front/quickactions.php:302 front/quickactions.php:321 front/quickactions.php:327
+msgid "One field per line."
+msgstr "One field per line."
+
+#: front/quickactions.php:311
+msgid "JSON object used only for UPDATE requests."
+msgstr "JSON object used only for UPDATE requests."
+
+#: front/quickactions.php:317
+msgid "Use JSON matching the GLPI DB abstraction array format."
+msgstr "Use JSON matching the GLPI DB abstraction array format."
+
+#: front/quickactions.php:321
+msgid "LEFT JOIN"
+msgstr "LEFT JOIN"
+
+#: front/quickactions.php:323
+msgid "Optional JSON join definition. SELECT only."
+msgstr "Optional JSON join definition. SELECT only."
+
+#: front/quickactions.php:326
+msgid "GROUP BY"
+msgstr "GROUP BY"
+
+#: front/quickactions.php:333
+msgid "ORDER"
+msgstr "ORDER"
+
+#: front/quickactions.php:335
+msgid "One field per line. SELECT only."
+msgstr "One field per line. SELECT only."
+
+#: front/quickactions.php:339
+msgid "Limit"
+msgstr "Limit"
+
+#: front/quickactions.php:344
+msgid "Preview command"
+msgstr "Preview command"
+
+#: front/quickactions.php:346
+msgid "Confirm and execute"
+msgstr "Confirm and execute"
+
+#: front/quickactions.php:352
+msgid "Built request"
+msgstr "Built request"
+
+#: front/quickactions.php:358
+msgid "Result"
+msgstr "Result"

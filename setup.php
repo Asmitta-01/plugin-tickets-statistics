@@ -64,6 +64,11 @@ function plugin_init_ticketsstatistics(): void
         //     'helpdesk' => ['GlpiPlugin\\Ticketsstatistics\\TicketsStatistics'],
         // ];
     }
+    if (\Session::haveRight('config', UPDATE)) {
+        $PLUGIN_HOOKS[\Glpi\Plugin\Hooks::MENU_TOADD]['ticketsstatistics']['admin'] = [
+            'GlpiPlugin\\Ticketsstatistics\\TicketsStatisticsQuickActions',
+        ];
+    }
 
     if (
         strpos($_SERVER['REQUEST_URI'], "plugins/ticketsstatistics/front/dashboard.php") !== false
