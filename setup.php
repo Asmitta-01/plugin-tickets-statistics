@@ -65,8 +65,8 @@ function plugin_init_ticketsstatistics(): void
         // ];
     }
     if (\Session::haveRight('config', UPDATE)) {
-        $PLUGIN_HOOKS[\Glpi\Plugin\Hooks::MENU_TOADD]['ticketsstatistics']['admin'] = [
-            'GlpiPlugin\\Ticketsstatistics\\TicketsStatisticsQuickActions',
+        $PLUGIN_HOOKS['menu_toadd']['ticketsstatistics'] = [
+            'config' => ['GlpiPlugin\\Ticketsstatistics\\TicketsStatisticsQuickActions'],
         ];
     }
 

@@ -134,7 +134,7 @@ if ($action !== '') {
     }
 }
 
-Html::header(__('Tickets Statistics Quick Actions', 'ticketsstatistics'), $_SERVER['PHP_SELF'], 'config', 'ticketsstatistics', 'quickactions');
+Html::header(__('Tickets Statistics Quick Actions', 'ticketsstatistics'), $_SERVER['PHP_SELF'], 'config', \GlpiPlugin\Ticketsstatistics\TicketsStatisticsQuickActions::class);
 ?>
 <div class="container-fluid mt-3">
     <div class="card shadow-sm">
@@ -265,5 +265,18 @@ Html::header(__('Tickets Statistics Quick Actions', 'ticketsstatistics'), $_SERV
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        <?php foreach ($errors as $error) : ?>
+            glpi_toast_error('<?= htmlescape($error) ?>');
+        <?php endforeach; ?>
+
+        <?php if ($result_message !== '') : ?>
+            glpi_toast_info('<?= htmlescape($result_message) ?>');
+        <?php endif; ?>
+    });
+</script>
+
 <?php
 Html::footer();
