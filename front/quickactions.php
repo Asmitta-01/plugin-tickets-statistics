@@ -239,7 +239,7 @@ Html::header(__('Tickets Statistics Quick Actions', 'ticketsstatistics'), $_SERV
             <?php if ($request_export !== '') : ?>
                 <hr>
                 <h3 class="h5"><?= __('Built request', 'ticketsstatistics') ?></h3>
-                <pre class="bg-light border rounded p-3 mb-0"><?= htmlspecialchars($request_export) ?></pre>
+                <pre class="text-dark bg-light border rounded p-3 mb-0"><?= htmlspecialchars($request_export) ?></pre>
             <?php endif; ?>
 
             <?php if ($result_table !== '') : ?>
