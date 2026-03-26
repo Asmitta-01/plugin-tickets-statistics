@@ -35,7 +35,7 @@ function ticketsstatistics_render_result_table(array $rows): string
     $html .= '<table class="table table-sm table-hover align-middle mb-0">';
     $html .= '<thead><tr>';
     foreach ($columns as $column) {
-        $html .= '<th>' . htmlescape($column) . '</th>';
+        $html .= '<th>' . htmlspecialchars($column) . '</th>';
     }
     $html .= '</tr></thead><tbody>';
 
@@ -46,7 +46,7 @@ function ticketsstatistics_render_result_table(array $rows): string
             if (is_array($value)) {
                 $value = json_encode($value);
             }
-            $html .= '<td>' . htmlescape((string) $value) . '</td>';
+            $html .= '<td>' . htmlspecialchars((string) $value) . '</td>';
         }
         $html .= '</tr>';
     }
@@ -149,17 +149,17 @@ Html::header(__('Tickets Statistics Quick Actions', 'ticketsstatistics'), $_SERV
             <?php foreach ($errors as $error) : ?>
                 <div class="alert align-items-center alert-danger text-white bg-danger ">
                     <i class="ti ti-exclamation-circle"></i>
-                    <?= htmlescape($error) ?>
+                    <?= htmlspecialchars($error) ?>
                 </div>
             <?php endforeach; ?>
 
             <?php if ($preview_message !== '') : ?>
-                <div class="alert alert-info"><?= htmlescape($preview_message) ?></div>
+                <div class="alert alert-info"><?= htmlspecialchars($preview_message) ?></div>
             <?php endif; ?>
 
             <?php if ($result_message !== '') : ?>
                 <div class="alert alert-success">
-                    <?= htmlescape($result_message) ?>
+                    <?= htmlspecialchars($result_message) ?>
                     <?php if ($result_table !== '') : ?>
                         <button class="btn btn-primary btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#resultTable">
                             <i class="ti ti-table"></i>
@@ -170,7 +170,7 @@ Html::header(__('Tickets Statistics Quick Actions', 'ticketsstatistics'), $_SERV
             <?php endif; ?>
 
             <form method="post" class="row g-3">
-                <input type="hidden" name="confirm_fingerprint" value="<?= htmlescape($data['confirm_fingerprint']) ?>">
+                <input type="hidden" name="confirm_fingerprint" value="<?= htmlspecialchars($data['confirm_fingerprint']) ?>">
 
                 <div class="col-md-3">
                     <label class="form-label" for="query_type"><?= __('Request type', 'ticketsstatistics') ?></label>
@@ -182,48 +182,48 @@ Html::header(__('Tickets Statistics Quick Actions', 'ticketsstatistics'), $_SERV
 
                 <div class="col-md-9">
                     <label class="form-label" for="table"><?= __('Table', 'ticketsstatistics') ?></label>
-                    <input class="form-control" id="table" name="table" value="<?= htmlescape($data['table']) ?>" placeholder="glpi_tickets">
+                    <input class="form-control" id="table" name="table" value="<?= htmlspecialchars($data['table']) ?>" placeholder="glpi_tickets">
                 </div>
 
                 <div class="col-12">
                     <label class="form-label" for="select_fields"><?= __('SELECT fields', 'ticketsstatistics') ?></label>
-                    <textarea class="form-control" id="select_fields" name="select_fields" rows="5" placeholder="glpi_tickets.id&#10;glpi_tickets.name&#10;glpi_tickets.status"><?= htmlescape($data['select_fields']) ?></textarea>
+                    <textarea class="form-control" id="select_fields" name="select_fields" rows="5" placeholder="glpi_tickets.id&#10;glpi_tickets.name&#10;glpi_tickets.status"><?= htmlspecialchars($data['select_fields']) ?></textarea>
                     <div class="form-text"><?= __('One field per line.', 'ticketsstatistics') ?></div>
                 </div>
 
                 <div class="col-12">
                     <label class="form-label" for="update_values"><?= __('UPDATE values', 'ticketsstatistics') ?></label>
-                    <textarea class="form-control" id="update_values" name="update_values" rows="4" placeholder='{"status": 2}'><?= htmlescape($data['update_values']) ?></textarea>
+                    <textarea class="form-control" id="update_values" name="update_values" rows="4" placeholder='{"status": 2}'><?= htmlspecialchars($data['update_values']) ?></textarea>
                     <div class="form-text"><?= __('JSON object used only for UPDATE requests.', 'ticketsstatistics') ?></div>
                 </div>
 
                 <div class="col-12">
                     <label class="form-label" for="where_clause"><?= __('WHERE clause', 'ticketsstatistics') ?></label>
-                    <textarea class="form-control" id="where_clause" name="where_clause" rows="6" placeholder='{"glpi_tickets.is_deleted": 0, "glpi_tickets.status": 1}'><?= htmlescape($data['where_clause']) ?></textarea>
+                    <textarea class="form-control" id="where_clause" name="where_clause" rows="6" placeholder='{"glpi_tickets.is_deleted": 0, "glpi_tickets.status": 1}'><?= htmlspecialchars($data['where_clause']) ?></textarea>
                     <div class="form-text"><?= __('Use JSON matching the GLPI DB abstraction array format.', 'ticketsstatistics') ?></div>
                 </div>
 
                 <div class="col-12">
                     <label class="form-label" for="left_join"><?= __('LEFT JOIN', 'ticketsstatistics') ?></label>
-                    <textarea class="form-control" id="left_join" name="left_join" rows="6" placeholder='{"glpi_itilcategories": {"ON": {"glpi_itilcategories": "id", "glpi_tickets": "itilcategories_id"}}}'><?= htmlescape($data['left_join']) ?></textarea>
+                    <textarea class="form-control" id="left_join" name="left_join" rows="6" placeholder='{"glpi_itilcategories": {"ON": {"glpi_itilcategories": "id", "glpi_tickets": "itilcategories_id"}}}'><?= htmlspecialchars($data['left_join']) ?></textarea>
                     <div class="form-text"><?= __('Optional JSON join definition. SELECT only.', 'ticketsstatistics') ?></div>
                 </div>
 
                 <div class="col-md-6">
                     <label class="form-label" for="groupby"><?= __('GROUP BY', 'ticketsstatistics') ?></label>
-                    <textarea class="form-control" id="groupby" name="groupby" rows="4" placeholder="glpi_tickets.status"><?= htmlescape($data['groupby']) ?></textarea>
+                    <textarea class="form-control" id="groupby" name="groupby" rows="4" placeholder="glpi_tickets.status"><?= htmlspecialchars($data['groupby']) ?></textarea>
                     <div class="form-text"><?= __('One field per line. SELECT only.', 'ticketsstatistics') ?></div>
                 </div>
 
                 <div class="col-md-6">
                     <label class="form-label" for="order"><?= __('ORDER', 'ticketsstatistics') ?></label>
-                    <textarea class="form-control" id="order" name="order" rows="4" placeholder="glpi_tickets.date DESC"><?= htmlescape($data['order']) ?></textarea>
+                    <textarea class="form-control" id="order" name="order" rows="4" placeholder="glpi_tickets.date DESC"><?= htmlspecialchars($data['order']) ?></textarea>
                     <div class="form-text"><?= __('One field per line. SELECT only.', 'ticketsstatistics') ?></div>
                 </div>
 
                 <div class="col-md-3">
                     <label class="form-label" for="limit"><?= __('Limit', 'ticketsstatistics') ?></label>
-                    <input class="form-control" id="limit" name="limit" type="number" min="1" value="<?= htmlescape($data['limit']) ?>">
+                    <input class="form-control" id="limit" name="limit" type="number" min="1" value="<?= htmlspecialchars($data['limit']) ?>">
                 </div>
 
                 <div class="col-12 d-flex gap-2">
@@ -239,7 +239,7 @@ Html::header(__('Tickets Statistics Quick Actions', 'ticketsstatistics'), $_SERV
             <?php if ($request_export !== '') : ?>
                 <hr>
                 <h3 class="h5"><?= __('Built request', 'ticketsstatistics') ?></h3>
-                <pre class="bg-light border rounded p-3 mb-0"><?= htmlescape($request_export) ?></pre>
+                <pre class="bg-light border rounded p-3 mb-0"><?= htmlspecialchars($request_export) ?></pre>
             <?php endif; ?>
 
             <?php if ($result_table !== '') : ?>
@@ -269,11 +269,11 @@ Html::header(__('Tickets Statistics Quick Actions', 'ticketsstatistics'), $_SERV
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         <?php foreach ($errors as $error) : ?>
-            glpi_toast_error('<?= htmlescape($error) ?>');
+            glpi_toast_error('<?= htmlspecialchars($error) ?>');
         <?php endforeach; ?>
 
         <?php if ($result_message !== '') : ?>
-            glpi_toast_info('<?= htmlescape($result_message) ?>');
+            glpi_toast_info('<?= htmlspecialchars($result_message) ?>');
         <?php endif; ?>
     });
 </script>
