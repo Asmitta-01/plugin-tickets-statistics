@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: TicketsStatistics\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-25 10:24+0100\n"
-"PO-Revision-Date: 2026-03-25 10:33+0100\n"
+"POT-Creation-Date: 2026-03-26 09:44+0100\n"
+"PO-Revision-Date: 2026-03-26 09:48+0100\n"
 "Last-Translator: Codex\n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -43,7 +43,7 @@ msgstr "Télécharger le PDF"
 #: front/dashboard.php:57 public/js/period.js:232 public/js/period.js:299
 #: ajax/tickets.php:111 public/js/period.js:257 public/js/period.js:335
 #: front/dashboard.php:64 front/dashboard.php:122 front/dashboard.php:190
-#: src/TicketCityExport.php:45
+#: src/TicketCityExport.php:45 ajax/tickets.php:69
 msgid "New"
 msgstr "Nouveau"
 
@@ -132,7 +132,7 @@ msgstr "Tickets résolus/fermés"
 #: public/js/period.js:91 public/js/period.js:164 public/js/period.js:238
 #: public/js/period.js:364 ajax/tickets.php:113 public/js/period.js:178
 #: public/js/period.js:263 public/js/period.js:422 front/dashboard.php:130
-#: front/dashboard.php:198
+#: front/dashboard.php:198 ajax/tickets.php:71
 msgid "In progress"
 msgstr "En cours"
 
@@ -140,7 +140,8 @@ msgstr "En cours"
 msgid "Tickets opened"
 msgstr "Tickets ouverts"
 
-#: ajax/data.php:117 ajax/tickets.php:156 ajax/tickets.php:231
+#: ajax/data.php:117 ajax/tickets.php:156 ajax/tickets.php:231 ajax/data.php:91
+#: ajax/tickets.php:120 ajax/tickets.php:195
 msgid "None"
 msgstr "Aucun"
 
@@ -154,37 +155,39 @@ msgid "Resolved / Closed"
 msgstr "Résolus/fermés"
 
 #: ajax/tickets.php:88 ajax/tickets.php:184 public/js/period.js:617
-#: front/dashboard.php:250
+#: front/dashboard.php:250 ajax/tickets.php:46 ajax/tickets.php:148
 msgid "Tickets"
 msgstr "Tickets"
 
-#: ajax/tickets.php:92 src/TicketCityExport.php:31
+#: ajax/tickets.php:92 src/TicketCityExport.php:31 ajax/tickets.php:50
 msgid "Priority"
 msgstr "Priorité"
 
 #: ajax/tickets.php:95 public/js/period.js:581 public/js/period.js:643
-#: public/js/period.js:692 src/TicketCityExport.php:32
+#: public/js/period.js:692 src/TicketCityExport.php:32 ajax/tickets.php:53
 msgid "Category"
 msgstr "Catégorie"
 
 #: ajax/tickets.php:98 public/js/period.js:581 public/js/period.js:644
-#: public/js/period.js:693 src/TicketCityExport.php:33
+#: public/js/period.js:693 src/TicketCityExport.php:33 ajax/tickets.php:56
 msgid "Town"
 msgstr "Ville"
 
-#: ajax/tickets.php:101
+#: ajax/tickets.php:101 ajax/tickets.php:59
 msgid "Date"
 msgstr "Date"
 
 #: ajax/tickets.php:112 front/dashboard.php:126 front/dashboard.php:194
+#: ajax/tickets.php:70
 msgid "Resolved"
 msgstr "Résolus"
 
-#: ajax/tickets.php:164 ajax/tickets.php:232
+#: ajax/tickets.php:164 ajax/tickets.php:232 ajax/tickets.php:128
+#: ajax/tickets.php:196
 msgid "Unknown"
 msgstr "Inconnu"
 
-#: ajax/tickets.php:227
+#: ajax/tickets.php:227 ajax/tickets.php:191
 #, javascript-format, php-format
 msgid "Ticket #%d"
 msgstr "Ticket #%d"
@@ -272,7 +275,7 @@ msgstr "Télécharger en CSV"
 msgid "Download"
 msgstr "Télécharger"
 
-#: front/dashboard.php:257
+#: front/dashboard.php:257 front/quickactions.php:258
 msgid "Close"
 msgstr "Fermer"
 
@@ -313,143 +316,178 @@ msgid "Very high"
 msgstr "Tres élevé"
 
 #: src/TicketsStatisticsQuickActions.php:15 front/quickactions.php:237
-#: front/quickactions.php:242
+#: front/quickactions.php:242 front/quickactions.php:137
+#: front/quickactions.php:142 src/TicketsStatisticsQuickActions.php:17
 msgid "Tickets Statistics Quick Actions"
 msgstr "Actions rapides Tickets Statistics"
 
-#: front/quickactions.php:46
+#: front/quickactions.php:46 src/TicketsStatisticsQuickActions.php:68
 #, php-format
 msgid "%s must be valid JSON."
 msgstr "%s doit être un JSON valide."
 
 #: front/quickactions.php:61 front/quickactions.php:287
+#: src/TicketsStatisticsQuickActions.php:85
 msgid "Table is required."
 msgstr "La table est obligatoire."
 
 #: front/quickactions.php:64 front/quickactions.php:315
+#: src/TicketsStatisticsQuickActions.php:88
 msgid "Where clause"
 msgstr "Clause WHERE"
 
-#: front/quickactions.php:65
+#: front/quickactions.php:65 src/TicketsStatisticsQuickActions.php:89
 msgid "Left join"
 msgstr "Jointure gauche"
 
-#: front/quickactions.php:70
+#: front/quickactions.php:70 src/TicketsStatisticsQuickActions.php:94
 msgid "At least one SELECT field is required."
 msgstr "Au moins un champ SELECT est requis."
 
 #: front/quickactions.php:107 front/quickactions.php:309
+#: src/TicketsStatisticsQuickActions.php:140
 msgid "Update values"
 msgstr "Valeurs UPDATE"
 
-#: front/quickactions.php:109
+#: front/quickactions.php:109 src/TicketsStatisticsQuickActions.php:142
 msgid "At least one UPDATE value is required."
 msgstr "Au moins une valeur UPDATE est requise."
 
-#: front/quickactions.php:112
+#: front/quickactions.php:112 src/TicketsStatisticsQuickActions.php:145
 msgid "UPDATE requires a WHERE clause."
 msgstr "UPDATE nécessite une clause WHERE."
 
-#: front/quickactions.php:115
+#: front/quickactions.php:115 src/TicketsStatisticsQuickActions.php:148
 msgid "UPDATE does not support LEFT JOIN in this tool."
 msgstr "UPDATE ne prend pas en charge LEFT JOIN dans cet outil."
 
-#: front/quickactions.php:118
+#: front/quickactions.php:118 src/TicketsStatisticsQuickActions.php:151
 msgid "GROUP BY and ORDER are only available for SELECT."
 msgstr "GROUP BY et ORDER sont disponibles uniquement pour SELECT."
 
-#: front/quickactions.php:148
+#: front/quickactions.php:148 front/quickactions.php:30
 msgid "No result returned."
 msgstr "Aucun résultat retourne."
 
-#: front/quickactions.php:191
+#: front/quickactions.php:191 front/quickactions.php:78
 msgid "all"
 msgstr "tout"
 
-#: front/quickactions.php:194
+#: front/quickactions.php:194 front/quickactions.php:80
 #, php-format
 msgid "This command will run a SELECT on %s and fetch up to %s row(s)."
-msgstr "Cette commande exécutera un SELECT sur %s et récupérera jusqu'a %s ligne(s)."
+msgstr ""
+"Cette commande exécutera un SELECT sur %s et récupérera jusqu'a %s ligne(s)."
 
 #: front/quickactions.php:201 front/quickactions.php:223
+#: front/quickactions.php:87 front/quickactions.php:120
 msgid "Please preview the request before executing it."
 msgstr "Veuillez prévisualiser la requête avant de l'executer."
 
-#: front/quickactions.php:207
+#: front/quickactions.php:207 front/quickactions.php:93
 #, php-format
 msgid "SELECT completed with %d row(s)."
-msgstr "SELECT termine avec %d ligne(s)."
+msgstr "SELECT terminé avec %d ligne(s)."
 
-#: front/quickactions.php:219
+#: front/quickactions.php:219 front/quickactions.php:110
 #, php-format
 msgid "This command will update %d row(s) in %s."
-msgstr "Cette commande mettra a jour %d ligne(s) dans %s."
+msgstr "Cette commande mettra à jour %d ligne(s) dans %s."
 
-#: front/quickactions.php:227
+#: front/quickactions.php:227 front/quickactions.php:128
 #, php-format
 msgid "UPDATE completed. %d row(s) affected."
-msgstr "UPDATE termine. %d ligne(s) affectée(s)."
+msgstr "UPDATE terminé. %d ligne(s) affectée(s)."
 
-#: front/quickactions.php:246
-msgid "This tool only supports SELECT and UPDATE requests built from form inputs. Raw PHP, DELETE, INSERT, and other SQL statements are not allowed."
-msgstr "Cet outil prend uniquement en charge les requêtes SELECT et UPDATE construites a partir du formulaire. Le PHP brut, DELETE, INSERT et les autres instructions SQL ne sont pas autorisées."
+#: front/quickactions.php:246 front/quickactions.php:146
+msgid ""
+"This tool only supports SELECT and UPDATE requests built from form inputs. "
+"Raw PHP, DELETE, INSERT, and other SQL statements are not allowed."
+msgstr ""
+"Cet outil prend uniquement en charge les requêtes SELECT et UPDATE "
+"construites a partir du formulaire. Le PHP brut, DELETE, INSERT et les "
+"autres instructions SQL ne sont pas autorisées."
 
-#: front/quickactions.php:281
+#: front/quickactions.php:281 front/quickactions.php:176
 msgid "Request type"
 msgstr "Type de requête"
 
-#: front/quickactions.php:300
+#: front/quickactions.php:300 front/quickactions.php:189
 msgid "SELECT fields"
 msgstr "Champs SELECT"
 
-#: front/quickactions.php:302 front/quickactions.php:321 front/quickactions.php:327
+#: front/quickactions.php:302 front/quickactions.php:321
+#: front/quickactions.php:327 front/quickactions.php:191
 msgid "One field per line."
 msgstr "Un champ par ligne."
 
-#: front/quickactions.php:311
+#: front/quickactions.php:311 front/quickactions.php:197
 msgid "JSON object used only for UPDATE requests."
 msgstr "Objet JSON utilise uniquement pour les requêtes UPDATE."
 
-#: front/quickactions.php:317
+#: front/quickactions.php:317 front/quickactions.php:203
 msgid "Use JSON matching the GLPI DB abstraction array format."
-msgstr "Utilisez un JSON correspondant au format de tableau de l'abstraction BDD de GLPI."
+msgstr ""
+"Utilisez un JSON correspondant au format de tableau de l'abstraction BDD de "
+"GLPI."
 
-#: front/quickactions.php:321
+#: front/quickactions.php:321 front/quickactions.php:207
 msgid "LEFT JOIN"
 msgstr "LEFT JOIN"
 
-#: front/quickactions.php:323
+#: front/quickactions.php:323 front/quickactions.php:209
 msgid "Optional JSON join definition. SELECT only."
-msgstr "Definition JSON optionnelle de jointure. SELECT uniquement."
+msgstr "Définition JSON optionnelle de jointure. SELECT uniquement."
 
-#: front/quickactions.php:326
+#: front/quickactions.php:326 front/quickactions.php:213
 msgid "GROUP BY"
 msgstr "GROUP BY"
 
-#: front/quickactions.php:333
+#: front/quickactions.php:333 front/quickactions.php:219
 msgid "ORDER"
 msgstr "ORDER"
 
-#: front/quickactions.php:335
+#: front/quickactions.php:335 front/quickactions.php:215
+#: front/quickactions.php:221
 msgid "One field per line. SELECT only."
 msgstr "Un champ par ligne. SELECT uniquement."
 
-#: front/quickactions.php:339
+#: front/quickactions.php:339 front/quickactions.php:225
 msgid "Limit"
 msgstr "Limite"
 
-#: front/quickactions.php:344
+#: front/quickactions.php:344 front/quickactions.php:230
 msgid "Preview command"
 msgstr "Prévisualiser la commande"
 
-#: front/quickactions.php:346
+#: front/quickactions.php:346 front/quickactions.php:232
 msgid "Confirm and execute"
 msgstr "Confirmer et executer"
 
-#: front/quickactions.php:352
+#: front/quickactions.php:352 front/quickactions.php:241
 msgid "Built request"
 msgstr "Requête construite"
 
-#: front/quickactions.php:358
+#: front/quickactions.php:358 front/quickactions.php:251
 msgid "Result"
 msgstr "Résultat"
+
+#: front/quickactions.php:115 front/quickactions.php:125
+msgid "An error occurred while executing the UPDATE request: "
+msgstr "Une erreur s'est produite lors de l'exécution de la requête UPDATE :"
+
+#: front/quickactions.php:166
+msgid "Show result table"
+msgstr "Afficher le tableau des résultats"
+
+#: front/quickactions.php:184
+msgid "Table"
+msgstr "Tableau"
+
+#: front/quickactions.php:195
+msgid "UPDATE values"
+msgstr "Valeurs UPDATE"
+
+#: front/quickactions.php:201
+msgid "WHERE clause"
+msgstr "Clause WHERE"

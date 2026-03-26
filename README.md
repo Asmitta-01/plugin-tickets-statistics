@@ -33,7 +33,7 @@ Run this command to generate the translation files:
 
 ```bash
 find . -type f \( -name '*.php' -o -name '*.js' \) > files.list
-xgettext --language=PHP --language=JavaScript --keyword=__ --from-code=UTF-8 --output=locales/ticketsstatistics.pot --no-location --add-comments --files-from=files.list
+xgettext --language=PHP --language=JavaScript --keyword=__ --from-code=UTF-8 --output=locales/ticketsstatistics.pot --join --add-comments --files-from=files.list
 rm files.list
 ```
 
