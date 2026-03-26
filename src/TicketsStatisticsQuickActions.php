@@ -81,7 +81,27 @@ class TicketsStatisticsQuickActions
             return [];
         }
 
-        return $decoded;
+        return self::escapeLikeValues($decoded);
+    }
+
+    private static function escapeLikeValues(array $data): array
+    {
+        $exprClass = class_exists('\Glpi\DBAL\QueryExpression')
+            ? \Glpi\DBAL\QueryExpression::class
+            : \QueryExpression::class;
+
+        $result = [];
+        foreach ($data as $key => $value) {
+            if (is_array($value) && isset($value['LIKE']) && is_string($value['LIKE'])) {
+                $likeValue = $GLOBALS['DB']->escape($value['LIKE']);
+                $result[]  = new $exprClass("`$key` LIKE '$likeValue'");
+            } elseif (is_array($value)) {
+                $result[$key] = self::escapeLikeValues($value);
+            } else {
+                $result[$key] = $value;
+            }
+        }
+        return $result;
     }
 
     /**
