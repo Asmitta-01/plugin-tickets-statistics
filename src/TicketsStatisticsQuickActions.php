@@ -94,7 +94,16 @@ class TicketsStatisticsQuickActions
         foreach ($data as $key => $value) {
             if (is_array($value) && isset($value['LIKE']) && is_string($value['LIKE'])) {
                 $likeValue = $GLOBALS['DB']->escape($value['LIKE']);
-                $result[]  = new $exprClass("`$key` LIKE '$likeValue'");
+
+                // Sépare table.champ si nécessaire pour bien quoter
+                if (str_contains($key, '.')) {
+                    [$tbl, $col] = explode('.', $key, 2);
+                    $fieldExpr = "`$tbl`.`$col`";
+                } else {
+                    $fieldExpr = "`$key`";
+                }
+
+                $result[] = new $exprClass("$fieldExpr LIKE '$likeValue'");
             } elseif (is_array($value)) {
                 $result[$key] = self::escapeLikeValues($value);
             } else {
