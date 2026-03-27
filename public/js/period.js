@@ -330,6 +330,11 @@ function loadCharts() {
                     },
                 }
             });
+            const citiesDataLabels = {
+                anchor: 'end',
+                align: 'end',
+                formatter: (value) => value > 0 ? value : '',
+            };
             new Chart(document.getElementById('chart-city-new'), {
                 type: 'pie',
                 data: {
@@ -360,16 +365,7 @@ function loadCharts() {
                         legend: {
                             position: 'right',
                         },
-                        datalabels: {
-                            font: {
-                                weight: 'bold',
-                                size: 13,
-                            },
-                            anchor: 'center',
-                            align: 'center',
-                            color: '#fff',
-                            formatter: (value) => value > 0 ? value : '',
-                        }
+                        datalabels: citiesDataLabels
                     },
                 }
             });
@@ -404,16 +400,7 @@ function loadCharts() {
                         legend: {
                             position: 'right',
                         },
-                        datalabels: {
-                            font: {
-                                weight: 'bold',
-                                size: 13,
-                            },
-                            anchor: 'center',
-                            align: 'center',
-                            color: '#fff',
-                            formatter: (value) => value > 0 ? value : '',
-                        }
+                        datalabels: citiesDataLabels
                     },
                 }
             });
@@ -447,16 +434,7 @@ function loadCharts() {
                         legend: {
                             position: 'right',
                         },
-                        datalabels: {
-                            font: {
-                                weight: 'bold',
-                                size: 13,
-                            },
-                            anchor: 'center',
-                            align: 'center',
-                            color: '#fff',
-                            formatter: (value) => value > 0 ? value : '',
-                        }
+                        datalabels: citiesDataLabels
                     },
                 }
             });
@@ -725,7 +703,7 @@ function generateColorVariations(h, s, l, count) {
 
     for (let i = 0; i < count; i++) {
         // Adjust lightness and saturation for variation
-        const lightness = Math.min(100, Math.max(0, l + (i - Math.floor(count / 2)) * 10));
+        const lightness = Math.min(100, Math.max(25, l + (i - Math.floor(count / 2)) * 10));
         const saturation = Math.min(100, Math.max(0, s + (i - Math.floor(count / 2)) * 5));
         variations.push(`hsl(${h}, ${saturation}%, ${lightness}%)`);
     }
