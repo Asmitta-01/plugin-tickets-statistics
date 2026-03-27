@@ -61,19 +61,24 @@ require_once(__DIR__ . '/../../../inc/includes.php');
     <div class="row g-3 mb-4" id="ts-counters">
         <?php foreach (
             [
-                ['id' => 'incoming', 'label' => __('New'),      'color' => '#3bc519', 'icon' => 'ti-ticket'],
-                ['id' => 'assigned', 'label' => __('Assigned'), 'color' => '#f1cd29', 'icon' => 'ti-users'],
-                ['id' => 'waiting',  'label' => __('Pending'),  'color' => '#f1a129', 'icon' => 'ti-player-pause'],
-                ['id' => 'solved',   'label' => __('Solved'),   'color' => '#266ae9', 'icon' => 'ti-checkbox'],
-                ['id' => 'closed',   'label' => __('Closed'),   'color' => '#555555', 'icon' => 'ti-archive'],
+                ['id' => 'incoming', 'label' => __('New'),     'icon' => 'ti-ticket'],
+                ['id' => 'assigned', 'label' => __('Assigned'), 'icon' => 'ti-users'],
+                ['id' => 'waiting',  'label' => __('Pending'),  'icon' => 'ti-player-pause'],
+                ['id' => 'solved_closed',   'label' => __('Resolved / Closed', 'ticketsstatistics'),   'icon' => 'ti-checkbox'],
+                ['id' => 'total',   'label' => __('Total tickets', 'ticketsstatistics'),   'icon' => 'ti-archive'],
             ] as $c
         ): ?>
             <div class="col">
-                <div class="card text-center h-100" style="border-top: 3px solid <?= $c['color'] ?>">
+                <div class="card text-center h-100" style="border-top: 3px solid <?= GlpiPlugin\Ticketsstatistics\TicketsStatistics::getStatusColor($c['id']) ?>">
                     <div class="card-body py-3">
-                        <i class="ti <?= $c['icon'] ?> fs-1 mb-1" style="color:<?= $c['color'] ?>"></i>
+                        <i class="ti <?= $c['icon'] ?> fs-1 mb-1" style="color:<?= GlpiPlugin\Ticketsstatistics\TicketsStatistics::getStatusColor($c['id']) ?>"></i>
                         <div class="display-6 fw-bold ts-count" data-status="<?= $c['id'] ?>">—</div>
-                        <div class="text-muted small w-auto"><?= $c['label'] ?></div>
+                        <div class="text-muted small w-auto">
+                            <?php if ($c['id'] == 'assigned'): ?>
+                                <i class="itilstatus far fa-circle assigned me-1" title="<?= Ticket::getStatus(Ticket::ASSIGNED) ?>" data-bs-toggle="tooltip"></i>
+                            <?php endif; ?>
+                            <?= $c['label'] ?>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -148,17 +153,17 @@ require_once(__DIR__ . '/../../../inc/includes.php');
                 </div>
                 <div class="card-body d-flex p-0">
                     <div
-                        class="table-responsive-md w-100 overflow-y-auto" style="max-height:260px">
+                        class="table-responsive-md w-100 overflow-auto" style="max-height:260px">
                         <table
-                            class="table table-sm table-hover mb-0 align-middle">
+                            class="table table-sm table-hover mb-0 align-middle" style="table-layout: fixed;">
                             <thead>
                                 <tr>
-                                    <th class="text-center" scope="col"><?= __('Name', 'ticketsstatistics') ?></th>
-                                    <th class="text-center" scope="col"><?= __('Total tickets', 'ticketsstatistics') ?></th>
-                                    <th class="text-center" scope="col"><?= __('Actions', 'ticketsstatistics') ?></th>
+                                    <th class="text-center align-content-center" scope="col"><?= __('Name', 'ticketsstatistics') ?></th>
+                                    <th class="text-center align-content-center" scope="col"><?= __('Total tickets', 'ticketsstatistics') ?></th>
+                                    <th class="text-center align-content-center" scope="col"><?= __('Actions', 'ticketsstatistics') ?></th>
                                 </tr>
                             </thead>
-                            <tbody id="ts-towns-table" class="overflow-y-auto">
+                            <tbody id="ts-towns-table">
                                 <tr>
                                     <td class="text-center"><i class="ti ti-loader"></i></td>
                                     <td class="text-center"><i class="ti ti-loader"></i></td>

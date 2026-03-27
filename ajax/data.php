@@ -44,6 +44,8 @@ foreach (
     ]);
     $counters[$key] = (int) $iter->current()['cpt'];
 }
+$counters['total'] = array_sum($counters);
+$counters['solved_closed'] = $counters['solved'] + $counters['closed'];
 
 // --- By priority ---
 $priority = ['labels' => [], 'values' => []];

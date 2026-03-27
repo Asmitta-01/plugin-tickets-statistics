@@ -48,4 +48,21 @@ class TicketsStatistics
     {
         return self::getAvailablePeriods()[$period] ?? $period;
     }
+
+    private static function getStatusColors(): array
+    {
+        return [
+            'new' => '#49bf4d',
+            'incoming' => '#49bf4d',
+            'assigned' => '#49bf4d',
+            'waiting' => '#ffa500',
+            'solved_closed' => '#C00000',
+            'total' => '#555555',
+        ];
+    }
+
+    public static function getStatusColor(string $status): string
+    {
+        return self::getStatusColors()[$status] ?? '#000000';
+    }
 }
