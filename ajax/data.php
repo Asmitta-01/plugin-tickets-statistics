@@ -183,7 +183,10 @@ $cityData['values']['in_progress'] = array_column($cityStats, 'in_progress');
 
 
 // --- Per day ---
-$perday = ['labels' => [], 'values' => []];
+$perday = ['labels' => [], 'opened' => [], 'closed' => []];
+
+// Tickets ouverts par jour
+$openedByDay = [];
 foreach (
     $DB->request([
         'SELECT'  => [
@@ -196,8 +199,38 @@ foreach (
         'ORDER'   => new \QueryExpression('`day` ASC'),
     ]) as $row
 ) {
-    $perday['labels'][] = $row['day'];
-    $perday['values'][] = (int) $row['cpt'];
+    $openedByDay[$row['day']] = (int) $row['cpt'];
+}
+
+// Tickets clôturés par jour
+$closedWhere = array_merge($where, [
+    'NOT' => ["$table.closedate" => null],
+]);
+
+$closedByDay = [];
+foreach (
+    $DB->request([
+        'SELECT'  => [
+            'COUNT DISTINCT' => "$table.id AS cpt",
+            new \QueryExpression("DATE($table.`closedate`) AS `day`"),
+        ],
+        'FROM'    => $table,
+        'WHERE'   => $closedWhere,
+        'GROUPBY' => new \QueryExpression('`day`'),
+        'ORDER'   => new \QueryExpression('`day` ASC'),
+    ]) as $row
+) {
+    $closedByDay[$row['day']] = (int) $row['cpt'];
+}
+
+// Fusionne les labels (union des deux ensembles de dates)
+$allDays = array_unique(array_merge(array_keys($openedByDay), array_keys($closedByDay)));
+sort($allDays);
+
+foreach ($allDays as $day) {
+    $perday['labels'][]  = $day;
+    $perday['opened'][]  = $openedByDay[$day] ?? 0;
+    $perday['closed'][]  = $closedByDay[$day] ?? 0;
 }
 
 echo json_encode(compact('counters', 'priority', 'category', 'cityData', 'perday'));

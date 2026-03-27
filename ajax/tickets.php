@@ -137,9 +137,15 @@ switch ($type) {
         }
         break;
 
-    case 'perday':
+    case 'perday-opened':
         if (\DateTime::createFromFormat('Y-m-d', $label) !== false) {
             $where[] = new \QueryExpression("DATE($table.`date`) = " . $DB->quoteValue($label));
+        }
+        break;
+    case 'perday-closed':
+        $where[] = ["$table.status" => [\Ticket::SOLVED, \Ticket::CLOSED]];
+        if (\DateTime::createFromFormat('Y-m-d', $label) !== false) {
+            $where[] = new \QueryExpression("DATE($table.`closedate`) = " . $DB->quoteValue($label));
         }
         break;
 
@@ -175,6 +181,7 @@ foreach (
             "$table.status",
             "$table.date",
             "$table.date_mod",
+            "$table.closedate",
             "$cat_table.completename AS category_name",
             "$loc_table.town AS town_name",
         ],
@@ -192,6 +199,7 @@ foreach (
         'status' => \Ticket::getStatus((int) $row['status']),
         'creation' => \Html::convDateTime($row['date']),
         'last_update' => \Html::convDateTime($row['date_mod']),
+        'closed' => \Html::convDateTime($row['closedate']),
         'category' => $row['category_name'] ?: __('None'),
         'town' => $row['town_name'] ?: __('Unknown', 'ticketsstatistics'),
         'url' => $CFG_GLPI['root_doc'] . '/front/ticket.form.php?id=' . $ticket_id,

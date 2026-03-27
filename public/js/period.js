@@ -445,28 +445,37 @@ function loadCharts() {
                 data: {
                     labels: data.perday.labels,
                     datasets: [{
-                        label: __('Tickets opened'),
-                        data: data.perday.values,
+                        label: __('Tickets opened', 'ticketsstatistics'),
+                        data: data.perday.opened,
                         borderColor: '#10b981',
                         backgroundColor: 'rgba(16,185,129,.15)',
                         fill: true,
-                        tension: data.perday.values.length > 60 ? 0.1 : 0.3
+                        tension: data.perday.opened.length > 60 ? 0.1 : 0.3
+                    },
+                    {
+                        label: __('Tickets closed', 'ticketsstatistics'),
+                        data: data.perday.closed,
+                        borderColor: '#fb6356',
+                        backgroundColor: 'rgba(251, 99, 86, .15)',
+                        fill: true,
+                        tension: data.perday.closed.length > 60 ? 0.1 : 0.3
                     }]
                 },
                 options: {
-                    onClick: function (_, elements) {
+                    onClick: function (_, elements, chart) {
                         if (!elements.length) {
                             return;
                         }
 
+                        const { datasetIndex } = elements[0];
                         openTicketsModal({
-                            type: 'perday',
+                            type: datasetIndex == 0 ? 'perday-opened' : 'perday-closed',
                             label: data.perday.labels[elements[0].index]
                         });
                     },
                     plugins: {
                         legend: {
-                            display: false
+                            display: 'top'
                         },
                         zoom: {
                             pan: {
@@ -483,7 +492,7 @@ function loadCharts() {
                                 mode: 'xy',
                             },
                             limits: {
-                                y: { min: 0, max: Math.max(...data.perday.values) * 1.15 },
+                                y: { min: 0, max: 100 },
                             },
                         },
                         datalabels: { display: false }
@@ -560,11 +569,11 @@ function openTicketsModal(filters) {
             downloadBtn.disabled = !payload.tickets.length;
             downloadBtn.onclick = function () {
                 if (!window.tsModalTickets.length) return;
-                const headers = ['ID', __('Title'), __('Status'), __('Last update'), __('Creation', 'ticketsstatistics'), __('Category'), __('Town', 'ticketsstatistics')];
+                const headers = ['ID', __('Title'), __('Status'), __('Last update'), __('Creation', 'ticketsstatistics'), __('Close date', 'ticketsstatistics'), __('Category'), __('Town', 'ticketsstatistics')];
                 const escape = v => '"' + String(v ?? '').replace(/"/g, '""') + '"';
 
                 const rows = window.tsModalTickets.map(t =>
-                    [t.id, t.name, t.status, t.last_update, t.creation, t.category, t.town]
+                    [t.id, t.name, t.status, t.last_update, t.creation, t.closed, t.category, t.town]
                         .map(escape)
                         .join(';')
                 );
@@ -656,6 +665,7 @@ function renderTicketsTable(tickets) {
             <td>${escapeHtml(ticket.status)}</td>
             <td>${escapeHtml(ticket.last_update)}</td>
             <td>${escapeHtml(ticket.creation)}</td>
+            <td>${escapeHtml(ticket.closed)}</td>
             <td>${escapeHtml(ticket.category)}</td>
             <td>${escapeHtml(ticket.town)}</td>
         </tr>
@@ -671,6 +681,7 @@ function renderTicketsTable(tickets) {
                         <th>${__('Status', 'ticketsstatistics')}</th>
                         <th>${__('Last update', 'ticketsstatistics')}</th>
                         <th>${__('Creation', 'ticketsstatistics')}</th>
+                        <th>${__('Close date', 'ticketsstatistics')}</th>
                         <th>${__('Category', 'ticketsstatistics')}</th>
                         <th>${__('Town', 'ticketsstatistics')}</th>
                     </tr>

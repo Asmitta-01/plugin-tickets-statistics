@@ -208,14 +208,14 @@ require_once(__DIR__ . '/../../../inc/includes.php');
             <div class="card shadow-sm">
                 <div class="card-header d-flex align-items-center justify-content-between">
                     <span>
-                        <?= __('Tickets opened per day', 'ticketsstatistics') . ' (' . GlpiPlugin\Ticketsstatistics\TicketsStatistics::getPeriodLabel($period) . ')' ?>
+                        <?= __('Tickets opened per day', 'ticketsstatistics') . ' / ' . __('Tickets closed per day', 'ticketsstatistics') . ' (' . GlpiPlugin\Ticketsstatistics\TicketsStatistics::getPeriodLabel($period) . ')' ?>
                     </span>
                     <button data-bs-toggle="tooltip" title="<?= __('Reset the zoom', 'ticketsstatistics') ?>" class="btn btn-sm btn-outline-secondary ts-reset-chart" data-canvas="chart-perday">
                         <?= __('Reset', 'ticketsstatistics') ?>
                     </button>
                 </div>
                 <div class="card-body">
-                    <canvas id="chart-perday" style="height:260px"></canvas>
+                    <canvas id="chart-perday" style="height:280px"></canvas>
                 </div>
             </div>
         </div>
