@@ -522,12 +522,12 @@ function loadCharts() {
                             pointRadius: 3,
                         },
                         {
-                            label: __('Global average: %avg', 'ticketsstatistics').replace({ '%avg': data.resolution.average[0] }),
+                            label: __('Global average: %avgh', 'ticketsstatistics').replace('%avg', data.resolution.average[0]),
                             data: data.resolution.average,
                             borderColor: '#dc3545',
-                            borderDash: [6, 4],
-                            borderWidth: 2,
-                            pointRadius: 0,       // pas de points sur la ligne moyenne
+                            borderDash: [8, 4],
+                            borderWidth: 2.5,
+                            pointRadius: 1,
                             fill: false,
                             tension: 0,
                         },
@@ -536,19 +536,35 @@ function loadCharts() {
                 options: {
                     responsive: true,
                     plugins: {
-                        legend: { position: 'bottom' },
+                        legend: { position: 'top' },
                         tooltip: {
                             callbacks: {
-                                label: ctx => ctx.dataset.label + ': ' + ctx.parsed.y + 'h'
+                                label: ctx =>
+                                    ctx.datasetIndex === 0
+                                        ? `${ctx.dataset.label}: ${ctx.parsed.y}h`
+                                        : ctx.dataset.label
                             }
-                        }
+                        },
+                        datalabels: { display: false },
+                        zoom: {
+                            pan: {
+                                enabled: true,
+                                mode: 'xy',
+                            },
+                            zoom: {
+                                wheel: { enabled: true },
+                                pinch: { enabled: true },
+                                mode: 'xy',
+                            },
+                            limits: { y: { min: 0 } },
+                        },
                     },
                     scales: {
                         x: { grid: { display: false } },
                         y: {
                             beginAtZero: true,
                             ticks: {
-                                callback: val => val + 'h'
+                                callback: val => `${Math.round(val * 100) / 100}h`
                             }
                         }
                     }

@@ -237,43 +237,53 @@ foreach ($allDays as $day) {
 // -- Temps de réponse moyen par jour ---
 $resolution = ['labels' => [], 'values' => [], 'average' => []];
 
-$resolvedWhere = array_merge($where, [
-    'OR' => [
-        ['NOT' => ["$table.solve_delay_stat" => 0]],
-        ['NOT' => ["$table.close_delay_stat" => 0]],
-    ]
+$resolutionWhere = array_merge($where, [
+    new \QueryExpression(
+        "($table.`solve_delay_stat` != 0 OR $table.`close_delay_stat` != 0)"
+    ),
 ]);
 
-$totalHours = 0;
-$totalCount = 0;
-
+$resolutionRows = [];
 foreach (
     $DB->request([
         'SELECT' => [
             "$table.id",
-            "$table.date",
+            new \QueryExpression("DATE(COALESCE(NULLIF($table.`solvedate`, '0000-00-00 00:00:00'), $table.`closedate`)) AS `day`"),
             "$table.solve_delay_stat",
             "$table.close_delay_stat",
         ],
         'FROM'  => $table,
-        'WHERE' => $resolvedWhere,
-        'ORDER' => ["$table.date ASC"],
+        'WHERE' => $resolutionWhere,
+        'ORDER' => new \QueryExpression("COALESCE(NULLIF($table.`solvedate`, '0000-00-00 00:00:00'), $table.`closedate`) ASC"),
     ]) as $row
 ) {
-    $seconds = (int) $row['solve_delay_stat'] !== 0
-        ? (int) $row['solve_delay_stat']
-        : (int) $row['close_delay_stat'];
+    $seconds = (int) $row['solve_delay_stat'] ?: (int) $row['close_delay_stat'];
+    if ($seconds <= 0) continue;
 
-    $hours = round($seconds / HOUR_TIMESTAMP, 2);
-
-    $resolution['labels'][] = substr($row['date'], 0, 10);
-    $resolution['values'][] = $hours;
-
-    $totalHours += $hours;
-    $totalCount++;
+    $hours = round($seconds / 3600, 2);
+    $resolutionRows[] = ['day' => $row['day'], 'hours' => $hours];
 }
 
-$globalAverage = $totalCount > 0 ? round($totalHours / $totalCount, 2) : 0;
-$resolution['average'] = array_fill(0, count($resolution['labels']), $globalAverage);
+// Groupe par jour — moyenne par jour
+$byDay = [];
+foreach ($resolutionRows as $r) {
+    $byDay[$r['day']][] = $r['hours'];
+}
+ksort($byDay);
+
+$totalSum   = 0;
+$totalCount = 0;
+
+foreach ($byDay as $day => $hours) {
+    $avg         = round(array_sum($hours) / count($hours), 2);
+    $totalSum   += array_sum($hours);
+    $totalCount += count($hours);
+
+    $resolution['labels'][] = $day;
+    $resolution['values'][] = $avg;
+}
+
+$globalAvg = $totalCount > 0 ? round($totalSum / $totalCount, 2) : 0;
+$resolution['average'] = array_fill(0, count($resolution['labels']), $globalAvg);
 
 echo json_encode(compact('counters', 'priority', 'category', 'cityData', 'perday', 'resolution'));
