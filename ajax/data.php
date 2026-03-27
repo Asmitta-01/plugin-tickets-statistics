@@ -244,7 +244,30 @@ $resolutionWhere = array_merge($where, [
     ),
 ]);
 if ($categoryFilter !== null && (int) $categoryFilter > 0) {
-    $resolutionWhere["$table.`itilcategories_id`"] = $categoryFilter;
+    $categoryId = (int) $categoryFilter;
+
+    // Récupère tous les enfants de cette catégorie
+    $childIds = [$categoryId];
+    $children = $DB->request([
+        'SELECT' => ['id'],
+        'FROM'   => 'glpi_itilcategories',
+        'WHERE'  => ['itilcategories_id' => $categoryId],
+    ]);
+    foreach ($children as $child) {
+        $childIds[] = (int) $child['id'];
+    }
+
+    // Récupère aussi les petits-enfants (un niveau de plus)
+    $grandchildren = $DB->request([
+        'SELECT' => ['id'],
+        'FROM'   => 'glpi_itilcategories',
+        'WHERE'  => ['itilcategories_id' => $childIds],
+    ]);
+    foreach ($grandchildren as $child) {
+        $childIds[] = (int) $child['id'];
+    }
+
+    $resolutionWhere["$table.itilcategories_id"] = $childIds;
 }
 
 $resolutionRows = [];
