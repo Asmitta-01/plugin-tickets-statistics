@@ -113,6 +113,10 @@ function loadCharts() {
     const params = new URLSearchParams(document.location.search)
     const url = root + '/plugins/ticketsstatistics/ajax/data.php' + '?' + params.toString();
 
+    const colorSuccess = '#49bf4d';
+    const colorDanger = '#C00000';
+    const colorWarning = '#ffa500';
+
     fetch(url)
         .then(r => r.json())
         .then(data => {
@@ -167,17 +171,17 @@ function loadCharts() {
                     datasets: [{
                         label: __('New Tickets', 'ticketsstatistics'),
                         data: data.category.values.new,
-                        backgroundColor: '#3bc519'
+                        backgroundColor: colorSuccess
                     },
                     {
                         label: __('Resolved/Closed tickers', 'ticketsstatistics'),
                         data: data.category.values.resolved,
-                        backgroundColor: '#C00000'
+                        backgroundColor: colorDanger
                     },
                     {
                         label: __('In progress', 'ticketsstatistics'),
                         data: data.category.values.in_progress,
-                        backgroundColor: '#f1cd29'
+                        backgroundColor: colorWarning
                     }]
                 },
                 options: {
@@ -250,19 +254,19 @@ function loadCharts() {
                         {
                             label: __('Resolved / Closed', 'ticketsstatistics'),
                             data: data.cityData.values.resolved,
-                            backgroundColor: '#C00000',
+                            backgroundColor: colorDanger,
                             hoverOffset: 16,
                         },
                         {
                             label: __('New'),
                             data: data.cityData.values.new,
-                            backgroundColor: '#3bc519',
+                            backgroundColor: colorSuccess,
                             hoverOffset: 8,
                         },
                         {
                             label: __('In progress'),
                             data: data.cityData.values.in_progress,
-                            backgroundColor: '#f1cd29',
+                            backgroundColor: colorWarning,
                             hoverOffset: 4,
                         },
                     ]

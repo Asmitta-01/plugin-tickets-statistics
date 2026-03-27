@@ -102,9 +102,12 @@ require_once(__DIR__ . '/../../../inc/includes.php');
             <div class="card shadow-sm h-100">
                 <div class="card-header d-flex align-items-center justify-content-between">
                     <span><?= __('Tickets by category (top 10)', 'ticketsstatistics') ?></span>
-                    <button data-bs-toggle="tooltip" title="<?= __('Reset the zoom', 'ticketsstatistics') ?>" class="btn btn-sm btn-outline-secondary ts-reset-chart" data-canvas="chart-category">
-                        <?= __('Reset', 'ticketsstatistics') ?>
-                    </button>
+                    <div>
+                        <?php \GlpiPlugin\Ticketsstatistics\TicketsStatistics::showStatusGroupButtons('ts-category-status-group'); ?>
+                        <button data-bs-toggle="tooltip" title="<?= __('Reset the zoom', 'ticketsstatistics') ?>" class="btn btn-sm btn-outline-secondary ms-2 ts-reset-chart" data-canvas="chart-category">
+                            <?= __('Reset', 'ticketsstatistics') ?>
+                        </button>
+                    </div>
                 </div>
                 <div class="card-body">
                     <canvas id="chart-category" style="max-height:280px"></canvas>
@@ -120,21 +123,7 @@ require_once(__DIR__ . '/../../../inc/includes.php');
                 <div class="card-header d-flex align-items-center justify-content-between">
                     <span><?= __('Tickets by town', 'ticketsstatistics') ?></span>
                     <div class="w-md-50">
-                        <div class="btn-group btn-group-sm" role="group" aria-label="" id="ts-category-status-group">
-                            <div class="btn"><?= __('Status', 'ticketsstatistics') ?></div>
-                            <div class="btn">
-                                <span class="badge bg-success me-1"></span>
-                                <?= __('New', 'ticketsstatistics') ?>
-                            </div>
-                            <div class="btn">
-                                <span class="badge bg-danger me-1"></span>
-                                <?= __('Resolved', 'ticketsstatistics') ?>
-                            </div>
-                            <div class="btn">
-                                <span class="badge bg-warning me-1"></span>
-                                <?= __('In progress', 'ticketsstatistics') ?>
-                            </div>
-                        </div>
+                        <?php \GlpiPlugin\Ticketsstatistics\TicketsStatistics::showStatusGroupButtons('ts-town-status-group'); ?>
                         <button data-bs-toggle="tooltip" title="<?= __('Reset the zoom', 'ticketsstatistics') ?>" class="ms-md-2 btn btn-sm btn-outline-secondary ts-reset-chart" data-canvas="chart-city">
                             <?= __('Reset', 'ticketsstatistics') ?>
                         </button>
@@ -188,21 +177,7 @@ require_once(__DIR__ . '/../../../inc/includes.php');
         <div class="card-header d-flex align-items-center justify-content-between">
             <span><?= __('Tickets by town (splitted)', 'ticketsstatistics') ?></span>
             <div class="w-md-50">
-                <div class="btn-group btn-group-sm" role="group" aria-label="" id="ts-category-status-group">
-                    <div class="btn"><?= __('Status', 'ticketsstatistics') ?></div>
-                    <div class="btn">
-                        <span class="badge bg-success me-1"></span>
-                        <?= __('New', 'ticketsstatistics') ?>
-                    </div>
-                    <div class="btn">
-                        <span class="badge bg-danger me-1"></span>
-                        <?= __('Resolved', 'ticketsstatistics') ?>
-                    </div>
-                    <div class="btn">
-                        <span class="badge bg-warning me-1"></span>
-                        <?= __('In progress', 'ticketsstatistics') ?>
-                    </div>
-                </div>
+                <?php \GlpiPlugin\Ticketsstatistics\TicketsStatistics::showStatusGroupButtons('ts-towns-status-group'); ?>
             </div>
         </div>
         <div class="card-body d-flex align-items-center justify-content-center">
