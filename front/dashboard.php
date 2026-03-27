@@ -220,6 +220,25 @@ require_once(__DIR__ . '/../../../inc/includes.php');
             </div>
         </div>
     </div>
+
+    <!-- Charts row 5: TTR -->
+    <div class="row g-3 mb-3">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header d-flex align-items-center justify-content-between">
+                    <span>
+                        <?= __('Average tickets time resolution (TTR)', 'ticketsstatistics') . ' (' . GlpiPlugin\Ticketsstatistics\TicketsStatistics::getPeriodLabel($period) . ')' ?>
+                    </span>
+                    <button data-bs-toggle="tooltip" title="<?= __('Reset the zoom', 'ticketsstatistics') ?>" class="btn btn-sm btn-outline-secondary ts-reset-chart" data-canvas="chart-resolution">
+                        <?= __('Reset', 'ticketsstatistics') ?>
+                    </button>
+                </div>
+                <div class="card-body">
+                    <canvas id="chart-resolution" style="max-height:260px"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <div class="modal fade" id="ts-tickets-modal" tabindex="-1" aria-hidden="true">

@@ -233,4 +233,47 @@ foreach ($allDays as $day) {
     $perday['closed'][]  = $closedByDay[$day] ?? 0;
 }
 
-echo json_encode(compact('counters', 'priority', 'category', 'cityData', 'perday'));
+
+// -- Temps de réponse moyen par jour ---
+$resolution = ['labels' => [], 'values' => [], 'average' => []];
+
+$resolvedWhere = array_merge($where, [
+    'OR' => [
+        ['NOT' => ["$table.solve_delay_stat" => 0]],
+        ['NOT' => ["$table.close_delay_stat" => 0]],
+    ]
+]);
+
+$totalHours = 0;
+$totalCount = 0;
+
+foreach (
+    $DB->request([
+        'SELECT' => [
+            "$table.id",
+            "$table.date",
+            "$table.solve_delay_stat",
+            "$table.close_delay_stat",
+        ],
+        'FROM'  => $table,
+        'WHERE' => $resolvedWhere,
+        'ORDER' => ["$table.date ASC"],
+    ]) as $row
+) {
+    $seconds = (int) $row['solve_delay_stat'] !== 0
+        ? (int) $row['solve_delay_stat']
+        : (int) $row['close_delay_stat'];
+
+    $hours = round($seconds / HOUR_TIMESTAMP, 2);
+
+    $resolution['labels'][] = substr($row['date'], 0, 10);
+    $resolution['values'][] = $hours;
+
+    $totalHours += $hours;
+    $totalCount++;
+}
+
+$globalAverage = $totalCount > 0 ? round($totalHours / $totalCount, 2) : 0;
+$resolution['average'] = array_fill(0, count($resolution['labels']), $globalAverage);
+
+echo json_encode(compact('counters', 'priority', 'category', 'cityData', 'perday', 'resolution'));

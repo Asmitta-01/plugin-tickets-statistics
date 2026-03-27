@@ -505,6 +505,55 @@ function loadCharts() {
                     maintainAspectRatio: false
                 }
             });
+
+            // TTR lines
+            new Chart('chart-resolution', {
+                type: 'line',
+                data: {
+                    labels: data.resolution.labels,
+                    datasets: [
+                        {
+                            label: __('Avg resolution time(hours)', 'ticketsstatistics'),
+                            data: data.resolution.values,
+                            borderColor: '#0d6efd',
+                            backgroundColor: 'rgba(13,110,253,0.08)',
+                            tension: 0.3,
+                            fill: true,
+                            pointRadius: 3,
+                        },
+                        {
+                            label: __('Global average: %avg', 'ticketsstatistics').replace({ '%avg': data.resolution.average[0] }),
+                            data: data.resolution.average,
+                            borderColor: '#dc3545',
+                            borderDash: [6, 4],
+                            borderWidth: 2,
+                            pointRadius: 0,       // pas de points sur la ligne moyenne
+                            fill: false,
+                            tension: 0,
+                        },
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        tooltip: {
+                            callbacks: {
+                                label: ctx => ctx.dataset.label + ': ' + ctx.parsed.y + 'h'
+                            }
+                        }
+                    },
+                    scales: {
+                        x: { grid: { display: false } },
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: val => val + 'h'
+                            }
+                        }
+                    }
+                }
+            });
         });
 }
 
