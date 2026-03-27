@@ -118,7 +118,7 @@ require_once(__DIR__ . '/../../../inc/includes.php');
 
     <!-- Charts row 2 -->
     <div class="row g-3 mb-3">
-        <div class="col-md-9">
+        <div class="col-md-8">
             <div class="card shadow-sm h-100">
                 <div class="card-header d-flex align-items-center justify-content-between">
                     <span><?= __('Tickets by town', 'ticketsstatistics') ?></span>
@@ -135,7 +135,7 @@ require_once(__DIR__ . '/../../../inc/includes.php');
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-4">
             <div class="card shadow-sm h-100">
                 <div class="card-header d-flex align-items-center justify-content-between">
                     <?= __('Total tickets per town', 'ticketsstatistics') ?>
@@ -144,22 +144,22 @@ require_once(__DIR__ . '/../../../inc/includes.php');
                     <div
                         class="table-responsive-md w-100 overflow-auto" style="max-height:260px">
                         <table
-                            class="table table-sm table-hover mb-0 align-middle" style="table-layout: fixed;">
+                            class="table table-sm table-hover mb-0 align-middle">
                             <thead>
                                 <tr>
-                                    <th class="text-center align-content-center" scope="col"><?= __('Name', 'ticketsstatistics') ?></th>
-                                    <th class="text-center align-content-center" scope="col"><?= __('Total tickets', 'ticketsstatistics') ?></th>
-                                    <th class="text-center align-content-center" scope="col"><?= __('Actions', 'ticketsstatistics') ?></th>
+                                    <th class="ps-md-3 align-content-center" width="50%" scope="col"><?= __('Name', 'ticketsstatistics') ?></th>
+                                    <th class="text-center align-content-center" width="30%" scope="col"><?= __('Total tickets', 'ticketsstatistics') ?></th>
+                                    <th class="text-center align-content-center" width="20%" scope="col"><?= __('Actions', 'ticketsstatistics') ?></th>
                                 </tr>
                             </thead>
                             <tbody id="ts-towns-table">
                                 <tr>
-                                    <td class="text-center"><i class="ti ti-loader"></i></td>
+                                    <td class="ps-md-3"><i class="ti ti-loader"></i></td>
                                     <td class="text-center"><i class="ti ti-loader"></i></td>
                                     <td class="text-center"><i class="ti ti-loader"></i></td>
                                 </tr>
                                 <tr>
-                                    <td class="text-center"><i class="ti ti-loader"></i></td>
+                                    <td class="ps-md-3"><i class="ti ti-loader"></i></td>
                                     <td class="text-center"><i class="ti ti-loader"></i></td>
                                     <td class="text-center"><i class="ti ti-loader"></i></td>
                                 </tr>

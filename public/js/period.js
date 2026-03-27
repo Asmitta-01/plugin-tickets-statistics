@@ -518,7 +518,7 @@ function fillTownsTable(data) {
         const url = root + '/plugins/ticketsstatistics/front/ticketcityexport.php?' + params.toString();
         return `
         <tr>
-            <td class="text-center">${escapeHtml(town.name)}</td>
+            <td class="ps-3">${escapeHtml(town.name)}</td>
             <td class="text-center">${town.count}</td>
             <td class="text-center">
                 <a class="text-decoration-none" href="${url}" title="${__('Download tickets in CSV', 'ticketsstatistics')}" target="_blank">
