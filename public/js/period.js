@@ -108,6 +108,12 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 });
 
+function refreshPageWithCategory(category) {
+    const url = new URL(window.location.href);
+    url.searchParams.set('ttr_category', category);
+    window.location.href = url.toString();
+}
+
 function loadCharts() {
     const root = CFG_GLPI.root_doc;
     const params = new URLSearchParams(document.location.search)

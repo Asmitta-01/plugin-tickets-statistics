@@ -236,12 +236,16 @@ foreach ($allDays as $day) {
 
 // -- Temps de réponse moyen par jour ---
 $resolution = ['labels' => [], 'values' => [], 'average' => []];
+$categoryFilter = $_GET['ttr_category'] ?? null;
 
 $resolutionWhere = array_merge($where, [
     new \QueryExpression(
         "($table.`solve_delay_stat` != 0 OR $table.`close_delay_stat` != 0)"
     ),
 ]);
+if ($categoryFilter !== null && (int) $categoryFilter > 0) {
+    $resolutionWhere["$table.`itilcategories_id`"] = $categoryFilter;
+}
 
 $resolutionRows = [];
 foreach (

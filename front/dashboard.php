@@ -34,7 +34,7 @@ require_once(__DIR__ . '/../../../inc/includes.php');
             <div class="col-auto row gx-2 align-items-center">
                 <label for="ts-period" class="form-label mb-1 fw-semibold"><?= __('Period', 'ticketsstatistics') ?></label>
                 <select class="form-select form-select-sm" id="ts-period" name="period">
-                    <?php foreach (GlpiPlugin\Ticketsstatistics\TicketsStatistics::getAvailablePeriods() as $value => $label): ?>
+                    <?php foreach (GlpiPlugin\Ticketsstatistics\PeriodFilter::getAvailablePeriods() as $value => $label): ?>
                         <option value="<?= $value ?>" <?= $period === $value ? ' selected' : '' ?>><?= htmlspecialchars($label) ?></option>
                     <?php endforeach; ?>
                 </select>
@@ -208,7 +208,7 @@ require_once(__DIR__ . '/../../../inc/includes.php');
             <div class="card shadow-sm">
                 <div class="card-header d-flex align-items-center justify-content-between">
                     <span>
-                        <?= __('Tickets opened per day', 'ticketsstatistics') . ' / ' . __('Tickets closed per day', 'ticketsstatistics') . ' (' . GlpiPlugin\Ticketsstatistics\TicketsStatistics::getPeriodLabel($period) . ')' ?>
+                        <?= __('Tickets opened per day', 'ticketsstatistics') . ' / ' . __('Tickets closed per day', 'ticketsstatistics') . ' (' . GlpiPlugin\Ticketsstatistics\PeriodFilter::getPeriodLabel($period) . ')' ?>
                     </span>
                     <button data-bs-toggle="tooltip" title="<?= __('Reset the zoom', 'ticketsstatistics') ?>" class="btn btn-sm btn-outline-secondary ts-reset-chart" data-canvas="chart-perday">
                         <?= __('Reset', 'ticketsstatistics') ?>
@@ -226,9 +226,20 @@ require_once(__DIR__ . '/../../../inc/includes.php');
         <div class="col-12">
             <div class="card shadow-sm">
                 <div class="card-header d-flex align-items-center justify-content-between">
-                    <span>
-                        <?= __('Average tickets time resolution (TTR)', 'ticketsstatistics') . ' (' . GlpiPlugin\Ticketsstatistics\TicketsStatistics::getPeriodLabel($period) . ')' ?>
-                    </span>
+                    <div>
+                        <span class="me-2">
+                            <?= __('Average TTR', 'ticketsstatistics') . ' (' . GlpiPlugin\Ticketsstatistics\PeriodFilter::getPeriodLabel($period) . ')' ?>
+                        </span>
+                        <?php \ITILCategory::dropdown([
+                            'name' => 'ttr_category',
+                            'display_emptychoice' => true,
+                            'emptylabel' => __('All categories', 'ticketsstatistics'),
+                            'value' => $_GET['ttr_category'] ?? 0,
+                            'addicon' => false,
+                            'comments' => false,
+                            'on_change' => 'refreshPageWithCategory(this.value)',
+                        ]); ?>
+                    </div>
                     <button data-bs-toggle="tooltip" title="<?= __('Reset the zoom', 'ticketsstatistics') ?>" class="btn btn-sm btn-outline-secondary ts-reset-chart" data-canvas="chart-resolution">
                         <?= __('Reset', 'ticketsstatistics') ?>
                     </button>

@@ -5,6 +5,22 @@ namespace GlpiPlugin\Ticketsstatistics;
 class PeriodFilter
 {
 
+    public static function getAvailablePeriods(): array
+    {
+        return [
+            'last7' => __('Last 7 days', 'ticketsstatistics'),
+            'last30' => __('Last 30 days', 'ticketsstatistics'),
+            'last90' => __('Last 90 days', 'ticketsstatistics'),
+            'thisyear' => __('This year', 'ticketsstatistics'),
+            'lastyear' => __('Last year', 'ticketsstatistics'),
+            'custom' => __('Custom period', 'ticketsstatistics'),
+        ];
+    }
+
+    public static function getPeriodLabel(string $period): string
+    {
+        return self::getAvailablePeriods()[$period] ?? $period;
+    }
 
     /**
      * Applies a date filter to the provided where clause array based on the specified period.
