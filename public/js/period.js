@@ -3,21 +3,11 @@ window.tsModalTickets = [];
 
 // Show/hide custom period fields
 document.addEventListener('DOMContentLoaded', function () {
-    var periodSelect = document.getElementById('ts-period');
-    var customFields = document.getElementById('ts-custom-period-fields');
-    var applyBtnCol = document.getElementById('ts-apply-btn-col');
+    const periodSelect = document.getElementById('ts-period');
+    const categorySelect = document.querySelector('#ts-category>select');
     ticketsStatisticsModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('ts-tickets-modal'));
-    periodSelect.addEventListener('change', function () {
-        if (this.value === 'custom') {
-            customFields.style.display = 'block';
-            applyBtnCol.style.display = '';
-        } else {
-            customFields.style.display = 'none';
-            applyBtnCol.style.display = 'none';
-            const filterForm = document.getElementById('ts-filter-form');
-            if (filterForm) filterForm.submit();
-        }
-    });
+    periodSelect.addEventListener('change', submitFilterForm);
+    categorySelect.addEventListener('change', submitFilterForm);
 
     const downloadPdfButton = document.getElementById('ticketsstatisticsDownloadPdfBtn');
     downloadPdfButton.addEventListener('click', async function () {
@@ -107,6 +97,20 @@ document.addEventListener('DOMContentLoaded', function () {
         console.error('Failed to load charts.'.error.message);
     }
 });
+
+function submitFilterForm() {
+    const customFields = document.getElementById('ts-custom-period-fields');
+    const applyBtnCol = document.getElementById('ts-apply-btn-col');
+    if (document.getElementById('ts-period').value === 'custom') {
+        customFields.style.display = 'block';
+        applyBtnCol.style.display = '';
+    } else {
+        customFields.style.display = 'none';
+        applyBtnCol.style.display = 'none';
+        const filterForm = document.getElementById('ts-filter-form');
+        if (filterForm) filterForm.submit();
+    }
+}
 
 function refreshPageWithCategory(category) {
     const url = new URL(window.location.href);

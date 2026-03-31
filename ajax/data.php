@@ -18,11 +18,37 @@ $DB    = DBConnection::getReadConnection();
 $table = Ticket::getTable();
 $where = ["$table.is_deleted" => 0] + getEntitiesRestrictCriteria($table);
 
-// Get the period filter from the request
+// Get the period and category filter from the request
 $period = $_GET['period'] ?? 'last30';
+$categoryId = $_GET['category'] ?? 0;
 
 $dateFrom = $_GET['date_from'] ?? null;
 $dateTo   = $_GET['date_to']   ?? null;
+
+if ($categoryId > 0) {
+    // Récupère tous les enfants de cette catégorie
+    $childIds = [$categoryId];
+    $children = $DB->request([
+        'SELECT' => ['id'],
+        'FROM'   => 'glpi_itilcategories',
+        'WHERE'  => ['itilcategories_id' => $categoryId],
+    ]);
+    foreach ($children as $child) {
+        $childIds[] = (int) $child['id'];
+    }
+
+    // Récupère aussi les petits-enfants (un niveau de plus)
+    $grandchildren = $DB->request([
+        'SELECT' => ['id'],
+        'FROM'   => 'glpi_itilcategories',
+        'WHERE'  => ['itilcategories_id' => $childIds],
+    ]);
+    foreach ($grandchildren as $child) {
+        $childIds[] = (int) $child['id'];
+    }
+
+    $where["$table.itilcategories_id"] = $childIds;
+}
 
 \GlpiPlugin\Ticketsstatistics\PeriodFilter::apply($where, $table, $period, $dateFrom, $dateTo);
 
@@ -236,39 +262,11 @@ foreach ($allDays as $day) {
 
 // -- Temps de réponse moyen par jour ---
 $resolution = ['labels' => [], 'values' => [], 'average' => []];
-$categoryFilter = $_GET['ttr_category'] ?? null;
-
 $resolutionWhere = array_merge($where, [
     new \QueryExpression(
         "($table.`solve_delay_stat` != 0 OR $table.`close_delay_stat` != 0)"
     ),
 ]);
-if ($categoryFilter !== null && (int) $categoryFilter > 0) {
-    $categoryId = (int) $categoryFilter;
-
-    // Récupère tous les enfants de cette catégorie
-    $childIds = [$categoryId];
-    $children = $DB->request([
-        'SELECT' => ['id'],
-        'FROM'   => 'glpi_itilcategories',
-        'WHERE'  => ['itilcategories_id' => $categoryId],
-    ]);
-    foreach ($children as $child) {
-        $childIds[] = (int) $child['id'];
-    }
-
-    // Récupère aussi les petits-enfants (un niveau de plus)
-    $grandchildren = $DB->request([
-        'SELECT' => ['id'],
-        'FROM'   => 'glpi_itilcategories',
-        'WHERE'  => ['itilcategories_id' => $childIds],
-    ]);
-    foreach ($grandchildren as $child) {
-        $childIds[] = (int) $child['id'];
-    }
-
-    $resolutionWhere["$table.itilcategories_id"] = $childIds;
-}
 
 $resolutionRows = [];
 foreach (

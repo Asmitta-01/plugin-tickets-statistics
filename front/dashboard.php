@@ -47,12 +47,27 @@ require_once(__DIR__ . '/../../../inc/includes.php');
                     <input type="date" class="form-control form" id="ts-date-to" name="date_to" value="<?= isset($_GET['date_to']) ? htmlspecialchars($_GET['date_to']) : '' ?>">
                 </div>
             </div>
-            <div class="col-md-2 align-self-center" <?= $period === 'custom' ? '' : ' style="display:none;"' ?> id="ts-apply-btn-col">
+            <div class="col-auto align-items-center">
+                <label for="ts-category" class="form-label mb-1 fw-semibold"><?= __('Category', 'ticketsstatistics') ?></label>
+                <div id="ts-category">
+                    <?php \ITILCategory::dropdown([
+                        'name' => 'category',
+                        'display_emptychoice' => true,
+                        'emptylabel' => __('All categories', 'ticketsstatistics'),
+                        'value' => $_GET['category'] ?? 0,
+                        'addicon' => false,
+                        'comments' => false,
+                        'class' => 'form-select form-select-sm',
+                        'on_change' => "this.dispatchEvent(new Event('change'))"
+                    ]); ?>
+                </div>
+            </div>
+            <div class="col-auto align-self-center" <?= $period === 'custom' ? '' : ' style="display:none;"' ?> id="ts-apply-btn-col">
                 <button type="submit" class="btn btn-primary btn-sm"><?= __('Apply', 'ticketsstatistics') ?></button>
             </div>
         </form>
 
-        <button id='ticketsstatisticsDownloadPdfBtn' class='btn btn-primary btn-sm'>
+        <button id='ticketsstatisticsDownloadPdfBtn' class='btn btn-primary'>
             <i class='ti ti-download'></i> <?= __('Download PDF', 'ticketsstatistics') ?>
         </button>
     </div>
@@ -227,18 +242,7 @@ require_once(__DIR__ . '/../../../inc/includes.php');
             <div class="card shadow-sm">
                 <div class="card-header d-flex align-items-center justify-content-between">
                     <div>
-                        <span class="me-2">
-                            <?= __('Average TTR', 'ticketsstatistics') . ' (' . GlpiPlugin\Ticketsstatistics\PeriodFilter::getPeriodLabel($period) . ')' ?>
-                        </span>
-                        <?php \ITILCategory::dropdown([
-                            'name' => 'ttr_category',
-                            'display_emptychoice' => true,
-                            'emptylabel' => __('All categories', 'ticketsstatistics'),
-                            'value' => $_GET['ttr_category'] ?? 0,
-                            'addicon' => false,
-                            'comments' => false,
-                            'on_change' => 'refreshPageWithCategory(this.value)',
-                        ]); ?>
+                        <?= __('Average TTR', 'ticketsstatistics') . ' (' . GlpiPlugin\Ticketsstatistics\PeriodFilter::getPeriodLabel($period) . ')' ?>
                     </div>
                     <button data-bs-toggle="tooltip" title="<?= __('Reset the zoom', 'ticketsstatistics') ?>" class="btn btn-sm btn-outline-secondary ts-reset-chart" data-canvas="chart-resolution">
                         <?= __('Reset', 'ticketsstatistics') ?>
