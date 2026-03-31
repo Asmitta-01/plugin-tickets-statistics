@@ -4,6 +4,7 @@ include('../../../inc/includes.php');
 
 use Glpi\Csv\CsvResponse;
 use GlpiPlugin\Ticketsstatistics\PeriodFilter;
+use GlpiPlugin\Ticketsstatistics\CategoryFilter;
 use GlpiPlugin\Ticketsstatistics\TicketCityExport;
 
 \Session::checkLoginUser();
@@ -26,8 +27,10 @@ $where = ["$table.is_deleted" => 0] + getEntitiesRestrictCriteria($table);
 $period   = $_GET['period']    ?? 'last30';
 $dateFrom = $_GET['date_from'] ?? null;
 $dateTo   = $_GET['date_to']   ?? null;
+$category = $_GET['category'] ?? 0;
 
 PeriodFilter::apply($where, $table, $period, $dateFrom, $dateTo);
+CategoryFilter::apply($where, $table, (int) $category);
 
 // Filtre ville
 $where["$locTable.town"] = $city;
