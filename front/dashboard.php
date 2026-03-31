@@ -116,7 +116,7 @@ require_once(__DIR__ . '/../../../inc/includes.php');
         <div class="col-md-8">
             <div class="card shadow-sm h-100">
                 <div class="card-header d-flex align-items-center justify-content-between">
-                    <?php $categoryLabel = $_GET['category'] > 0 ? \ITILCategory::getFriendlyNameById((int) $_GET['category']) : 'Top 10'; ?>
+                    <?php $categoryLabel = ($_GET['category'] ?? 0) > 0 ? \ITILCategory::getFriendlyNameById((int) $_GET['category']) : 'Top 10'; ?>
                     <span><?= sprintf(__('Tickets by category (%s)', 'ticketsstatistics'), $categoryLabel) ?></span>
                     <div>
                         <?php \GlpiPlugin\Ticketsstatistics\TicketsStatistics::showStatusGroupButtons('ts-category-status-group'); ?>

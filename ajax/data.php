@@ -20,7 +20,7 @@ $where = ["$table.is_deleted" => 0] + getEntitiesRestrictCriteria($table);
 
 // Get the period and category filter from the request
 $period = $_GET['period'] ?? 'last30';
-$categoryId = (int) $_GET['category'] ?? 0;
+$categoryId = (int) ($_GET['category'] ?? 0);
 
 $dateFrom = $_GET['date_from'] ?? null;
 $dateTo   = $_GET['date_to']   ?? null;
