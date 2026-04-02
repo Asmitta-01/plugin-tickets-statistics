@@ -58,7 +58,9 @@ function plugin_init_ticketsstatistics(): void
     }
 
     $PLUGIN_HOOKS[\Glpi\Plugin\Hooks::CHANGE_PROFILE]['ticketsstatistics'] = 'plugin_ticketsstatistics_change_profile';
-    $PLUGIN_HOOKS[\Glpi\Plugin\Hooks::PRE_ITEM_LIST]['ticketsstatistics'] = 'plugin_ticketsstatistics_pre_item_list';
+    if ($isGLPI11) {
+        $PLUGIN_HOOKS[\Glpi\Plugin\Hooks::PRE_ITEM_LIST]['ticketsstatistics'] = 'plugin_ticketsstatistics_pre_item_list';
+    }
     if (\Session::haveRight("dashboard", READ)) {
         $PLUGIN_HOOKS[\Glpi\Plugin\Hooks::REDEFINE_MENUS]['ticketsstatistics'] = 'plugin_ticketsstatistics_redefine_menus';
         // $PLUGIN_HOOKS['menu_toadd']['ticketsstatistics'] = [
