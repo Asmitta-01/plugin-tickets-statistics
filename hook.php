@@ -70,3 +70,72 @@ function plugin_ticketsstatistics_change_profile()
         }
     }
 }
+
+function plugin_ticketsstatistics_pre_item_list(array $params): void
+{
+    if (($params['itemtype'] ?? '') !== 'Ticket') {
+        return;
+    }
+    if (\Session::getCurrentInterface() !== 'central') {
+        return;
+    }
+
+    global $CFG_GLPI;
+    $ajaxUrl = $CFG_GLPI['root_doc'] . '/plugins/ticketsstatistics/ajax/data.php?period=last30';
+
+    $counters = [
+        ['id' => 'incoming',      'label' => __('New'),                                    'icon' => 'ti-ticket'],
+        ['id' => 'assigned',      'label' => __('Assigned'),                               'icon' => 'ti-users'],
+        ['id' => 'waiting',       'label' => __('Pending'),                                'icon' => 'ti-player-pause'],
+        ['id' => 'solved_closed', 'label' => __('Resolved / Closed', 'ticketsstatistics'), 'icon' => 'ti-checkbox'],
+        ['id' => 'total',         'label' => __('Total tickets', 'ticketsstatistics'),      'icon' => 'ti-archive'],
+    ];
+
+    echo '<div class="row g-3 mb-4 px-2" id="ts-counters-ticketlist">';
+    foreach ($counters as $c) {
+        $color    = htmlspecialchars(\GlpiPlugin\Ticketsstatistics\TicketsStatistics::getStatusColor($c['id']), ENT_QUOTES, 'UTF-8');
+        $icon     = htmlspecialchars($c['icon'], ENT_QUOTES, 'UTF-8');
+        $statusId = htmlspecialchars($c['id'], ENT_QUOTES, 'UTF-8');
+        $label    = htmlspecialchars($c['label'], ENT_QUOTES, 'UTF-8');
+        echo '<div class="col">';
+        echo '<div class="card text-center h-100" style="border-top: 3px solid ' . $color . '">';
+        echo '<div class="card-body py-3">';
+        echo '<i class="ti ' . $icon . ' fs-1 mb-1" style="color:' . $color . '"></i>';
+        echo '<div class="display-6 fw-bold ts-ticketlist-count" data-status="' . $statusId . '">—</div>';
+        echo '<div class="text-muted small">' . $label . '</div>';
+        echo '</div>';
+        echo '</div>';
+        echo '</div>';
+    }
+    echo '</div>';
+
+    $encodedUrl = json_encode($ajaxUrl);
+    echo <<<JS
+    <script>
+    (function () {
+        function removeGlpiMiniDashboard() {
+            var el = document.querySelector('.dashboard.mini');
+            if (el) { el.remove(); return true; }
+            return false;
+        }
+        if (!removeGlpiMiniDashboard()) {
+            var obs = new MutationObserver(function () {
+                if (removeGlpiMiniDashboard()) obs.disconnect();
+            });
+            obs.observe(document.documentElement, { childList: true, subtree: true });
+        }
+        fetch({$encodedUrl})
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                document.querySelectorAll('#ts-counters-ticketlist .ts-ticketlist-count').forEach(function (el) {
+                    var status = el.dataset.status;
+                    if (data.counters && data.counters[status] !== undefined) {
+                        el.textContent = data.counters[status];
+                    }
+                });
+            })
+            .catch(function () {});
+    })();
+    </script>
+    JS;
+}
