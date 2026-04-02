@@ -81,7 +81,7 @@ function plugin_ticketsstatistics_pre_item_list(array $params): void
     }
 
     global $CFG_GLPI;
-    $ajaxUrl = $CFG_GLPI['root_doc'] . '/plugins/ticketsstatistics/ajax/data.php?period=last30';
+    $baseAjaxUrl = htmlspecialchars($CFG_GLPI['root_doc'] . '/plugins/ticketsstatistics/ajax/data.php', ENT_QUOTES, 'UTF-8');
 
     $counters = [
         ['id' => 'incoming',      'label' => __('New'),                                    'icon' => 'ti-ticket'],
@@ -91,7 +91,36 @@ function plugin_ticketsstatistics_pre_item_list(array $params): void
         ['id' => 'total',         'label' => __('Total tickets', 'ticketsstatistics'),      'icon' => 'ti-archive'],
     ];
 
-    echo '<div class="row g-3 mb-4 px-2" id="ts-counters-ticketlist">';
+    $periods = \GlpiPlugin\Ticketsstatistics\PeriodFilter::getAvailablePeriods();
+
+    // Period selector + wrapper
+    echo '<div id="ts-ticketlist-wrapper" class="mb-4 px-2">';
+
+    // Toolbar: period selector
+    echo '<div class="d-flex align-items-center gap-2 mb-2">';
+    echo '<label for="ts-ticketlist-period" class="form-label mb-0 fw-semibold small">' . __('Period', 'ticketsstatistics') . '</label>';
+    echo '<select class="form-select form-select-sm w-auto" id="ts-ticketlist-period">';
+    foreach ($periods as $value => $label) {
+        $sel = ($value === 'last30') ? ' selected' : '';
+        echo '<option value="' . htmlspecialchars($value, ENT_QUOTES, 'UTF-8') . '"' . $sel . '>' . htmlspecialchars($label, ENT_QUOTES, 'UTF-8') . '</option>';
+    }
+    echo '</select>';
+    // Custom date fields (hidden by default)
+    echo '<div id="ts-ticketlist-custom" class="d-none d-flex align-items-center gap-1">';
+    echo '<input type="date" class="form-control form-control-sm" id="ts-ticketlist-date-from">';
+    echo '<span class="small">–</span>';
+    echo '<input type="date" class="form-control form-control-sm" id="ts-ticketlist-date-to">';
+    echo '<button class="btn btn-primary btn-sm" id="ts-ticketlist-apply">' . __('Apply', 'ticketsstatistics') . '</button>';
+    echo '</div>';
+    echo '</div>';
+
+    // Cards row (position: relative so spinner can overlay)
+    echo '<div class="row g-3" id="ts-counters-ticketlist" style="position:relative;">';
+    // Spinner overlay (hidden by default)
+    echo '<div id="ts-ticketlist-spinner" class="position-absolute top-0 start-0 w-100 h-100 d-none align-items-center justify-content-center" style="background:rgba(255,255,255,.6);z-index:10;">';
+    echo '<div class="spinner-border text-secondary" role="status"><span class="visually-hidden">Loading...</span></div>';
+    echo '</div>';
+
     foreach ($counters as $c) {
         $color    = htmlspecialchars(\GlpiPlugin\Ticketsstatistics\TicketsStatistics::getStatusColor($c['id']), ENT_QUOTES, 'UTF-8');
         $icon     = htmlspecialchars($c['icon'], ENT_QUOTES, 'UTF-8');
@@ -107,12 +136,15 @@ function plugin_ticketsstatistics_pre_item_list(array $params): void
         echo '</div>';
         echo '</div>';
     }
-    echo '</div>';
+    echo '</div>'; // .row
+    echo '</div>'; // #ts-ticketlist-wrapper
 
-    $encodedUrl = json_encode($ajaxUrl);
+    $encodedBaseUrl = json_encode($CFG_GLPI['root_doc'] . '/plugins/ticketsstatistics/ajax/data.php');
     echo <<<JS
     <script>
     (function () {
+        var baseUrl = {$encodedBaseUrl};
+
         function removeGlpiMiniDashboard() {
             var el = document.querySelector('.dashboard.mini');
             if (el) { el.remove(); return true; }
@@ -124,17 +156,58 @@ function plugin_ticketsstatistics_pre_item_list(array $params): void
             });
             obs.observe(document.documentElement, { childList: true, subtree: true });
         }
-        fetch({$encodedUrl})
-            .then(function (r) { return r.json(); })
-            .then(function (data) {
-                document.querySelectorAll('#ts-counters-ticketlist .ts-ticketlist-count').forEach(function (el) {
-                    var status = el.dataset.status;
-                    if (data.counters && data.counters[status] !== undefined) {
-                        el.textContent = data.counters[status];
-                    }
+
+        function loadCounters(period, dateFrom, dateTo) {
+            var spinner = document.getElementById('ts-ticketlist-spinner');
+            spinner.classList.remove('d-none');
+            spinner.classList.add('d-flex');
+
+            var url = baseUrl + '?period=' + encodeURIComponent(period);
+            if (period === 'custom') {
+                if (dateFrom) url += '&date_from=' + encodeURIComponent(dateFrom);
+                if (dateTo)   url += '&date_to='   + encodeURIComponent(dateTo);
+            }
+
+            fetch(url)
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    document.querySelectorAll('#ts-counters-ticketlist .ts-ticketlist-count').forEach(function (el) {
+                        var status = el.dataset.status;
+                        if (data.counters && data.counters[status] !== undefined) {
+                            el.textContent = data.counters[status];
+                        }
+                    });
+                })
+                .catch(function () {})
+                .finally(function () {
+                    spinner.classList.add('d-none');
+                    spinner.classList.remove('d-flex');
                 });
-            })
-            .catch(function () {});
+        }
+
+        var periodSel  = document.getElementById('ts-ticketlist-period');
+        var customDiv  = document.getElementById('ts-ticketlist-custom');
+        var dateFrom   = document.getElementById('ts-ticketlist-date-from');
+        var dateTo     = document.getElementById('ts-ticketlist-date-to');
+        var applyBtn   = document.getElementById('ts-ticketlist-apply');
+
+        periodSel.addEventListener('change', function () {
+            if (this.value === 'custom') {
+                customDiv.classList.remove('d-none');
+                customDiv.classList.add('d-flex');
+            } else {
+                customDiv.classList.add('d-none');
+                customDiv.classList.remove('d-flex');
+                loadCounters(this.value);
+            }
+        });
+
+        applyBtn.addEventListener('click', function () {
+            loadCounters('custom', dateFrom.value, dateTo.value);
+        });
+
+        // Initial load
+        loadCounters('last30');
     })();
     </script>
     JS;
