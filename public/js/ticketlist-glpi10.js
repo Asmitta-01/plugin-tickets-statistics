@@ -59,7 +59,7 @@
 
         var lbl = document.createElement('label');
         lbl.htmlFor = 'ts-ticketlist-period';
-        lbl.className = 'form-label mb-0 fw-semibold';
+        lbl.className = 'form-label mb-0 fw-semibold small';
         lbl.textContent = 'Period';
         toolbar.appendChild(lbl);
 
@@ -69,6 +69,7 @@
         periods.forEach(function (p) {
             var opt = document.createElement('option');
             opt.value = p.value;
+            opt.setAttribute('data-ts-label', p.value);
             opt.textContent = p.label();
             if (p.selected) { opt.selected = true; }
             sel.appendChild(opt);
@@ -111,7 +112,7 @@
                 '<div class="card-body py-3">' +
                 '<i class="ti ' + c.icon + ' fs-1 mb-1" style="color:' + color + '"></i>' +
                 '<div class="display-6 fw-bold ts-ticketlist-count" data-status="' + c.id + '">\u2014</div>' +
-                '<div class="text-muted">' + c.label() + '</div>' +
+                '<div class="text-muted" data-ts-label="' + c.id + '">' + c.label() + '</div>' +
                 '</div>' +
                 '</div>';
             row.appendChild(col);
@@ -210,26 +211,53 @@
         loadCounters('last30');
     }
 
-    // Delay init until the ticketsstatistics locale domain has been loaded by
-    // GLPI's async AJAX call (front/locale.php). Polling is needed because GLPI
-    // provides no event for this. We give up after ~5 s and run anyway so the
-    // widget still appears (with untranslated fallback strings).
-    function waitForDomain(tries) {
-        if (
-            window.i18n &&
-            window.i18n.options &&
-            window.i18n.options.locale_data &&
-            window.i18n.options.locale_data['ticketsstatistics']
-        ) {
-            init();
-        } else if (tries > 0) {
-            setTimeout(function () { waitForDomain(tries - 1); }, 100);
-        } else {
-            init(); // give up — run with untranslated fallback
+    // Patch already-rendered label text once the locale domain arrives.
+    function applyTranslations() {
+        counters.forEach(function (c) {
+            var el = document.querySelector('[data-ts-label="' + c.id + '"]');
+            if (el) { el.textContent = c.label(); }
+        });
+        periods.forEach(function (p) {
+            var opt = document.querySelector('[data-ts-label="' + p.value + '"]');
+            if (opt) { opt.textContent = p.label(); }
+        });
+        var applyBtn = document.getElementById('ts-ticketlist-apply');
+        if (applyBtn) { applyBtn.textContent = __('Apply', 'ticketsstatistics'); }
+    }
+
+    // Detect when the ticketsstatistics domain is loaded by trying to translate
+    // a known string and checking it changed from the raw msgid.
+    // This avoids depending on Jed internals and works for all GLPI versions.
+    function isDomainLoaded() {
+        try {
+            // Use a string whose en_US translation differs from the msgid in
+            // other locales. If the result differs from the msgid the domain
+            // is loaded. For en_US both are identical, so we cap at 10 tries
+            // (1 s) and accept the English fallback — it is already correct.
+            return window.i18n &&
+                typeof window.i18n.dcnpgettext === 'function' &&
+                window.i18n.dcnpgettext('ticketsstatistics', undefined, 'Last 7 days', undefined, undefined) !== 'Last 7 days';
+        } catch (e) {
+            return false;
         }
     }
 
-    // $(function(){}) ensures DOMContentLoaded has fired (same timing as
-    // GLPI's locale AJAX trigger) before we start polling.
+    // Poll for the ticketsstatistics domain (loaded async by GLPI's locale AJAX).
+    // The widget is already visible; this only updates text labels once ready.
+    function waitForDomain(tries) {
+        if (isDomainLoaded()) {
+            applyTranslations();
+        } else if (tries > 0) {
+            setTimeout(function () { waitForDomain(tries - 1); }, 100);
+        } else {
+            // Timed out — run anyway in case the domain loaded but the locale is
+            // en_US (msgid === msgstr so isDomainLoaded() always returns false).
+            applyTranslations();
+        }
+    }
+
+    // Run init immediately so the widget replaces the GLPI mini-dashboard at once.
+    // Then start polling for translations (dom is ready at <body> end).
+    init();
     $(function () { waitForDomain(50); });
 })();
