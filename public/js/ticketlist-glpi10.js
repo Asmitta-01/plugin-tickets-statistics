@@ -25,23 +25,24 @@
         total: '#555555'
     };
 
-    // Counter cards config
+    // Counter cards config — labels are functions so __() is called lazily,
+    // after the ticketsstatistics locale domain has been loaded by GLPI.
     var counters = [
-        { id: 'incoming', label: __('New', 'ticketsstatistics'), icon: 'ti-ticket' },
-        { id: 'assigned', label: __('Assigned', 'ticketsstatistics'), icon: 'ti-users' },
-        { id: 'waiting', label: __('Pending', 'ticketsstatistics'), icon: 'ti-player-pause' },
-        { id: 'solved_closed', label: __('Resolved / Closed', 'ticketsstatistics'), icon: 'ti-checkbox' },
-        { id: 'total', label: __('Total tickets', 'ticketsstatistics'), icon: 'ti-archive' }
+        { id: 'incoming', label: function () { return __('New', 'ticketsstatistics'); }, icon: 'ti-ticket' },
+        { id: 'assigned', label: function () { return __('Assigned', 'ticketsstatistics'); }, icon: 'ti-users' },
+        { id: 'waiting', label: function () { return __('Pending', 'ticketsstatistics'); }, icon: 'ti-player-pause' },
+        { id: 'solved_closed', label: function () { return __('Resolved / Closed', 'ticketsstatistics'); }, icon: 'ti-checkbox' },
+        { id: 'total', label: function () { return __('Total tickets', 'ticketsstatistics'); }, icon: 'ti-archive' }
     ];
 
     // Period selector options
     var periods = [
-        { value: 'last7', label: __('Last 7 days', 'ticketsstatistics') },
-        { value: 'last30', label: __('Last 30 days', 'ticketsstatistics'), selected: true },
-        { value: 'last90', label: __('Last 90 days', 'ticketsstatistics') },
-        { value: 'thisyear', label: __('This year', 'ticketsstatistics') },
-        { value: 'lastyear', label: __('Last year', 'ticketsstatistics') },
-        { value: 'custom', label: __('Custom period', 'ticketsstatistics') }
+        { value: 'last7', label: function () { return __('Last 7 days', 'ticketsstatistics'); } },
+        { value: 'last30', label: function () { return __('Last 30 days', 'ticketsstatistics'); }, selected: true },
+        { value: 'last90', label: function () { return __('Last 90 days', 'ticketsstatistics'); } },
+        { value: 'thisyear', label: function () { return __('This year', 'ticketsstatistics'); } },
+        { value: 'lastyear', label: function () { return __('Last year', 'ticketsstatistics'); } },
+        { value: 'custom', label: function () { return __('Custom period', 'ticketsstatistics'); } }
     ];
 
     // -----------------------------------------------------------------
@@ -68,7 +69,7 @@
         periods.forEach(function (p) {
             var opt = document.createElement('option');
             opt.value = p.value;
-            opt.textContent = p.label;
+            opt.textContent = p.label();
             if (p.selected) { opt.selected = true; }
             sel.appendChild(opt);
         });
@@ -82,7 +83,7 @@
             '<input type="date" class="form-control form-control-sm" id="ts-ticketlist-date-from">' +
             '<span class="small">\u2013</span>' +
             '<input type="date" class="form-control form-control-sm" id="ts-ticketlist-date-to">' +
-            `<button class="btn btn-primary btn-sm" id="ts-ticketlist-apply">${__('Apply', 'ticketsstatistics')}</button>`;
+            '<button class="btn btn-primary btn-sm" id="ts-ticketlist-apply">' + __('Apply', 'ticketsstatistics') + '</button>';
         toolbar.appendChild(customDiv);
 
         wrapper.appendChild(toolbar);
@@ -110,7 +111,7 @@
                 '<div class="card-body py-3">' +
                 '<i class="ti ' + c.icon + ' fs-1 mb-1" style="color:' + color + '"></i>' +
                 '<div class="display-6 fw-bold ts-ticketlist-count" data-status="' + c.id + '">\u2014</div>' +
-                '<div class="text-muted">' + c.label + '</div>' +
+                '<div class="text-muted">' + c.label() + '</div>' +
                 '</div>' +
                 '</div>';
             row.appendChild(col);
@@ -209,6 +210,26 @@
         loadCounters('last30');
     }
 
-    // Script is appended to <body> end by GLPI's footer; DOM is ready.
-    init();
+    // Delay init until the ticketsstatistics locale domain has been loaded by
+    // GLPI's async AJAX call (front/locale.php). Polling is needed because GLPI
+    // provides no event for this. We give up after ~5 s and run anyway so the
+    // widget still appears (with untranslated fallback strings).
+    function waitForDomain(tries) {
+        if (
+            window.i18n &&
+            window.i18n.options &&
+            window.i18n.options.locale_data &&
+            window.i18n.options.locale_data['ticketsstatistics']
+        ) {
+            init();
+        } else if (tries > 0) {
+            setTimeout(function () { waitForDomain(tries - 1); }, 100);
+        } else {
+            init(); // give up — run with untranslated fallback
+        }
+    }
+
+    // $(function(){}) ensures DOMContentLoaded has fired (same timing as
+    // GLPI's locale AJAX trigger) before we start polling.
+    $(function () { waitForDomain(50); });
 })();
