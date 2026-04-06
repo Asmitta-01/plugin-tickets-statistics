@@ -59,7 +59,7 @@
 
         var lbl = document.createElement('label');
         lbl.htmlFor = 'ts-ticketlist-period';
-        lbl.className = 'form-label mb-0 fw-semibold small';
+        lbl.className = 'form-label mb-0 fw-semibold';
         lbl.textContent = 'Period';
         toolbar.appendChild(lbl);
 
