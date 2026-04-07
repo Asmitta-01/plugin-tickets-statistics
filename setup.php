@@ -50,7 +50,9 @@ function plugin_init_ticketsstatistics(): void
 {
     global $PLUGIN_HOOKS;
 
+    $uri = $_SERVER['REQUEST_URI'] ?? '';
     $isGLPI11 = version_compare(GLPI_VERSION, '11.0.0', '>=');
+    $pluginAssetsRoot = $isGLPI11 ? '' : 'public/';
     if (!$isGLPI11) {
         // For GLPI 10, we need to explicitly declare CSRF compliance
         // @phpstan-ignore-next-line
@@ -62,13 +64,14 @@ function plugin_init_ticketsstatistics(): void
         $PLUGIN_HOOKS[\Glpi\Plugin\Hooks::PRE_ITEM_LIST]['ticketsstatistics'] = 'plugin_ticketsstatistics_pre_item_list';
     } elseif (
         \Session::getCurrentInterface() === 'central'
-        && strpos($_SERVER['REQUEST_URI'], 'front/ticket.php') !== false
+        && strpos($uri, 'front/ticket.php') !== false
     ) {
         // GLPI 10: PRE_ITEM_LIST does not exist; inject the counters widget via JS instead.
         $PLUGIN_HOOKS[\Glpi\Plugin\Hooks::ADD_JAVASCRIPT]['ticketsstatistics'][] = 'public/js/ticketlist-glpi10.js';
     }
     if (\Session::haveRight("dashboard", READ)) {
         $PLUGIN_HOOKS[\Glpi\Plugin\Hooks::REDEFINE_MENUS]['ticketsstatistics'] = 'plugin_ticketsstatistics_redefine_menus';
+        $PLUGIN_HOOKS[\Glpi\Plugin\Hooks::DISPLAY_CENTRAL]['ticketsstatistics'] = 'plugin_ticketsstatistics_display_central';
         // $PLUGIN_HOOKS['menu_toadd']['ticketsstatistics'] = [
         //     'helpdesk' => ['GlpiPlugin\\Ticketsstatistics\\TicketsStatistics'],
         // ];
@@ -79,11 +82,7 @@ function plugin_init_ticketsstatistics(): void
         ];
     }
 
-    if (
-        strpos($_SERVER['REQUEST_URI'], "plugins/ticketsstatistics/front/dashboard.php") !== false
-    ) {
-        $pluginAssetsRoot = $isGLPI11 ? '' : 'public/';
-
+    if (strpos($uri, "plugins/ticketsstatistics/front/dashboard.php") !== false) {
         $PLUGIN_HOOKS[\Glpi\Plugin\Hooks::ADD_JAVASCRIPT]['ticketsstatistics'][] = $pluginAssetsRoot . 'js/jspdf.umd.min.js';
         $PLUGIN_HOOKS[\Glpi\Plugin\Hooks::ADD_JAVASCRIPT]['ticketsstatistics'][] = $pluginAssetsRoot . 'js/html2canvas-pro.min.js';
         $PLUGIN_HOOKS[\Glpi\Plugin\Hooks::ADD_JAVASCRIPT]['ticketsstatistics'][] = $pluginAssetsRoot . 'js/chart.umd.min.js';
@@ -91,6 +90,16 @@ function plugin_init_ticketsstatistics(): void
         $PLUGIN_HOOKS[\Glpi\Plugin\Hooks::ADD_JAVASCRIPT]['ticketsstatistics'][] = $pluginAssetsRoot . 'js/chartjs-plugin-zoom.min.js';
         $PLUGIN_HOOKS[\Glpi\Plugin\Hooks::ADD_JAVASCRIPT]['ticketsstatistics'][] = $pluginAssetsRoot . 'js/chartjs-plugin-datalabels.min.js';
         $PLUGIN_HOOKS[\Glpi\Plugin\Hooks::ADD_JAVASCRIPT]['ticketsstatistics'][] = $pluginAssetsRoot . 'js/period.js';
+    }
+
+    // Central dashboard stats widget JS
+    if (
+        strpos($uri, 'front/central') !== false
+        || strpos($uri, 'Central') !== false
+    ) {
+        $PLUGIN_HOOKS[\Glpi\Plugin\Hooks::ADD_JAVASCRIPT]['ticketsstatistics'][] = $pluginAssetsRoot . 'js/chart.umd.min.js';
+        $PLUGIN_HOOKS[\Glpi\Plugin\Hooks::ADD_JAVASCRIPT]['ticketsstatistics'][] = $pluginAssetsRoot . 'js/chartjs-plugin-datalabels.min.js';
+        $PLUGIN_HOOKS[\Glpi\Plugin\Hooks::ADD_JAVASCRIPT]['ticketsstatistics'][] = $pluginAssetsRoot . 'js/central_stats.js';
     }
 
     // Check for pending redirect after session is ready  

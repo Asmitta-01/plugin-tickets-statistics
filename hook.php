@@ -212,3 +212,136 @@ function plugin_ticketsstatistics_pre_item_list(array $params): void
     </script>
     JS;
 }
+
+function plugin_ticketsstatistics_display_central(): void
+{
+    if (!\Session::haveRight('dashboard', READ)) {
+        return;
+    }
+
+    global $CFG_GLPI;
+
+    $periods = [];
+    foreach (\GlpiPlugin\Ticketsstatistics\PeriodFilter::getAvailablePeriods() as $value => $label) {
+        if ($value === 'custom') {
+            continue; // no custom range on the central widget
+        }
+        $periods[$value] = $label;
+    }
+
+    $counters = [
+        ['index' => 0, 'label' => __('New'),                                     'icon' => 'ti-ticket',       'color' => '#49bf4d'],
+        ['index' => 1, 'label' => __('Assigned'),                                'icon' => 'ti-users',        'color' => '#49bf4d'],
+        ['index' => 2, 'label' => __('Pending'),                                 'icon' => 'ti-player-pause', 'color' => '#ffa500'],
+        ['index' => 3, 'label' => __('Solved'),                                  'icon' => 'ti-check',        'color' => '#C00000'],
+        ['index' => 4, 'label' => __('Closed'),                                  'icon' => 'ti-checkbox',     'color' => '#888888'],
+    ];
+
+    // Build JS translations object (output before the HTML so the script can reference it)
+    $jsTranslations = json_encode([
+        'topRequesters' => __('Top Requesters', 'ticketsstatistics'),
+        'ticketsByTown' => __('Tickets by Town', 'ticketsstatistics'),
+    ]);
+
+    // The DISPLAY_CENTRAL hook fires inside <table class="tab_cadre_central">,
+    // so our output must be wrapped in <tr><td>.
+    // Force table to full width and remove padding to make our dashboard use all available space.
+    echo '<style>.tab_cadre_central { width: 100% !important;; } .tab_cadre_central td { padding:0; }</style>';
+    echo '<tr><td colspan="2" style="padding:0;">';
+    echo '<script>var tsTranslations = ' . $jsTranslations . ';</script>';
+    echo '<div id="ts-central-stats" class="py-3">';
+
+    // ---- Filter bar ----
+    echo '<div class="d-flex align-items-center gap-3 mb-3 p-2 rounded bg-light border">';
+    echo '<i class="ti ti-chart-bar fs-4 text-secondary"></i>';
+    echo '<span class="fw-semibold">' . htmlspecialchars(__('Tickets & Assets Statistics', 'ticketsstatistics'), ENT_QUOTES, 'UTF-8') . '</span>';
+    echo '<label for="ts-c-period" class="form-label mb-0 ms-3">' . htmlspecialchars(__('Period', 'ticketsstatistics'), ENT_QUOTES, 'UTF-8') . '</label>';
+    echo '<select id="ts-c-period" class="form-select form-select-sm w-auto">';
+    foreach ($periods as $value => $label) {
+        $selected = ($value === 'last30') ? ' selected' : '';
+        echo '<option value="' . htmlspecialchars($value, ENT_QUOTES, 'UTF-8') . '"' . $selected . '>'
+            . htmlspecialchars($label, ENT_QUOTES, 'UTF-8')
+            . '</option>';
+    }
+    echo '</select>';
+    echo '</div>'; // filter bar
+
+    // ---- Counter cards ----
+    echo '<div class="row g-3 mb-4 position-relative" id="ts-c-counters">';
+    // Spinner overlay
+    echo '<div id="ts-c-spinner" class="position-absolute top-0 start-0 w-100 h-100 d-none align-items-center justify-content-center" style="background:rgba(255,255,255,.6);z-index:10;">';
+    echo '<div class="spinner-border text-secondary" role="status"><span class="visually-hidden">Loading...</span></div>';
+    echo '</div>';
+    foreach ($counters as $c) {
+        $color = htmlspecialchars($c['color'], ENT_QUOTES, 'UTF-8');
+        $icon  = htmlspecialchars($c['icon'],  ENT_QUOTES, 'UTF-8');
+        $label = htmlspecialchars($c['label'], ENT_QUOTES, 'UTF-8');
+        echo '<div class="col">';
+        echo '<div class="card text-center h-100" style="border-top:3px solid ' . $color . '">';
+        echo '<div class="card-body py-3">';
+        echo '<i class="ti ' . $icon . ' fs-1 mb-1" style="color:' . $color . '"></i>';
+        echo '<div class="display-6 fw-bold" data-status-index="' . (int) $c['index'] . '">—</div>';
+        echo '<div class="text-muted small">' . $label . '</div>';
+        echo '</div>';
+        echo '</div>';
+        echo '</div>';
+    }
+    // Total card
+    echo '<div class="col">';
+    echo '<div class="card text-center h-100" style="border-top:3px solid #555555">';
+    echo '<div class="card-body py-3">';
+    echo '<i class="ti ti-archive fs-1 mb-1" style="color:#555555"></i>';
+    echo '<div class="display-6 fw-bold" data-status-total>—</div>';
+    echo '<div class="text-muted small">' . htmlspecialchars(__('Total tickets', 'ticketsstatistics'), ENT_QUOTES, 'UTF-8') . '</div>';
+    echo '</div>';
+    echo '</div>';
+    echo '</div>';
+    echo '</div>'; // #ts-c-counters
+
+    // ---- Charts row 1: ticket status doughnut + top requesters bar ----
+    echo '<div class="row g-3 mb-3">';
+    // Ticket status doughnut
+    echo '<div class="col-md-4">';
+    echo '<div class="card shadow-sm h-100">';
+    echo '<div class="card-header">' . htmlspecialchars(__('Tickets by Status', 'ticketsstatistics'), ENT_QUOTES, 'UTF-8') . '</div>';
+    echo '<div class="card-body d-flex align-items-center justify-content-center" style="min-height:260px;">';
+    echo '<canvas id="ts-c-chart-status"></canvas>';
+    echo '</div>';
+    echo '</div>';
+    echo '</div>';
+    // Top requesters horizontal bar
+    echo '<div class="col-md-8">';
+    echo '<div class="card shadow-sm h-100">';
+    echo '<div class="card-header">' . htmlspecialchars(__('Top Requesters', 'ticketsstatistics'), ENT_QUOTES, 'UTF-8') . '</div>';
+    echo '<div class="card-body" style="min-height:260px;">';
+    echo '<canvas id="ts-c-chart-requesters"></canvas>';
+    echo '</div>';
+    echo '</div>';
+    echo '</div>';
+    echo '</div>'; // row 1
+
+    // ---- Charts row 2: tickets by town bar + assets by type doughnut ----
+    echo '<div class="row g-3 mb-3">';
+    // Tickets by town
+    echo '<div class="col-md-8">';
+    echo '<div class="card shadow-sm h-100">';
+    echo '<div class="card-header">' . htmlspecialchars(__('Tickets by Town (Top 10)', 'ticketsstatistics'), ENT_QUOTES, 'UTF-8') . '</div>';
+    echo '<div class="card-body" style="min-height:260px;">';
+    echo '<canvas id="ts-c-chart-towns"></canvas>';
+    echo '</div>';
+    echo '</div>';
+    echo '</div>';
+    // Assets by type doughnut
+    echo '<div class="col-md-4">';
+    echo '<div class="card shadow-sm h-100">';
+    echo '<div class="card-header">' . htmlspecialchars(__('Assets by Type', 'ticketsstatistics'), ENT_QUOTES, 'UTF-8') . '</div>';
+    echo '<div class="card-body d-flex align-items-center justify-content-center" style="min-height:260px;">';
+    echo '<canvas id="ts-c-chart-assets"></canvas>';
+    echo '</div>';
+    echo '</div>';
+    echo '</div>';
+    echo '</div>'; // row 2
+
+    echo '</div>'; // #ts-central-stats
+    echo '</td></tr>';
+}
