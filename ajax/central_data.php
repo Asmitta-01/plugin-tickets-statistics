@@ -130,7 +130,13 @@ $ticketsByTown['labels'] = array_keys($townStats);
 $ticketsByTown['values'] = array_values($townStats);
 
 // --- 4. Assets by type (current total inventory, no period filter) ---
-$assetEntityWhere = getEntitiesRestrictCriteria('');
+// Build entity scope: active entity + all its descendants so child-entity
+// assets are always counted regardless of the user's "see sub-entities" toggle.
+$activeEntityId  = $_SESSION['glpiactive_entity'] ?? 0;
+$assetEntityIds  = array_merge(
+    [$activeEntityId],
+    array_keys(getSonsOf('glpi_entities', $activeEntityId))
+);
 $assetTypes = [
     __('Computers',         'ticketsstatistics') => 'glpi_computers',
     __('Monitors',          'ticketsstatistics') => 'glpi_monitors',
@@ -142,7 +148,7 @@ $assetTypes = [
 ];
 $assetsByType = ['labels' => [], 'values' => []];
 foreach ($assetTypes as $label => $assetTable) {
-    $entityWhere = getEntitiesRestrictCriteria($assetTable, is_recursive: true);
+    $entityWhere = getEntitiesRestrictCriteria($assetTable, '', $assetEntityIds);
     $countWhere  = ["$assetTable.is_deleted" => 0, "$assetTable.is_template" => 0] + $entityWhere;
     $iter = $DB->request([
         'COUNT' => 'cpt',

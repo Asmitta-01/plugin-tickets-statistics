@@ -248,10 +248,13 @@ function plugin_ticketsstatistics_display_central(): void
     // The DISPLAY_CENTRAL hook fires inside <table class="tab_cadre_central">,
     // so our output must be wrapped in <tr><td>.
     // Force table to full width and remove padding to make our dashboard use all available space.
-    echo '<style>.tab_cadre_central { width: 100% !important;; } .tab_cadre_central td { padding:0; }</style>';
+    $hideTabsStyle = \Session::haveRight('config', UPDATE)
+        ? ' #tabspanel { display: none !important; }'
+        : '';
+    echo '<style>.tab_cadre_central { width: 100% !important; } .tab_cadre_central td { padding:0; }' . $hideTabsStyle . '</style>';
     echo '<tr><td colspan="2" style="padding:0;">';
     echo '<script>var tsTranslations = ' . $jsTranslations . ';</script>';
-    echo '<div id="ts-central-stats" class="py-3">';
+    echo '<div id="ts-central-stats" class="py-1">';
 
     // ---- Filter bar ----
     echo '<div class="d-flex align-items-center gap-3 mb-3 p-2 rounded bg-light border" style="color: var(--tblr-body-color)!important;">';
