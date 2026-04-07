@@ -215,7 +215,10 @@ function plugin_ticketsstatistics_pre_item_list(array $params): void
 
 function plugin_ticketsstatistics_display_central(): void
 {
-    if (!\Session::haveRight('dashboard', READ)) {
+    if (
+        !\Session::haveRight('dashboard', READ)
+        || \Session::getActiveTab('Central') !== 'Central$0'
+    ) {
         return;
     }
 

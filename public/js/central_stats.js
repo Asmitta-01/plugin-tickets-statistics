@@ -244,16 +244,15 @@
             '.tab-content .grid-stack',
             '#dashboard-central',
         ];
-        let found = false;
         selectors.forEach(function (sel) {
             document.querySelectorAll(sel).forEach(function (el) {
                 if (!el.closest('#ts-central-stats')) {
                     el.style.display = 'none';
-                    found = true;
+                    return true;
                 }
             });
         });
-        return found;
+        return false;
     }
 
     function watchForGlpiGrid() {
