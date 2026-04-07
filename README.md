@@ -10,6 +10,7 @@ The plugin provides:
 - ticket creation trends per day
 - period filters including custom date ranges
 - PDF export of the dashboard
+- **stats widget embedded in the GLPI central dashboard** (Tab 0): ticket status doughnut, top requesters bar chart, tickets by town bar chart, and assets by type doughnut — all filterable by period
 
 ## Compatibility
 
