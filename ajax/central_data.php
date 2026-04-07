@@ -36,13 +36,16 @@ if (!in_array($period, $allowedPeriods, true)) {
 // --- 1. Ticket status counts ---
 $ticketStatus = ['labels' => [], 'values' => []];
 $statusMap = [
-    Ticket::INCOMING => __('New'),
-    Ticket::ASSIGNED => __('Assigned'),
-    Ticket::WAITING  => __('Pending'),
-    Ticket::SOLVED   => __('Solved'),
-    Ticket::CLOSED   => __('Closed'),
+    Ticket::INCOMING                       => __('New'),
+    Ticket::ASSIGNED                       => __('Assigned'),
+    Ticket::WAITING                        => __('Pending'),
+    Ticket::SOLVED       => __('Resolved / Closed', 'ticketsstatistics'),
 ];
 foreach ($statusMap as $statusId => $label) {
+    if ($statusId === Ticket::SOLVED) {
+        // For "Resolved / Closed", we want to include both SOLVED and CLOSED statuses
+        $statusId = [Ticket::SOLVED, Ticket::CLOSED];
+    }
     $iter = $DB->request([
         'COUNT' => 'cpt',
         'FROM'  => $table,

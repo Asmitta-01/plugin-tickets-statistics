@@ -233,11 +233,10 @@ function plugin_ticketsstatistics_display_central(): void
     }
 
     $counters = [
-        ['index' => 0, 'label' => __('New'),                                     'icon' => 'ti-ticket',       'color' => '#49bf4d'],
-        ['index' => 1, 'label' => __('Assigned'),                                'icon' => 'ti-users',        'color' => '#49bf4d'],
-        ['index' => 2, 'label' => __('Pending'),                                 'icon' => 'ti-player-pause', 'color' => '#ffa500'],
-        ['index' => 3, 'label' => __('Solved'),                                  'icon' => 'ti-check',        'color' => '#C00000'],
-        ['index' => 4, 'label' => __('Closed'),                                  'icon' => 'ti-checkbox',     'color' => '#888888'],
+        ['index' => 0, 'label' => __('New'),                                          'icon' => 'ti-ticket',       'color' => '#49bf4d'],
+        ['index' => 1, 'label' => __('Assigned'),                                     'icon' => 'ti-users',        'color' => '#49bf4d'],
+        ['index' => 2, 'label' => __('Pending'),                                      'icon' => 'ti-player-pause', 'color' => '#ffa500'],
+        ['index' => 3, 'label' => __('Resolved / Closed', 'ticketsstatistics'),       'icon' => 'ti-checkbox',     'color' => '#C00000'],
     ];
 
     // Build JS translations object (output before the HTML so the script can reference it)
