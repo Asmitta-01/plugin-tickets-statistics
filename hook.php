@@ -252,7 +252,7 @@ function plugin_ticketsstatistics_display_central(): void
     echo '<div id="ts-central-stats" class="py-3">';
 
     // ---- Filter bar ----
-    echo '<div class="d-flex align-items-center gap-3 mb-3 p-2 rounded bg-light border">';
+    echo '<div class="d-flex align-items-center gap-3 mb-3 p-2 rounded bg-light border" style="color: var(--tblr-body-color)!important;">';
     echo '<i class="ti ti-chart-bar fs-4 text-secondary"></i>';
     echo '<span class="fw-semibold">' . htmlspecialchars(__('Tickets & Assets Statistics', 'ticketsstatistics'), ENT_QUOTES, 'UTF-8') . '</span>';
     echo '<label for="ts-c-period" class="form-label mb-0 ms-3">' . htmlspecialchars(__('Period', 'ticketsstatistics'), ENT_QUOTES, 'UTF-8') . '</label>';
@@ -281,7 +281,7 @@ function plugin_ticketsstatistics_display_central(): void
         echo '<div class="card-body py-3">';
         echo '<i class="ti ' . $icon . ' fs-1 mb-1" style="color:' . $color . '"></i>';
         echo '<div class="display-6 fw-bold" data-status-index="' . (int) $c['index'] . '">—</div>';
-        echo '<div class="text-muted small">' . $label . '</div>';
+        echo '<div class="text-muted">' . $label . '</div>';
         echo '</div>';
         echo '</div>';
         echo '</div>';
@@ -292,7 +292,7 @@ function plugin_ticketsstatistics_display_central(): void
     echo '<div class="card-body py-3">';
     echo '<i class="ti ti-archive fs-1 mb-1" style="color:#555555"></i>';
     echo '<div class="display-6 fw-bold" data-status-total>—</div>';
-    echo '<div class="text-muted small">' . htmlspecialchars(__('Total tickets', 'ticketsstatistics'), ENT_QUOTES, 'UTF-8') . '</div>';
+    echo '<div class="text-muted">' . htmlspecialchars(__('Total tickets', 'ticketsstatistics'), ENT_QUOTES, 'UTF-8') . '</div>';
     echo '</div>';
     echo '</div>';
     echo '</div>';
