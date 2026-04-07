@@ -92,7 +92,7 @@ foreach (
 ) {
     $name = trim(($row['firstname'] ?? '') . ' ' . ($row['realname'] ?? ''));
     if ($name === '') {
-        $name = $row['login'] ?? __('Unknown');
+        $name = $row['login'] ?? __('Unknown', 'ticketsstatistics');
     }
     $topRequesters['labels'][] = $name;
     $topRequesters['values'][] = (int) $row['cpt'];
@@ -129,13 +129,13 @@ $ticketsByTown['values'] = array_values($townStats);
 // --- 4. Assets by type (current total inventory, no period filter) ---
 $assetEntityWhere = getEntitiesRestrictCriteria('');
 $assetTypes = [
-    __('Computers')          => 'glpi_computers',
-    __('Monitors')           => 'glpi_monitors',
-    __('Printers')           => 'glpi_printers',
-    __('Peripherals')        => 'glpi_peripherals',
-    __('Phones')             => 'glpi_phones',
-    __('Network Equipment')  => 'glpi_networkequipments',
-    __('Racks')              => 'glpi_racks',
+    __('Computers',         'ticketsstatistics') => 'glpi_computers',
+    __('Monitors',          'ticketsstatistics') => 'glpi_monitors',
+    __('Printers',          'ticketsstatistics') => 'glpi_printers',
+    __('Peripherals',       'ticketsstatistics') => 'glpi_peripherals',
+    __('Phones',            'ticketsstatistics') => 'glpi_phones',
+    __('Network Equipment', 'ticketsstatistics') => 'glpi_networkequipments',
+    __('Racks',             'ticketsstatistics') => 'glpi_racks',
 ];
 $assetsByType = ['labels' => [], 'values' => []];
 foreach ($assetTypes as $label => $assetTable) {

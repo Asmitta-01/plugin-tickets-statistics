@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: TicketsStatistics\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-03-27 16:23+0100\n"
-"PO-Revision-Date: 2026-03-27 16:27+0100\n"
+"PO-Revision-Date: 2026-04-07 08:59+0100\n"
 "Last-Translator: Codex\n"
 "Language-Team: English\n"
 "Language: en_US\n"
@@ -486,6 +486,63 @@ msgstr "LEFT JOIN"
 msgid "Optional JSON join definition. SELECT only."
 msgstr "Optional JSON join definition. SELECT only."
 
+#: hook.php
+#| msgid "Tickets Statistics"
+msgid "Tickets & Assets Statistics"
+msgstr "Tickets & Assets Statistics"
+
+#: hook.php
+#| msgid "Tickets by town"
+msgid "Tickets by Status"
+msgstr "Tickets by Status"
+
+#: hook.php public/js/central_stats.js
+#| msgid "Request type"
+msgid "Top Requesters"
+msgstr "Top Requesters"
+
+#: hook.php public/js/central_stats.js
+#| msgid "Tickets by town"
+msgid "Tickets by Town"
+msgstr "Tickets by Town"
+
+#: hook.php
+#| msgid "Tickets by category (top 10)"
+msgid "Tickets by Town (Top 10)"
+msgstr "Tickets by Town (Top 10)"
+
+#: hook.php
+msgid "Assets by Type"
+msgstr "Assets by Type"
+
+#: ajax/central_data.php
+msgid "Computers"
+msgstr "Computers"
+
+#: ajax/central_data.php
+msgid "Monitors"
+msgstr "Monitors"
+
+#: ajax/central_data.php
+msgid "Printers"
+msgstr "Printers"
+
+#: ajax/central_data.php
+msgid "Peripherals"
+msgstr "Peripherals"
+
+#: ajax/central_data.php
+msgid "Phones"
+msgstr "Phones"
+
+#: ajax/central_data.php
+msgid "Network Equipment"
+msgstr "Network Equipment"
+
+#: ajax/central_data.php
+msgid "Racks"
+msgstr "Racks"
+
 #: front/quickactions.php:326 front/quickactions.php:213
 #: front/quickactions.php:218
 msgid "GROUP BY"
@@ -549,7 +606,6 @@ msgid "WHERE clause"
 msgstr "WHERE clause"
 
 #: public/js/period.js:462
-#| msgid "Tickets opened"
 msgid "Tickets closed"
 msgstr "Tickets closed"
 
@@ -562,12 +618,10 @@ msgid "Global average: %avgh"
 msgstr "Global average: %avgh"
 
 #: public/js/period.js:643 public/js/period.js:755
-#| msgid "Closing date"
 msgid "Close date"
 msgstr "Close date"
 
 #: front/dashboard.php:211
-#| msgid "Tickets opened per day"
 msgid "Tickets closed per day"
 msgstr "Tickets closed per day"
 

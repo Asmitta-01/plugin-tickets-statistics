@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: TicketsStatistics\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-03-27 16:23+0100\n"
-"PO-Revision-Date: 2026-03-27 16:26+0100\n"
+"PO-Revision-Date: 2026-04-07 08:55+0100\n"
 "Last-Translator: Codex\n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -489,6 +489,58 @@ msgstr "LEFT JOIN"
 #: front/quickactions.php:214
 msgid "Optional JSON join definition. SELECT only."
 msgstr "Définition JSON optionnelle de jointure. SELECT uniquement."
+
+#: hook.php
+msgid "Tickets & Assets Statistics"
+msgstr "Statistiques des tickets et du parc"
+
+#: hook.php
+msgid "Tickets by Status"
+msgstr "Tickets par statut"
+
+#: hook.php public/js/central_stats.js
+msgid "Top Requesters"
+msgstr "Top Demandeurs"
+
+#: hook.php public/js/central_stats.js
+msgid "Tickets by Town"
+msgstr "Tickets par ville"
+
+#: hook.php
+msgid "Tickets by Town (Top 10)"
+msgstr "Tickets par ville  (top 10)"
+
+#: hook.php
+msgid "Assets by Type"
+msgstr "Appareils par type"
+
+#: ajax/central_data.php
+msgid "Computers"
+msgstr "Ordindateurs"
+
+#: ajax/central_data.php
+msgid "Monitors"
+msgstr "Moniteurs"
+
+#: ajax/central_data.php
+msgid "Printers"
+msgstr "Imprimantes"
+
+#: ajax/central_data.php
+msgid "Peripherals"
+msgstr "Périphériques"
+
+#: ajax/central_data.php
+msgid "Phones"
+msgstr "Téléphones"
+
+#: ajax/central_data.php
+msgid "Network Equipment"
+msgstr "Equipement réseau"
+
+#: ajax/central_data.php
+msgid "Racks"
+msgstr "Racks"
 
 #: front/quickactions.php:326 front/quickactions.php:213
 #: front/quickactions.php:218

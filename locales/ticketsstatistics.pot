@@ -497,7 +497,57 @@ msgstr ""
 #: front/quickactions.php:214
 msgid "Optional JSON join definition. SELECT only."
 msgstr ""
+#: hook.php
+msgid "Tickets & Assets Statistics"
+msgstr ""
 
+#: hook.php
+msgid "Tickets by Status"
+msgstr ""
+
+#: hook.php public/js/central_stats.js
+msgid "Top Requesters"
+msgstr ""
+
+#: hook.php public/js/central_stats.js
+msgid "Tickets by Town"
+msgstr ""
+
+#: hook.php
+msgid "Tickets by Town (Top 10)"
+msgstr ""
+
+#: hook.php
+msgid "Assets by Type"
+msgstr ""
+
+#: ajax/central_data.php
+msgid "Computers"
+msgstr ""
+
+#: ajax/central_data.php
+msgid "Monitors"
+msgstr ""
+
+#: ajax/central_data.php
+msgid "Printers"
+msgstr ""
+
+#: ajax/central_data.php
+msgid "Peripherals"
+msgstr ""
+
+#: ajax/central_data.php
+msgid "Phones"
+msgstr ""
+
+#: ajax/central_data.php
+msgid "Network Equipment"
+msgstr ""
+
+#: ajax/central_data.php
+msgid "Racks"
+msgstr ""
 #: front/quickactions.php:326 front/quickactions.php:213
 #: front/quickactions.php:218
 msgid "GROUP BY"
