@@ -142,7 +142,7 @@ $assetTypes = [
 ];
 $assetsByType = ['labels' => [], 'values' => []];
 foreach ($assetTypes as $label => $assetTable) {
-    $entityWhere = getEntitiesRestrictCriteria($assetTable);
+    $entityWhere = getEntitiesRestrictCriteria($assetTable, is_recursive: true);
     $countWhere  = ["$assetTable.is_deleted" => 0, "$assetTable.is_template" => 0] + $entityWhere;
     $iter = $DB->request([
         'COUNT' => 'cpt',
