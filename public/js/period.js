@@ -9,6 +9,13 @@ document.addEventListener('DOMContentLoaded', function () {
     periodSelect.addEventListener('change', submitFilterForm);
     categorySelect.addEventListener('change', submitFilterForm);
 
+    const viewSolvedCheckbox = document.getElementById('ts-view-solved');
+    if (viewSolvedCheckbox) {
+        viewSolvedCheckbox.addEventListener('change', function () {
+            toggleCountersView(this.checked);
+        });
+    }
+
     const downloadPdfButton = document.getElementById('ticketsstatisticsDownloadPdfBtn');
     downloadPdfButton.addEventListener('click', async function () {
         const btn = this;
@@ -98,6 +105,13 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 });
 
+function toggleCountersView(isSolved) {
+    const defaultRow = document.getElementById('ts-counters-default');
+    const solvedRow = document.getElementById('ts-counters-solved');
+    if (defaultRow) defaultRow.style.display = isSolved ? 'none' : '';
+    if (solvedRow) solvedRow.style.display = isSolved ? '' : 'none';
+}
+
 function submitFilterForm() {
     const customFields = document.getElementById('ts-custom-period-fields');
     const applyBtnCol = document.getElementById('ts-apply-btn-col');
@@ -124,11 +138,20 @@ function loadCharts() {
     fetch(url)
         .then(r => r.json())
         .then(data => {
-            // Big number counters
+            // Big number counters — creation-date view
             document.querySelectorAll('.ts-count').forEach(el => {
                 const status = el.dataset.status;
                 el.textContent = data.counters[status] ?? 0;
             });
+
+            // Big number counters — resolved-date view
+            if (data.solvedView) {
+                document.querySelectorAll('.ts-solved-count').forEach(el => {
+                    const key = el.dataset.solved;
+                    const val = data.solvedView[key] ?? 0;
+                    el.textContent = key === 'avg_ttr' ? val + 'h' : val;
+                });
+            }
 
             Chart.register(ChartDataLabels);
 

@@ -121,4 +121,81 @@ class PeriodFilter
                 break;
         }
     }
+
+    /**
+     * Same as apply() but filters on the resolved/closed date instead of the creation date.
+     * Uses COALESCE(NULLIF(solvedate, '0000-00-00 00:00:00'), closedate) as the date column.
+     */
+    public static function applySolvedDate(array &$where, string $table, string $period, ?string $dateFrom = null, ?string $dateTo = null): void
+    {
+        if (!class_exists('\Glpi\DBAL\QueryExpression')) {
+            self::applySolvedDateBackward($where, $table, $period, $dateFrom, $dateTo);
+            return;
+        }
+
+        $col = "COALESCE(NULLIF($table.`solvedate`, '0000-00-00 00:00:00'), $table.`closedate`)";
+
+        switch ($period) {
+            case 'last7':
+                $where[] = new \Glpi\DBAL\QueryExpression("$col >= DATE_SUB(NOW(), INTERVAL 7 DAY)");
+                break;
+            case 'last30':
+                $where[] = new \Glpi\DBAL\QueryExpression("$col >= DATE_SUB(NOW(), INTERVAL 30 DAY)");
+                break;
+            case 'last90':
+                $where[] = new \Glpi\DBAL\QueryExpression("$col >= DATE_SUB(NOW(), INTERVAL 90 DAY)");
+                break;
+            case 'thisyear':
+                $where[] = new \Glpi\DBAL\QueryExpression("YEAR($col) = YEAR(CURDATE())");
+                break;
+            case 'lastyear':
+                $where[] = new \Glpi\DBAL\QueryExpression("YEAR($col) = YEAR(CURDATE()) - 1");
+                break;
+            case 'custom':
+                if ($dateFrom && \DateTime::createFromFormat('Y-m-d', $dateFrom) !== false) {
+                    $where[] = new \Glpi\DBAL\QueryExpression("$col >= '$dateFrom'");
+                }
+                if ($dateTo && \DateTime::createFromFormat('Y-m-d', $dateTo) !== false) {
+                    $where[] = new \Glpi\DBAL\QueryExpression("$col <= '$dateTo 23:59:59'");
+                }
+                break;
+            default:
+                $where[] = new \Glpi\DBAL\QueryExpression("$col >= DATE_SUB(NOW(), INTERVAL 30 DAY)");
+                break;
+        }
+    }
+
+    public static function applySolvedDateBackward(array &$where, string $table, string $period, ?string $dateFrom = null, ?string $dateTo = null): void
+    {
+        $col = "COALESCE(NULLIF($table.`solvedate`, '0000-00-00 00:00:00'), $table.`closedate`)";
+
+        switch ($period) {
+            case 'last7':
+                $where[] = new \QueryExpression("$col >= DATE_SUB(NOW(), INTERVAL 7 DAY)");
+                break;
+            case 'last30':
+                $where[] = new \QueryExpression("$col >= DATE_SUB(NOW(), INTERVAL 30 DAY)");
+                break;
+            case 'last90':
+                $where[] = new \QueryExpression("$col >= DATE_SUB(NOW(), INTERVAL 90 DAY)");
+                break;
+            case 'thisyear':
+                $where[] = new \QueryExpression("YEAR($col) = YEAR(CURDATE())");
+                break;
+            case 'lastyear':
+                $where[] = new \QueryExpression("YEAR($col) = YEAR(CURDATE()) - 1");
+                break;
+            case 'custom':
+                if ($dateFrom && \DateTime::createFromFormat('Y-m-d', $dateFrom) !== false) {
+                    $where[] = new \QueryExpression("$col >= '$dateFrom'");
+                }
+                if ($dateTo && \DateTime::createFromFormat('Y-m-d', $dateTo) !== false) {
+                    $where[] = new \QueryExpression("$col <= '$dateTo 23:59:59'");
+                }
+                break;
+            default:
+                $where[] = new \QueryExpression("$col >= DATE_SUB(NOW(), INTERVAL 30 DAY)");
+                break;
+        }
+    }
 }

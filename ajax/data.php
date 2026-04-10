@@ -287,4 +287,49 @@ foreach ($byDay as $day => $hours) {
 $globalAvg = $totalCount > 0 ? round($totalSum / $totalCount, 2) : 0;
 $resolution['average'] = array_fill(0, count($resolution['labels']), $globalAvg);
 
-echo json_encode(compact('counters', 'priority', 'category', 'cityData', 'perday', 'resolution'));
+// --- Solved-date view: counters scoped to solve/close date instead of creation date ---
+$solvedWhere = ["$table.is_deleted" => 0] + getEntitiesRestrictCriteria($table);
+\GlpiPlugin\Ticketsstatistics\PeriodFilter::applySolvedDate($solvedWhere, $table, $period, $dateFrom, $dateTo);
+\GlpiPlugin\Ticketsstatistics\CategoryFilter::apply($solvedWhere, $table, $categoryId);
+
+// Tickets resolved/closed whose solve/close date falls in the selected period
+$solvedInPeriodIter = $DB->request([
+    'COUNT' => 'cpt',
+    'FROM'  => $table,
+    'WHERE' => $solvedWhere + ["$table.status" => [\Ticket::SOLVED, \Ticket::CLOSED]],
+]);
+$resolvedInPeriod = (int) $solvedInPeriodIter->current()['cpt'];
+
+// Average TTR for tickets resolved in the selected period
+$solvedTTRWhere = array_merge($solvedWhere, [
+    new \QueryExpression("($table.`solve_delay_stat` != 0 OR $table.`close_delay_stat` != 0)"),
+]);
+
+$solvedResolutionRows = [];
+foreach (
+    $DB->request([
+        'SELECT' => [
+            "$table.id",
+            "$table.solve_delay_stat",
+            "$table.close_delay_stat",
+        ],
+        'FROM'  => $table,
+        'WHERE' => $solvedTTRWhere,
+    ]) as $row
+) {
+    $seconds = (int) $row['solve_delay_stat'] ?: (int) $row['close_delay_stat'];
+    if ($seconds <= 0) continue;
+    $solvedResolutionRows[] = round($seconds / 3600, 2);
+}
+
+$solvedAvgTtr = count($solvedResolutionRows) > 0
+    ? round(array_sum($solvedResolutionRows) / count($solvedResolutionRows), 2)
+    : 0;
+
+$solvedView = [
+    'resolved_in_period' => $resolvedInPeriod,
+    'opened_in_period'   => $counters['total'],
+    'avg_ttr'            => $solvedAvgTtr,
+];
+
+echo json_encode(compact('counters', 'priority', 'category', 'cityData', 'perday', 'resolution', 'solvedView'));

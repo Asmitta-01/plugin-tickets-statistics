@@ -65,6 +65,12 @@ require_once(__DIR__ . '/../../../inc/includes.php');
             <div class="col-auto align-self-center" <?= $period === 'custom' ? '' : ' style="display:none;"' ?> id="ts-apply-btn-col">
                 <button type="submit" class="btn btn-primary btn-sm"><?= __('Apply', 'ticketsstatistics') ?></button>
             </div>
+            <div class="col-auto d-flex align-items-center mb-md-2 gap-2 ms-3">
+                <div class="form-check form-switch mb-0">
+                    <input class="form-check-input" type="checkbox" role="switch" id="ts-view-solved">
+                    <label class="form-check-label fw-semibold" for="ts-view-solved"><?= __('Resolved period view', 'ticketsstatistics') ?></label>
+                </div>
+            </div>
         </form>
 
         <button id='ticketsstatisticsDownloadPdfBtn' class='btn btn-primary'>
@@ -72,8 +78,8 @@ require_once(__DIR__ . '/../../../inc/includes.php');
         </button>
     </div>
 
-    <!-- Big numbers row -->
-    <div class="row g-3 mb-4" id="ts-counters">
+    <!-- Big numbers row — creation-date view -->
+    <div class="row g-3 mb-4" id="ts-counters-default">
         <?php foreach (
             [
                 ['id' => 'incoming', 'label' => __('New'),     'icon' => 'ti-ticket'],
@@ -94,6 +100,27 @@ require_once(__DIR__ . '/../../../inc/includes.php');
                             <?php endif; ?>
                             <?= $c['label'] ?>
                         </div>
+                    </div>
+                </div>
+            </div>
+        <?php endforeach; ?>
+    </div>
+
+    <!-- Big numbers row — resolved-date view -->
+    <div class="row g-3 mb-4" id="ts-counters-solved" style="display:none">
+        <?php foreach (
+            [
+                ['key' => 'resolved_in_period', 'label' => __('Resolved / Closed in period', 'ticketsstatistics'), 'icon' => 'ti-checkbox',  'color' => '#C00000'],
+                ['key' => 'opened_in_period',   'label' => __('Opened in period', 'ticketsstatistics'),            'icon' => 'ti-ticket',    'color' => '#49bf4d'],
+                ['key' => 'avg_ttr',            'label' => __('Average TTR', 'ticketsstatistics'),                 'icon' => 'ti-clock',     'color' => '#3498db'],
+            ] as $c
+        ): ?>
+            <div class="col">
+                <div class="card text-center h-100" style="border-top: 3px solid <?= $c['color'] ?>">
+                    <div class="card-body py-3">
+                        <i class="ti <?= $c['icon'] ?> fs-1 mb-1" style="color:<?= $c['color'] ?>"></i>
+                        <div class="display-6 fw-bold ts-solved-count" data-solved="<?= $c['key'] ?>">—</div>
+                        <div class="text-muted small"><?= $c['label'] ?></div>
                     </div>
                 </div>
             </div>
