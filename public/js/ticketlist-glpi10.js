@@ -92,7 +92,7 @@
         switchWrap.className = 'form-check form-switch mb-0 ms-3';
         switchWrap.innerHTML =
             '<input class="form-check-input" type="checkbox" role="switch" id="ts-ticketlist-view-solved">' +
-            '<label class="form-check-label fw-semibold small" for="ts-ticketlist-view-solved">' + __('Resolved period view', 'ticketsstatistics') + '</label>';
+            '<label class="form-check-label fw-semibold" for="ts-ticketlist-view-solved">' + __('Resolved period view', 'ticketsstatistics') + '</label>';
         toolbar.appendChild(switchWrap);
 
         wrapper.appendChild(toolbar);
@@ -152,7 +152,7 @@
                 '<div class="card-body py-3">' +
                 '<i class="ti ' + sc.icon + ' fs-1 mb-1" style="color:' + color + '"></i>' +
                 '<div class="display-6 fw-bold ts-ticketlist-solved-count" data-solved="' + sc.key + '">—</div>' +
-                '<div class="text-muted small" data-ts-solved-label="' + sc.labelId + '"></div>' +
+                '<div class="text-muted" data-ts-solved-label="' + sc.labelId + '"></div>' +
                 '</div></div>';
             solvedRow.appendChild(col);
         });
