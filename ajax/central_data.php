@@ -159,4 +159,47 @@ foreach ($assetTypes as $label => $assetTable) {
     $assetsByType['values'][] = (int) $iter->current()['cpt'];
 }
 
-echo json_encode(compact('ticketStatus', 'topRequesters', 'ticketsByTown', 'assetsByType'));
+// --- 5. Solved-date view counters ---
+$solvedWhere = ["$table.is_deleted" => 0] + getEntitiesRestrictCriteria($table);
+\GlpiPlugin\Ticketsstatistics\PeriodFilter::applySolvedDate($solvedWhere, $table, $period);
+
+$resolvedInPeriodIter = $DB->request([
+    'COUNT' => 'cpt',
+    'FROM'  => $table,
+    'WHERE' => $solvedWhere + ["$table.status" => [Ticket::SOLVED, Ticket::CLOSED]],
+]);
+$resolvedInPeriod = (int) $resolvedInPeriodIter->current()['cpt'];
+
+$openedIter = $DB->request([
+    'COUNT' => 'cpt',
+    'FROM'  => $table,
+    'WHERE' => $where,
+]);
+$openedInPeriod = (int) $openedIter->current()['cpt'];
+
+$solvedTTRWhere = array_merge($solvedWhere, [
+    new \QueryExpression("($table.`solve_delay_stat` != 0 OR $table.`close_delay_stat` != 0)"),
+]);
+$solvedResolutionRows = [];
+foreach (
+    $DB->request([
+        'SELECT' => ["$table.solve_delay_stat", "$table.close_delay_stat"],
+        'FROM'   => $table,
+        'WHERE'  => $solvedTTRWhere,
+    ]) as $row
+) {
+    $seconds = (int) $row['solve_delay_stat'] ?: (int) $row['close_delay_stat'];
+    if ($seconds <= 0) continue;
+    $solvedResolutionRows[] = round($seconds / 3600, 2);
+}
+$solvedAvgTtr = count($solvedResolutionRows) > 0
+    ? round(array_sum($solvedResolutionRows) / count($solvedResolutionRows), 2)
+    : 0;
+
+$solvedView = [
+    'resolved_in_period' => $resolvedInPeriod,
+    'opened_in_period'   => $openedInPeriod,
+    'avg_ttr'            => $solvedAvgTtr,
+];
+
+echo json_encode(compact('ticketStatus', 'topRequesters', 'ticketsByTown', 'assetsByType', 'solvedView'));

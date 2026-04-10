@@ -112,6 +112,11 @@ function plugin_ticketsstatistics_pre_item_list(array $params): void
     echo '<input type="date" class="form-control form-control-sm" id="ts-ticketlist-date-to">';
     echo '<button class="btn btn-primary btn-sm" id="ts-ticketlist-apply">' . __('Apply', 'ticketsstatistics') . '</button>';
     echo '</div>';
+    // Resolved-period view toggle
+    echo '<div class="form-check form-switch mb-0 ms-3">';
+    echo '<input class="form-check-input" type="checkbox" role="switch" id="ts-ticketlist-view-solved">';
+    echo '<label class="form-check-label fw-semibold small" for="ts-ticketlist-view-solved">' . __('Resolved period view', 'ticketsstatistics') . '</label>';
+    echo '</div>';
     echo '</div>';
 
     // Cards row (position: relative so spinner can overlay)
@@ -137,6 +142,32 @@ function plugin_ticketsstatistics_pre_item_list(array $params): void
         echo '</div>';
     }
     echo '</div>'; // .row
+
+    // Resolved-date view cards row (hidden by default)
+    echo '<div class="row g-3" id="ts-counters-ticketlist-solved" style="display:none">';
+    foreach (
+        [
+            ['key' => 'resolved_in_period', 'label' => __('Resolved / Closed in period', 'ticketsstatistics'), 'icon' => 'ti-checkbox', 'color' => '#C00000'],
+            ['key' => 'opened_in_period',   'label' => __('Opened in period', 'ticketsstatistics'),            'icon' => 'ti-ticket',   'color' => '#49bf4d'],
+            ['key' => 'avg_ttr',            'label' => __('Average TTR', 'ticketsstatistics'),                 'icon' => 'ti-clock',    'color' => '#3498db'],
+        ] as $sc
+    ) {
+        $color = htmlspecialchars($sc['color'], ENT_QUOTES, 'UTF-8');
+        $icon  = htmlspecialchars($sc['icon'],  ENT_QUOTES, 'UTF-8');
+        $key   = htmlspecialchars($sc['key'],   ENT_QUOTES, 'UTF-8');
+        $label = htmlspecialchars($sc['label'], ENT_QUOTES, 'UTF-8');
+        echo '<div class="col">';
+        echo '<div class="card text-center h-100" style="border-top: 3px solid ' . $color . '">';
+        echo '<div class="card-body py-3">';
+        echo '<i class="ti ' . $icon . ' fs-1 mb-1" style="color:' . $color . '"></i>';
+        echo '<div class="display-6 fw-bold ts-ticketlist-solved-count" data-solved="' . $key . '">—</div>';
+        echo '<div class="text-muted small">' . $label . '</div>';
+        echo '</div>';
+        echo '</div>';
+        echo '</div>';
+    }
+    echo '</div>'; // #ts-counters-ticketlist-solved
+
     echo '</div>'; // #ts-ticketlist-wrapper
 
     $encodedBaseUrl = json_encode($CFG_GLPI['root_doc'] . '/plugins/ticketsstatistics/ajax/data.php');
@@ -177,12 +208,33 @@ function plugin_ticketsstatistics_pre_item_list(array $params): void
                             el.textContent = data.counters[status];
                         }
                     });
+                    if (data.solvedView) {
+                        document.querySelectorAll('#ts-counters-ticketlist-solved .ts-ticketlist-solved-count').forEach(function (el) {
+                            var key = el.dataset.solved;
+                            var val = data.solvedView[key] !== undefined ? data.solvedView[key] : 0;
+                            el.textContent = key === 'avg_ttr' ? val + 'h' : val;
+                        });
+                    }
                 })
                 .catch(function () {})
                 .finally(function () {
                     spinner.classList.add('d-none');
                     spinner.classList.remove('d-flex');
                 });
+        }
+
+        function toggleCountersView(isSolved) {
+            var defRow    = document.getElementById('ts-counters-ticketlist');
+            var solvedRow = document.getElementById('ts-counters-ticketlist-solved');
+            if (defRow)    defRow.style.display    = isSolved ? 'none' : '';
+            if (solvedRow) solvedRow.style.display = isSolved ? ''     : 'none';
+        }
+
+        var viewSolvedSwitch = document.getElementById('ts-ticketlist-view-solved');
+        if (viewSolvedSwitch) {
+            viewSolvedSwitch.addEventListener('change', function () {
+                toggleCountersView(this.checked);
+            });
         }
 
         var periodSel  = document.getElementById('ts-ticketlist-period');
@@ -269,6 +321,10 @@ function plugin_ticketsstatistics_display_central(): void
             . '</option>';
     }
     echo '</select>';
+    echo '<div class="form-check form-switch mb-0 ms-3">';
+    echo '<input class="form-check-input" type="checkbox" role="switch" id="ts-c-view-solved">';
+    echo '<label class="form-check-label fw-semibold" for="ts-c-view-solved">' . htmlspecialchars(__('Resolved period view', 'ticketsstatistics'), ENT_QUOTES, 'UTF-8') . '</label>';
+    echo '</div>';
     echo '</div>'; // filter bar
 
     // ---- Counter cards ----
@@ -302,6 +358,31 @@ function plugin_ticketsstatistics_display_central(): void
     echo '</div>';
     echo '</div>';
     echo '</div>'; // #ts-c-counters
+
+    // Resolved-date view cards row (hidden by default)
+    echo '<div class="row g-3 mb-4" id="ts-c-counters-solved" style="display:none">';
+    foreach (
+        [
+            ['key' => 'resolved_in_period', 'label' => __('Resolved / Closed in period', 'ticketsstatistics'), 'icon' => 'ti-checkbox', 'color' => '#C00000'],
+            ['key' => 'opened_in_period',   'label' => __('Opened in period', 'ticketsstatistics'),            'icon' => 'ti-ticket',   'color' => '#49bf4d'],
+            ['key' => 'avg_ttr',            'label' => __('Average TTR', 'ticketsstatistics'),                 'icon' => 'ti-clock',    'color' => '#3498db'],
+        ] as $sc
+    ) {
+        $color = htmlspecialchars($sc['color'], ENT_QUOTES, 'UTF-8');
+        $icon  = htmlspecialchars($sc['icon'],  ENT_QUOTES, 'UTF-8');
+        $key   = htmlspecialchars($sc['key'],   ENT_QUOTES, 'UTF-8');
+        $label = htmlspecialchars($sc['label'], ENT_QUOTES, 'UTF-8');
+        echo '<div class="col">';
+        echo '<div class="card text-center h-100" style="border-top:3px solid ' . $color . '">';
+        echo '<div class="card-body py-3">';
+        echo '<i class="ti ' . $icon . ' fs-1 mb-1" style="color:' . $color . '"></i>';
+        echo '<div class="display-6 fw-bold ts-c-solved-count" data-solved="' . $key . '">—</div>';
+        echo '<div class="text-muted">' . $label . '</div>';
+        echo '</div>';
+        echo '</div>';
+        echo '</div>';
+    }
+    echo '</div>'; // #ts-c-counters-solved
 
     // ---- Charts row 1: ticket status doughnut + top requesters bar ----
     echo '<div class="row g-3 mb-3">';

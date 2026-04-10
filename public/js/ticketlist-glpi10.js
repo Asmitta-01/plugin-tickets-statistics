@@ -87,6 +87,14 @@
             '<button class="btn btn-primary btn-sm" id="ts-ticketlist-apply">' + __('Apply', 'ticketsstatistics') + '</button>';
         toolbar.appendChild(customDiv);
 
+        // Resolved-period view toggle
+        var switchWrap = document.createElement('div');
+        switchWrap.className = 'form-check form-switch mb-0 ms-3';
+        switchWrap.innerHTML =
+            '<input class="form-check-input" type="checkbox" role="switch" id="ts-ticketlist-view-solved">' +
+            '<label class="form-check-label fw-semibold small" for="ts-ticketlist-view-solved">' + __('Resolved period view', 'ticketsstatistics') + '</label>';
+        toolbar.appendChild(switchWrap);
+
         wrapper.appendChild(toolbar);
 
         // --- Cards row ---
@@ -119,6 +127,37 @@
         });
 
         wrapper.appendChild(row);
+
+        // Solved-date view cards row (hidden by default)
+        var solvedColors = {
+            resolved_in_period: '#C00000',
+            opened_in_period: '#49bf4d',
+            avg_ttr: '#3498db'
+        };
+        var solvedCards = [
+            { key: 'resolved_in_period', icon: 'ti-checkbox', labelId: 'resolved_in_period' },
+            { key: 'opened_in_period', icon: 'ti-ticket', labelId: 'opened_in_period' },
+            { key: 'avg_ttr', icon: 'ti-clock', labelId: 'avg_ttr' }
+        ];
+        var solvedRow = document.createElement('div');
+        solvedRow.className = 'row g-3';
+        solvedRow.id = 'ts-counters-ticketlist-solved';
+        solvedRow.style.display = 'none';
+        solvedCards.forEach(function (sc) {
+            var color = solvedColors[sc.key] || '#000';
+            var col = document.createElement('div');
+            col.className = 'col';
+            col.innerHTML =
+                '<div class="card text-center h-100" style="border-top:3px solid ' + color + '">' +
+                '<div class="card-body py-3">' +
+                '<i class="ti ' + sc.icon + ' fs-1 mb-1" style="color:' + color + '"></i>' +
+                '<div class="display-6 fw-bold ts-ticketlist-solved-count" data-solved="' + sc.key + '">—</div>' +
+                '<div class="text-muted small" data-ts-solved-label="' + sc.labelId + '"></div>' +
+                '</div></div>';
+            solvedRow.appendChild(col);
+        });
+        wrapper.appendChild(solvedRow);
+
         return wrapper;
     }
 
@@ -156,6 +195,13 @@
                         el.textContent = data.counters[status];
                     }
                 });
+                if (data.solvedView) {
+                    document.querySelectorAll('#ts-counters-ticketlist-solved .ts-ticketlist-solved-count').forEach(function (el) {
+                        var key = el.getAttribute('data-solved');
+                        var val = data.solvedView[key] !== undefined ? data.solvedView[key] : 0;
+                        el.textContent = key === 'avg_ttr' ? val + 'h' : val;
+                    });
+                }
             })
             .catch(function () { })
             .finally(function () {
@@ -207,6 +253,16 @@
             loadCounters('custom', dateFrom.value, dateTo.value);
         });
 
+        var viewSolvedSwitch = document.getElementById('ts-ticketlist-view-solved');
+        if (viewSolvedSwitch) {
+            viewSolvedSwitch.addEventListener('change', function () {
+                var defRow = document.getElementById('ts-counters-ticketlist');
+                var solvedRow = document.getElementById('ts-counters-ticketlist-solved');
+                if (defRow) defRow.style.display = this.checked ? 'none' : '';
+                if (solvedRow) solvedRow.style.display = this.checked ? '' : 'none';
+            });
+        }
+
         // Initial load with default period
         loadCounters('last30');
     }
@@ -223,6 +279,18 @@
         });
         var applyBtn = document.getElementById('ts-ticketlist-apply');
         if (applyBtn) { applyBtn.textContent = __('Apply', 'ticketsstatistics'); }
+
+        var solvedLabelMap = {
+            resolved_in_period: __('Resolved / Closed in period', 'ticketsstatistics'),
+            opened_in_period: __('Opened in period', 'ticketsstatistics'),
+            avg_ttr: __('Average TTR', 'ticketsstatistics'),
+        };
+        Object.keys(solvedLabelMap).forEach(function (key) {
+            var el = document.querySelector('[data-ts-solved-label="' + key + '"]');
+            if (el) { el.textContent = solvedLabelMap[key]; }
+        });
+        var switchLabel = document.querySelector('label[for="ts-ticketlist-view-solved"]');
+        if (switchLabel) { switchLabel.textContent = __('Resolved period view', 'ticketsstatistics'); }
     }
 
     // Detect when the ticketsstatistics domain is loaded by trying to translate

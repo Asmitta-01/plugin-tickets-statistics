@@ -66,6 +66,22 @@
         if (totalEl) totalEl.textContent = total;
     }
 
+    function updateSolvedCounters(solvedView) {
+        if (!solvedView) return;
+        document.querySelectorAll('#ts-c-counters-solved .ts-c-solved-count').forEach(function (el) {
+            const key = el.dataset.solved;
+            const val = solvedView[key] !== undefined ? solvedView[key] : 0;
+            el.textContent = key === 'avg_ttr' ? val + 'h' : val;
+        });
+    }
+
+    function toggleCentralCountersView(isSolved) {
+        const defRow = document.getElementById('ts-c-counters');
+        const solvedRow = document.getElementById('ts-c-counters-solved');
+        if (defRow) defRow.style.display = isSolved ? 'none' : '';
+        if (solvedRow) solvedRow.style.display = isSolved ? '' : 'none';
+    }
+
     // -----------------------------------------------------------------------
     // Chart renderers
     // -----------------------------------------------------------------------
@@ -214,6 +230,7 @@
             .then(function (data) {
                 Chart.register(ChartDataLabels);
                 updateCounters(data.ticketStatus);
+                updateSolvedCounters(data.solvedView);
                 renderTicketStatusChart(data.ticketStatus);
                 renderTopRequestersChart(data.topRequesters);
                 renderTicketsByTownChart(data.ticketsByTown);
@@ -281,6 +298,13 @@
                 loadCentralStats(this.value);
             });
             loadCentralStats(periodSel.value);
+        }
+
+        const viewSolvedSwitch = document.getElementById('ts-c-view-solved');
+        if (viewSolvedSwitch) {
+            viewSolvedSwitch.addEventListener('change', function () {
+                toggleCentralCountersView(this.checked);
+            });
         }
     }
 
