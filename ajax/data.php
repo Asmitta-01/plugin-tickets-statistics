@@ -206,7 +206,9 @@ foreach (
 
 // Tickets clôturés par jour
 $closedWhere = array_merge($where, [
-    'NOT' => ["$table.closedate" => null],
+    new \QueryExpression(
+        "COALESCE(NULLIF($table.`solvedate`, '0000-00-00 00:00:00'), NULLIF($table.`closedate`, '0000-00-00 00:00:00')) IS NOT NULL"
+    ),
 ]);
 
 $closedByDay = [];
@@ -214,7 +216,7 @@ foreach (
     $DB->request([
         'SELECT'  => [
             'COUNT DISTINCT' => "$table.id AS cpt",
-            new \QueryExpression("DATE($table.`closedate`) AS `day`"),
+            new \QueryExpression("DATE(COALESCE(NULLIF($table.`solvedate`, '0000-00-00 00:00:00'), $table.`closedate`)) AS `day`"),
         ],
         'FROM'    => $table,
         'WHERE'   => $closedWhere,
