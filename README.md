@@ -33,9 +33,15 @@ After installation and activation, users with access to the helpdesk dashboard c
 Run this command to generate the translation files:
 
 ```bash
-find . -type f \( -name '*.php' -o -name '*.js' \) > files.list
-xgettext --language=PHP --language=JavaScript --keyword=__ --from-code=UTF-8 --output=locales/ticketsstatistics.pot --join --add-comments --files-from=files.list
-rm files.list
+find . -type f \( -name '*.php' \) > files-php.list
+xgettext --language=PHP --keyword=__ --from-code=UTF-8 --output=locales/ticketsstatistics.pot --join --add-comments --files-from=files-php.list
+rm files-php.list
+```
+
+```bash
+find . -type f \( -name '*.js' \) > files-js.list
+xgettext --language=JavaScript --keyword=__ --from-code=UTF-8 --output=locales/ticketsstatistics.pot --join --add-comments --files-from=files-js.list
+rm files-js.list
 ```
 
 Then open the generated `locales/ticketsstatistics.pot` file with a translation tool (e.g. [Poedit](https://poedit.net/)) and create the `.po` files for each language. Finally, compile the `.po` files to `.mo` files.
