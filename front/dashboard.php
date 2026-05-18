@@ -12,17 +12,19 @@ require_once(__DIR__ . '/../../../inc/includes.php');
 
 \Session::checkCentralAccess();
 
-\Html::header(__('Tickets Statistics', 'ticketsstatistics'), '', 'helpdesk', 'ticketsstatistics');
+\Html::header(__('Tickets Statistics', 'ticketsstatistics'), '', 'helpdesk');
 ?>
 
 <div class="container-fluid mt-3" id="ts-content">
-    <div class="row g-3 mb-3">
-        <div class="col-12">
-            <h2 class="page-title">
-                <i class="ti ti-chart-bar me-2"></i>
-                <?= __('Tickets Statistics', 'ticketsstatistics') ?>
-            </h2>
-        </div>
+    <div class="d-flex justify-content-between align-items-center g-3 mb-3">
+        <h2 class="page-title">
+            <i class="ti ti-chart-bar me-2"></i>
+            <?= __('Tickets Statistics', 'ticketsstatistics') ?>
+        </h2>
+
+        <a href="/plugins/ticketsstatistics/front/technicians.php" data-bs-toggle="tooltip" title="<?= __('View technicians statistics', 'ticketsstatistics') ?>" class="btn btn-sm btn-outline-secondary">
+            <i class="ti ti-users-group me-1"></i> <?= __('Technicians Stats', 'ticketsstatistics') ?>
+        </a>
     </div>
 
     <!-- Filter row -->

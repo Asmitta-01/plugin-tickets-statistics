@@ -658,3 +658,71 @@ msgstr ""
 #, php-format
 msgid "Tickets by category (%s)"
 msgstr ""
+
+#: front/technicians.php:12 front/technicians.php:19
+msgid "Technicians Statistics"
+msgstr ""
+
+#: front/technicians.php:65
+msgid "Tickets by status per technician"
+msgstr ""
+
+#: front/technicians.php:81
+msgid "Average resolution time (hours)"
+msgstr ""
+
+#: front/technicians.php:97
+msgid "Resolution rate (%)"
+msgstr ""
+
+#: front/technicians.php:115
+msgid "Technicians detailed statistics"
+msgstr ""
+
+#: front/technicians.php:122
+msgid "Technician"
+msgstr ""
+
+#: front/technicians.php:123
+msgid "Total Tickets"
+msgstr ""
+
+#: front/technicians.php:124 front/technicians.php:201
+msgid "In Progress"
+msgstr ""
+
+#: front/technicians.php:126
+msgid "Avg Resolution Time (h)"
+msgstr ""
+
+#: front/technicians.php:127
+msgid "Resolution Rate (%)"
+msgstr ""
+
+#: front/technicians.php:128
+msgid "Avg Assign Time (h)"
+msgstr ""
+
+#: front/technicians.php:192
+msgid "Failed to load technicians data."
+msgstr ""
+
+#: front/technicians.php:207
+msgid "Hours"
+msgstr ""
+
+#: front/technicians.php:236
+msgid "Rate (%)"
+msgstr ""
+
+#: front/technicians.php:266
+msgid "Processing..."
+msgstr ""
+
+#: front/technicians.php:267
+msgid "Search"
+msgstr ""
+
+#: front/technicians.php:268
+msgid "Show _MENU_ entries"
+msgstr ""

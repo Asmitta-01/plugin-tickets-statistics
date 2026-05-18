@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: TicketsStatistics\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-04-10 11:11+0100\n"
-"PO-Revision-Date: 2026-04-10 11:15+0100\n"
+"PO-Revision-Date: 2026-05-18 11:01+0100\n"
 "Last-Translator: Codex\n"
 "Language-Team: English\n"
 "Language: en_US\n"
@@ -658,3 +658,71 @@ msgstr "Opened in period"
 #| msgid "Tickets by category (top 10)"
 msgid "Tickets by category (%s)"
 msgstr "Tickets by category (%s)"
+
+#: front/technicians.php:12 front/technicians.php:19
+msgid "Technicians Statistics"
+msgstr "Technicians Statistics"
+
+#: front/technicians.php:65
+msgid "Tickets by status per technician"
+msgstr "Tickets by status per technician"
+
+#: front/technicians.php:81
+msgid "Average resolution time (hours)"
+msgstr "Average resolution time (hours)"
+
+#: front/technicians.php:97
+msgid "Resolution rate (%)"
+msgstr "Resolution rate (%)"
+
+#: front/technicians.php:115
+msgid "Technicians detailed statistics"
+msgstr "Technicians detailed statistics"
+
+#: front/technicians.php:122
+msgid "Technician"
+msgstr "Technician"
+
+#: front/technicians.php:123
+msgid "Total Tickets"
+msgstr "Total Tickets"
+
+#: front/technicians.php:124 front/technicians.php:201
+msgid "In Progress"
+msgstr "In Progress"
+
+#: front/technicians.php:126
+msgid "Avg Resolution Time (h)"
+msgstr "Avg Resolution Time (h)"
+
+#: front/technicians.php:127
+msgid "Resolution Rate (%)"
+msgstr "Resolution Rate (%)"
+
+#: front/technicians.php:128
+msgid "Avg Assign Time (h)"
+msgstr "Avg Assign Time (h)"
+
+#: front/technicians.php:192
+msgid "Failed to load technicians data."
+msgstr "Failed to load technicians data."
+
+#: front/technicians.php:207
+msgid "Hours"
+msgstr "Hours"
+
+#: front/technicians.php:236
+msgid "Rate (%)"
+msgstr "Rate (%)"
+
+#: front/technicians.php:266
+msgid "Processing..."
+msgstr "Processing..."
+
+#: front/technicians.php:267
+msgid "Search"
+msgstr "Search"
+
+#: front/technicians.php:268
+msgid "Show _MENU_ entries"
+msgstr "Show _MENU_ entries"

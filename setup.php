@@ -102,6 +102,14 @@ function plugin_init_ticketsstatistics(): void
         $PLUGIN_HOOKS[\Glpi\Plugin\Hooks::ADD_JAVASCRIPT]['ticketsstatistics'][] = $pluginAssetsRoot . 'js/central_stats.js';
     }
 
+    if (strpos($uri, "plugins/ticketsstatistics/front/technicians.php") !== false) {
+        $PLUGIN_HOOKS[\Glpi\Plugin\Hooks::ADD_JAVASCRIPT]['ticketsstatistics'][] = $pluginAssetsRoot . 'js/chart.umd.min.js';
+        $PLUGIN_HOOKS[\Glpi\Plugin\Hooks::ADD_JAVASCRIPT]['ticketsstatistics'][] = $pluginAssetsRoot . 'js/hammerjs@2.0.8.js';
+        $PLUGIN_HOOKS[\Glpi\Plugin\Hooks::ADD_JAVASCRIPT]['ticketsstatistics'][] = $pluginAssetsRoot . 'js/chartjs-plugin-zoom.min.js';
+        $PLUGIN_HOOKS[\Glpi\Plugin\Hooks::ADD_JAVASCRIPT]['ticketsstatistics'][] = $pluginAssetsRoot . 'js/chartjs-plugin-datalabels.min.js';
+        $PLUGIN_HOOKS[\Glpi\Plugin\Hooks::ADD_JAVASCRIPT]['ticketsstatistics'][] = $pluginAssetsRoot . 'js/technicians.js';
+    }
+
     // Check for pending redirect after session is ready  
     if (isset($_SESSION['plugin_redirect'])) {
         $redirect = $_SESSION['plugin_redirect'];
