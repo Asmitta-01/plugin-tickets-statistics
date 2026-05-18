@@ -81,7 +81,7 @@ require_once(__DIR__ . '/../../../inc/includes.php');
                     </button>
                 </div>
                 <div class="card-body d-flex align-items-center justify-content-center">
-                    <canvas id="chart-tech-status" style="max-height:450px;"></canvas>
+                    <canvas id="chart-tech-status" style="min-height:400px; max-height:400px;"></canvas>
                 </div>
             </div>
         </div>
@@ -98,7 +98,7 @@ require_once(__DIR__ . '/../../../inc/includes.php');
                     </button>
                 </div>
                 <div class="card-body d-flex align-items-center justify-content-center">
-                    <canvas id="chart-tech-resolution-time" style="max-height:350px;"></canvas>
+                    <canvas id="chart-tech-resolution-time" style="min-height:350px; max-height:350px;"></canvas>
                 </div>
             </div>
         </div>
@@ -111,7 +111,7 @@ require_once(__DIR__ . '/../../../inc/includes.php');
                     </button>
                 </div>
                 <div class="card-body d-flex align-items-center justify-content-center">
-                    <canvas id="chart-tech-resolution-rate" style="max-height:350px;"></canvas>
+                    <canvas id="chart-tech-resolution-rate" style="min-height:350px; max-height:350px;"></canvas>
                 </div>
             </div>
         </div>
