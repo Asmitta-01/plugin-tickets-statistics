@@ -24,6 +24,14 @@ msgstr ""
 msgid "Tickets Statistics"
 msgstr ""
 
+#: front/dashboard.php:25
+msgid "View technicians statistics"
+msgstr ""
+
+#: front/dashboard.php:26
+msgid "Technicians Stats"
+msgstr ""
+
 #: front/dashboard.php:31 front/dashboard.php:35 hook.php:101
 msgid "Period"
 msgstr ""
@@ -661,6 +669,10 @@ msgstr ""
 
 #: front/technicians.php:12 front/technicians.php:19
 msgid "Technicians Statistics"
+msgstr ""
+
+#: front/technicians.php:26
+msgid "Back to dashboard"
 msgstr ""
 
 #: front/technicians.php:65

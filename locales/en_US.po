@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: TicketsStatistics\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-04-10 11:11+0100\n"
-"PO-Revision-Date: 2026-05-18 11:01+0100\n"
+"PO-Revision-Date: 2026-05-18 11:50+0100\n"
 "Last-Translator: Codex\n"
 "Language-Team: English\n"
 "Language: en_US\n"
@@ -19,6 +19,14 @@ msgstr ""
 #: src/TicketsStatistics.php:27
 msgid "Tickets Statistics"
 msgstr "Tickets Statistics"
+
+#: front/dashboard.php:25
+msgid "View technicians statistics"
+msgstr "View technicians statistics"
+
+#: front/dashboard.php:26
+msgid "Technicians Stats"
+msgstr "Technicians Stats"
 
 #: front/dashboard.php:31 front/dashboard.php:35 hook.php:101
 msgid "Period"
@@ -640,12 +648,10 @@ msgid "All categories"
 msgstr "All categories"
 
 #: front/dashboard.php:71
-#| msgid "Resolved/Closed tickers"
 msgid "Resolved period view"
 msgstr "Resolved period view"
 
 #: front/dashboard.php:113
-#| msgid "Resolved / Closed"
 msgid "Resolved / Closed in period"
 msgstr "Resolved / Closed in period"
 
@@ -655,13 +661,16 @@ msgstr "Opened in period"
 
 #: front/dashboard.php:147
 #, php-format
-#| msgid "Tickets by category (top 10)"
 msgid "Tickets by category (%s)"
 msgstr "Tickets by category (%s)"
 
 #: front/technicians.php:12 front/technicians.php:19
 msgid "Technicians Statistics"
 msgstr "Technicians Statistics"
+
+#: front/technicians.php:26
+msgid "Back to dashboard"
+msgstr "Back to dashboard"
 
 #: front/technicians.php:65
 msgid "Tickets by status per technician"
