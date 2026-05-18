@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: TicketsStatistics\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-04-10 11:11+0100\n"
-"PO-Revision-Date: 2026-05-18 11:50+0100\n"
+"PO-Revision-Date: 2026-05-18 16:47+0100\n"
 "Last-Translator: Codex\n"
 "Language-Team: English\n"
 "Language: en_US\n"
@@ -19,6 +19,10 @@ msgstr ""
 #: src/TicketsStatistics.php:27
 msgid "Tickets Statistics"
 msgstr "Tickets Statistics"
+
+#: front/technicians.php:125
+msgid "Waiting"
+msgstr "Waiting"
 
 #: front/dashboard.php:25
 msgid "View technicians statistics"

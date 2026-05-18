@@ -24,6 +24,10 @@ msgstr ""
 msgid "Tickets Statistics"
 msgstr ""
 
+#: front/technicians.php:125
+msgid "Waiting"
+msgstr ""
+
 #: front/dashboard.php:25
 msgid "View technicians statistics"
 msgstr ""

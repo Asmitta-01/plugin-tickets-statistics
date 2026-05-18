@@ -131,9 +131,9 @@ require_once(__DIR__ . '/../../../inc/includes.php');
                                 <tr>
                                     <th><?= __('Technician', 'ticketsstatistics') ?></th>
                                     <th class="text-end"><?= __('Total Tickets', 'ticketsstatistics') ?></th>
-                                    <th class="text-end"><?= __('New', 'ticketsstatistics') ?></th>
-                                    <th class="text-end"><?= __('In Progress', 'ticketsstatistics') ?></th>
                                     <th class="text-end"><?= __('Resolved', 'ticketsstatistics') ?></th>
+                                    <th class="text-end"><?= __('In Progress', 'ticketsstatistics') ?></th>
+                                    <th class="text-end"><?= __('Waiting', 'ticketsstatistics') ?></th>
                                     <th class="text-end"><?= __('Avg Resolution Time (h)', 'ticketsstatistics') ?></th>
                                     <th class="text-end"><?= __('Resolution Rate (%)', 'ticketsstatistics') ?></th>
                                     <th class="text-end"><?= __('Avg Assign Time (h)', 'ticketsstatistics') ?></th>

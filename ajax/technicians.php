@@ -29,11 +29,8 @@ $dateTo   = $_GET['date_to']   ?? null;
 \GlpiPlugin\Ticketsstatistics\CategoryFilter::apply($where, $table, $categoryId);
 
 // Status groups for categorization
-$statusGroups = [
-    'new'        => [\Ticket::INCOMING],
-    'resolved'   => [\Ticket::SOLVED, \Ticket::CLOSED],
-    'in_progress' => [\Ticket::ASSIGNED, \Ticket::WAITING, \Ticket::ACCEPTED, \Ticket::OBSERVED],
-];
+$resolvedStatuses = [\Ticket::SOLVED, \Ticket::CLOSED];
+$inProgressStatuses = [\Ticket::ASSIGNED, \Ticket::INCOMING];
 
 $tuTable = 'glpi_tickets_users';
 $usersTable = 'glpi_users';
@@ -75,9 +72,9 @@ foreach (
     $techniciansData[$userId] = [
         'name'         => $userName,
         'total'        => (int) $row['total_tickets'],
-        'new'          => 0,
-        'in_progress'  => 0,
         'resolved'     => 0,
+        'in_progress'  => 0,
+        'waiting'      => 0,
         'resolution_time_sum' => 0,
         'resolution_time_count' => 0,
         'assign_time_sum' => 0,
@@ -120,12 +117,12 @@ if (count($techniciansData)) {
         $count = (int) $row['cpt'];
 
         // Determine status group
-        $group = 'in_progress'; // fallback
-        foreach ($statusGroups as $groupName => $statuses) {
-            if (in_array($status, $statuses, true)) {
-                $group = $groupName;
-                break;
-            }
+        if (in_array($status, $resolvedStatuses, true)) {
+            $group = 'resolved';
+        } elseif (in_array($status, $inProgressStatuses, true)) {
+            $group = 'in_progress';
+        } else {
+            $group = 'waiting';
         }
 
         if (isset($techniciansData[$userId])) {
@@ -199,19 +196,19 @@ $result = [
             'labels' => [],
             'datasets' => [
                 [
-                    'label' => __('New', 'ticketsstatistics'),
+                    'label' => __('Resolved', 'ticketsstatistics'),
                     'data' => [],
-                    'backgroundColor' => '#49bf4d',
+                    'backgroundColor' => '#C00000',
                 ],
                 [
                     'label' => __('In Progress', 'ticketsstatistics'),
                     'data' => [],
-                    'backgroundColor' => '#ffa500',
+                    'backgroundColor' => '#49bf4d',
                 ],
                 [
-                    'label' => __('Resolved', 'ticketsstatistics'),
+                    'label' => __('Waiting', 'ticketsstatistics'),
                     'data' => [],
-                    'backgroundColor' => '#C00000',
+                    'backgroundColor' => '#ffa500',
                 ],
             ],
         ],
@@ -244,9 +241,9 @@ foreach ($techniciansData as $userId => $data) {
         'user_id'             => $userId,
         'name'                => $data['name'],
         'total'               => $data['total'],
-        'new'                 => $data['new'],
-        'in_progress'         => $data['in_progress'],
         'resolved'            => $data['resolved'],
+        'in_progress'         => $data['in_progress'],
+        'waiting'             => $data['waiting'],
         'avg_resolution_time' => $avgResolutionTime,
         'resolution_rate'     => $resolutionRate,
         'avg_assign_time'     => $avgAssignTime,
@@ -254,9 +251,9 @@ foreach ($techniciansData as $userId => $data) {
 
     // Add to charts
     $result['charts']['status_by_tech']['labels'][] = $data['name'];
-    $result['charts']['status_by_tech']['datasets'][0]['data'][] = $data['new'];
+    $result['charts']['status_by_tech']['datasets'][0]['data'][] = $data['resolved'];
     $result['charts']['status_by_tech']['datasets'][1]['data'][] = $data['in_progress'];
-    $result['charts']['status_by_tech']['datasets'][2]['data'][] = $data['resolved'];
+    $result['charts']['status_by_tech']['datasets'][2]['data'][] = $data['waiting'];
 
     $result['charts']['avg_resolution_time']['labels'][] = $data['name'];
     $result['charts']['avg_resolution_time']['data'][] = $avgResolutionTime;
