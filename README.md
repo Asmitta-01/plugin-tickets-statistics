@@ -2,12 +2,15 @@
 
 TicketsStatistics adds a dedicated reporting dashboard to GLPI for helpdesk ticket activity.
 
+Current release: 0.3.0
+
 The plugin provides:
 
 - ticket counters by status
 - charts by priority and category
 - charts and tables by town
 - ticket creation trends per day
+- dedicated technicians statistics page with assignment and performance metrics
 - period filters including custom date ranges
 - PDF export of the dashboard
 - **stats widget embedded in the GLPI central dashboard** (Tab 0): ticket status doughnut, top requesters bar chart, tickets by town bar chart, and assets by type doughnut — all filterable by period
