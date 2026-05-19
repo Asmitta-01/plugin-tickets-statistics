@@ -50,7 +50,8 @@ function loadTechnicianData() {
     const params = new URLSearchParams();
     params.append('period', document.getElementById('ts-tech-period').value);
     params.append('category', document.getElementById('ts-tech-category').querySelector('select').value || 0);
-    params.append('only_current', document.getElementById('ts-only-technicians-switch').checked ? 'true' : 'false');
+    if (document.getElementById('ts-only-technicians-switch') !== null)
+        params.append('only_current', document.getElementById('ts-only-technicians-switch').checked ? 'true' : 'false');
 
     if (document.getElementById('ts-tech-period').value === 'custom') {
         const dateFrom = document.getElementById('ts-tech-date-from').value;
