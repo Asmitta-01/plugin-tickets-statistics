@@ -73,11 +73,11 @@ function updateTable(technicians) {
     technicians.forEach(tech => {
         const row = document.createElement('tr');
         row.innerHTML = `
-            <td><strong>${escapeHtml(tech.name)}</strong></td>
+            <td><a class="fw-bold" href="/front/user.form.php?id=${tech.user_id}" target="_blank">${escapeHtml(tech.name)}</a></td>
             <td class="text-end">${tech.total}</td>
-            <td class="text-end">${tech.new}</td>
-            <td class="text-end">${tech.in_progress}</td>
             <td class="text-end">${tech.resolved}</td>
+            <td class="text-end">${tech.in_progress}</td>
+            <td class="text-end">${tech.waiting}</td>
             <td class="text-end">${tech.avg_resolution_time}</td>
             <td class="text-end">${tech.resolution_rate}</td>
             <td class="text-end">${tech.avg_assign_time}</td>
@@ -125,6 +125,10 @@ function updateCharts(charts, technicians) {
                     position: 'top'
                 },
                 zoom: {
+                    pan: {
+                        enabled: true,
+                        mode: 'x',
+                    },
                     zoom: {
                         wheel: {
                             enabled: true
@@ -133,7 +137,10 @@ function updateCharts(charts, technicians) {
                             enabled: true
                         },
                         mode: 'x'
-                    }
+                    },
+                    limits: {
+                        x: { min: 0, max: 2000 },
+                    },
                 },
                 datalabels: {
                     display: false
@@ -142,7 +149,7 @@ function updateCharts(charts, technicians) {
             scales: {
                 x: {
                     stacked: true,
-                    beginAtZero: true
+                    beginAtZero: true,
                 },
                 y: {
                     stacked: true
@@ -173,6 +180,10 @@ function updateCharts(charts, technicians) {
                     position: 'top'
                 },
                 zoom: {
+                    pan: {
+                        enabled: true,
+                        mode: 'x',
+                    },
                     zoom: {
                         wheel: {
                             enabled: true
@@ -218,6 +229,10 @@ function updateCharts(charts, technicians) {
                     position: 'top'
                 },
                 zoom: {
+                    pan: {
+                        enabled: true,
+                        mode: 'x',
+                    },
                     zoom: {
                         wheel: {
                             enabled: true
