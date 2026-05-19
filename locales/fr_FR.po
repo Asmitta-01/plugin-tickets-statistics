@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: TicketsStatistics\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-04-10 11:11+0100\n"
-"PO-Revision-Date: 2026-05-18 16:47+0100\n"
+"PO-Revision-Date: 2026-05-19 10:20+0100\n"
 "Last-Translator: Codex\n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -23,6 +23,16 @@ msgstr "Statistiques des tickets"
 #: front/technicians.php:125
 msgid "Waiting"
 msgstr "En attente"
+
+#: front/technicians.php:71
+msgid "Display only the users that are currently technicians"
+msgstr ""
+"Afficher uniquement les utilisateurs qui sont actuellement des techniciens "
+"ou super-administrateurs"
+
+#: front/technicians.php:70
+msgid "Only current technicians"
+msgstr "Uniquement les techniciens actuels"
 
 #: front/dashboard.php:25
 msgid "View technicians statistics"

@@ -25,6 +25,8 @@ $categoryId = (int) ($_GET['category'] ?? 0);
 $dateFrom = $_GET['date_from'] ?? null;
 $dateTo   = $_GET['date_to']   ?? null;
 
+$onlyCurrentTechnicians = !isset($_GET['only_current']) || $_GET['only_current'] === 'true';
+
 \GlpiPlugin\Ticketsstatistics\PeriodFilter::apply($where, $table, $period, $dateFrom, $dateTo);
 \GlpiPlugin\Ticketsstatistics\CategoryFilter::apply($where, $table, $categoryId);
 
@@ -34,6 +36,31 @@ $inProgressStatuses = [\Ticket::ASSIGNED, \Ticket::INCOMING];
 
 $tuTable = 'glpi_tickets_users';
 $usersTable = 'glpi_users';
+
+if ($onlyCurrentTechnicians) {
+    // Get current technicians (with technician profile) to filter the data
+    $techProfileIds = [4, 6];
+    $technicianIds = [];
+
+    try {
+        foreach (
+            $DB->request([
+                'SELECT' => "$usersTable.id",
+                'FROM'   => $usersTable,
+                'WHERE'  => [
+                    "$usersTable.is_deleted" => 0,
+                    new \QueryExpression("$usersTable.id IN (SELECT users_id FROM glpi_profiles_users pu JOIN glpi_profiles p ON pu.profiles_id = p.id WHERE p.id IN (" . implode(',', $techProfileIds) . ") AND pu.users_id = $usersTable.id)"),
+                ],
+            ]) as $row
+        ) {
+            $technicianIds[] = (int) $row['id'];
+        }
+
+        $where["$usersTable.id"] = $technicianIds;
+    } catch (\Exception $e) {
+        \Toolbox::logInFile("php-errors", "Error fetching technician IDs: " . $e->getMessage());
+    }
+}
 
 // Fetch all technicians with their tickets
 $techniciansData = [];

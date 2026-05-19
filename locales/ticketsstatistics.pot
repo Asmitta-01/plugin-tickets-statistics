@@ -28,6 +28,14 @@ msgstr ""
 msgid "Waiting"
 msgstr ""
 
+#: front/technicians.php:71
+msgid "Display only the users that are currently technicians"
+msgstr ""
+
+#: front/technicians.php:70
+msgid "Only current technicians"
+msgstr ""
+
 #: front/dashboard.php:25
 msgid "View technicians statistics"
 msgstr ""

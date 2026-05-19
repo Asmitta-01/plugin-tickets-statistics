@@ -1,6 +1,6 @@
 
 document.addEventListener('DOMContentLoaded', function () {
-    const $form = document.getElementById('ts-tech-filter-form');
+    const form = document.getElementById('ts-tech-filter-form');
     const $period = document.getElementById('ts-tech-period');
     const $customFields = document.getElementById('ts-tech-custom-period-fields');
     const $applyBtn = document.getElementById('ts-tech-apply-btn-col');
@@ -19,8 +19,15 @@ document.addEventListener('DOMContentLoaded', function () {
     // Category change triggers reload
     document.getElementById('ts-tech-category').addEventListener('change', loadTechnicianData);
 
+    const viewOnlyTechniciansCheckbox = document.getElementById('ts-only-technicians-switch');
+    if (viewOnlyTechniciansCheckbox) {
+        viewOnlyTechniciansCheckbox.addEventListener('change', function () {
+            loadTechnicianData();
+        });
+    }
+
     // Form submission
-    $form.addEventListener('submit', function (e) {
+    form.addEventListener('submit', function (e) {
         e.preventDefault();
         loadTechnicianData();
     });
@@ -43,6 +50,7 @@ function loadTechnicianData() {
     const params = new URLSearchParams();
     params.append('period', document.getElementById('ts-tech-period').value);
     params.append('category', document.getElementById('ts-tech-category').querySelector('select').value || 0);
+    params.append('only_current', document.getElementById('ts-only-technicians-switch').checked ? 'true' : 'false');
 
     if (document.getElementById('ts-tech-period').value === 'custom') {
         const dateFrom = document.getElementById('ts-tech-date-from').value;

@@ -64,6 +64,14 @@ require_once(__DIR__ . '/../../../inc/includes.php');
                     ]); ?>
                 </div>
             </div>
+            <div class="col-auto d-flex align-items-center mb-md-2 gap-2 ms-3">
+                <div class="form-check form-switch mb-0">
+                    <input class="form-check-input" type="checkbox" role="switch" id="ts-only-technicians-switch" name="only_current" value="true" <?= !isset($_GET['only_current']) || $_GET['only_current'] === 'true' ? ' checked' : '' ?>>
+                    <label class="form-check-label fw-semibold" for="ts-only-technicians-switch" data-bs-toggle="tooltip" title="<?= __('Display only the users that are currently technicians', 'ticketsstatistics') ?>">
+                        <?= __('Only current technicians', 'ticketsstatistics') ?>
+                    </label>
+                </div>
+            </div>
             <div class="col-auto align-self-center" <?= $period === 'custom' ? '' : ' style="display:none;"' ?> id="ts-tech-apply-btn-col">
                 <button type="submit" class="btn btn-primary btn-sm"><?= __('Apply', 'ticketsstatistics') ?></button>
             </div>
