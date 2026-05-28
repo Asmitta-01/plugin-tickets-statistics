@@ -21,8 +21,7 @@ if (!\Session::haveRight('dashboard', READ)) {
     \Html::displayRightError();
 }
 
-$town = trim((string) ($_GET['town'] ?? ''));
-$town = mb_substr($town, 0, 255);
+$townId = (int) ($_GET['town'] ?? 0);
 $manufacturerId = (int) ($_GET['manufacturer'] ?? 0);
 
 $towns = [];
@@ -31,8 +30,7 @@ foreach (
         'SELECT'  => ['town'],
         'FROM'    => 'glpi_locations',
         'WHERE'   => [
-            'NOT' => ['glpi_locations.town' => null],
-            ['glpi_locations.town' => ['!=', '']],
+            ['glpi_locations.id' => $townId],
         ] + getEntitiesRestrictCriteria('glpi_locations'),
         'GROUPBY' => ['town'],
         'ORDER'   => ['town ASC'],
@@ -56,13 +54,13 @@ foreach (
 }
 
 $counts = [
-    'computers'       => AssetStatistics::countAssets('glpi_computers', $town, $manufacturerId),
-    'network_devices' => AssetStatistics::countAssets('glpi_networkequipments', $town, $manufacturerId),
-    'monitors'        => AssetStatistics::countAssets('glpi_monitors', $town, $manufacturerId),
+    'computers'       => AssetStatistics::countAssets('glpi_computers', $townId, $manufacturerId),
+    'network_devices' => AssetStatistics::countAssets('glpi_networkequipments', $townId, $manufacturerId),
+    'monitors'        => AssetStatistics::countAssets('glpi_monitors', $townId, $manufacturerId),
 ];
 $totalAssets = array_sum($counts);
 
-$showTownChart = $town === '';
+$showTownChart = $townId <= 0;
 $showManufacturerChart = $manufacturerId <= 0;
 
 $assetDatasets = [
@@ -84,7 +82,7 @@ $assetDatasets = [
 ];
 
 $townBreakdown = $showTownChart ? AssetStatistics::getCountsByTown($manufacturerId) : [];
-$manufacturerBreakdown = $showManufacturerChart ? AssetStatistics::getCountsByManufacturer($town) : [];
+$manufacturerBreakdown = $showManufacturerChart ? AssetStatistics::getCountsByManufacturer($townId) : [];
 
 $townChart = ['labels' => [], 'datasets' => []];
 if ($showTownChart) {
@@ -135,14 +133,17 @@ if ($showManufacturerChart) {
         <form class="row g-2 align-items-end" method="get">
             <div class="col-md-4">
                 <label for="ts-assets-town" class="form-label mb-1 fw-semibold"><?= __('Town', 'ticketsstatistics') ?></label>
-                <select class="form-select form-select-sm" id="ts-assets-town" name="town">
-                    <option value=""><?= __('All towns', 'ticketsstatistics') ?></option>
-                    <?php foreach ($towns as $townOption): ?>
-                        <option value="<?= htmlspecialchars($townOption, ENT_QUOTES, 'UTF-8') ?>" <?= $town === $townOption ? 'selected' : '' ?>>
-                            <?= htmlspecialchars($townOption, ENT_QUOTES, 'UTF-8') ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
+                <div id="ts-assets-town">
+                    <?php \Location::dropdown([
+                        'name' => 'town',
+                        'display_emptychoice' => true,
+                        'emptylabel' => __('All towns', 'ticketsstatistics'),
+                        'value' => $_GET['town'] ?? 0,
+                        'addicon' => false,
+                        'comments' => false,
+                        'class' => 'form-select form-select-sm',
+                    ]); ?>
+                </div>
             </div>
 
             <div class="col-md-4">

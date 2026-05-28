@@ -13,7 +13,7 @@ class AssetStatistics
     /**
      * Count assets for one asset table with optional town/manufacturer filters.
      */
-    public static function countAssets(string $assetTable, string $town, int $manufacturerId): int
+    public static function countAssets(string $assetTable, int $townId, int $manufacturerId): int
     {
         global $DB;
 
@@ -32,7 +32,7 @@ class AssetStatistics
             'WHERE' => $where,
         ];
 
-        if ($town !== '' && $DB->fieldExists($assetTable, 'locations_id')) {
+        if ($townId > 0 && $DB->fieldExists($assetTable, 'locations_id')) {
             $query['LEFT JOIN'] = [
                 'glpi_locations' => [
                     'ON' => [
@@ -41,7 +41,7 @@ class AssetStatistics
                     ],
                 ],
             ];
-            $query['WHERE']['glpi_locations.town'] = $town;
+            $query['WHERE']['glpi_locations.id'] = $townId;
         }
 
         $iter = $DB->request($query);
@@ -50,24 +50,24 @@ class AssetStatistics
         return (int) ($row['cpt'] ?? 0);
     }
 
-    public static function getCountsByTown(int $manufacturerId): array
+    public static function getCountsByTown(int $townId): array
     {
-        return self::buildBreakdown('town', '', $manufacturerId);
+        return self::buildBreakdown('town', $townId, 0);
     }
 
-    public static function getCountsByManufacturer(string $town): array
+    public static function getCountsByManufacturer(int $manufacturerId): array
     {
-        return self::buildBreakdown('manufacturer', $town, 0);
+        return self::buildBreakdown('manufacturer', 0, $manufacturerId);
     }
 
-    private static function buildBreakdown(string $dimension, string $town, int $manufacturerId): array
+    private static function buildBreakdown(string $dimension, int $townId, int $manufacturerId): array
     {
         $breakdown = [];
 
         foreach (self::ASSET_TABLES as $assetType => $assetTable) {
             $rows = $dimension === 'town'
                 ? self::getTownBreakdownForAsset($assetTable, $manufacturerId)
-                : self::getManufacturerBreakdownForAsset($assetTable, $town);
+                : self::getManufacturerBreakdownForAsset($assetTable, $townId);
 
             foreach ($rows as $label => $count) {
                 if (!isset($breakdown[$label])) {
@@ -147,7 +147,7 @@ class AssetStatistics
         return $rows;
     }
 
-    private static function getManufacturerBreakdownForAsset(string $assetTable, string $town): array
+    private static function getManufacturerBreakdownForAsset(string $assetTable, int $townId): array
     {
         global $DB;
 
@@ -169,7 +169,7 @@ class AssetStatistics
             ],
         ];
 
-        if ($town !== '') {
+        if ($townId > 0) {
             if (!$DB->fieldExists($assetTable, 'locations_id')) {
                 return [];
             }
@@ -180,7 +180,7 @@ class AssetStatistics
                     $assetTable      => 'locations_id',
                 ],
             ];
-            $where['glpi_locations.town'] = $town;
+            $where['glpi_locations.id'] = $townId;
             $where = array_merge($where, getEntitiesRestrictCriteria('glpi_locations'));
         }
 
