@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: TicketsStatistics\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-04-10 11:11+0100\n"
-"PO-Revision-Date: 2026-05-19 10:19+0100\n"
+"PO-Revision-Date: 2026-05-28 14:25+0100\n"
 "Last-Translator: Codex\n"
 "Language-Team: English\n"
 "Language: en_US\n"
@@ -747,3 +747,51 @@ msgstr "Search"
 #: front/technicians.php:268
 msgid "Show _MENU_ entries"
 msgstr "Show _MENU_ entries"
+
+#: front/assets.php:94 front/assets.php:101
+msgid "Assets Statistics"
+msgstr "Assets Statistics"
+
+#: front/assets.php:106
+msgid "Back to tickets dashboard"
+msgstr "Back to tickets dashboard"
+
+#: front/assets.php:114
+msgid "All towns"
+msgstr "All towns"
+
+#: front/assets.php:124
+msgid "Manufacturer"
+msgstr "Manufacturer"
+
+#: front/assets.php:126
+msgid "All manufacturers"
+msgstr "All manufacturers"
+
+#: front/assets.php:137
+msgid "Filter"
+msgstr "Filter"
+
+#: front/assets.php:149 front/assets.php:197
+msgid "Total assets"
+msgstr "Total assets"
+
+#: front/assets.php:169 front/assets.php:206
+msgid "Network devices"
+msgstr "Network devices"
+
+#: front/assets.php:198
+msgid "Share"
+msgstr "Share"
+
+#: front/assets.php
+msgid "Assets by Town"
+msgstr "Assets by Town"
+
+#: front/assets.php
+msgid "Assets by Manufacturer"
+msgstr "Assets by Manufacturer"
+
+#: front/assets.php
+msgid "No data available"
+msgstr "No data available"

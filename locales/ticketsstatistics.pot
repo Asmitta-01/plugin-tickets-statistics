@@ -750,3 +750,51 @@ msgstr ""
 #: front/technicians.php:268
 msgid "Show _MENU_ entries"
 msgstr ""
+
+#: front/assets.php:94 front/assets.php:101
+msgid "Assets Statistics"
+msgstr ""
+
+#: front/assets.php:106
+msgid "Back to tickets dashboard"
+msgstr ""
+
+#: front/assets.php:114
+msgid "All towns"
+msgstr ""
+
+#: front/assets.php:124
+msgid "Manufacturer"
+msgstr ""
+
+#: front/assets.php:126
+msgid "All manufacturers"
+msgstr ""
+
+#: front/assets.php:137
+msgid "Filter"
+msgstr ""
+
+#: front/assets.php:149 front/assets.php:197
+msgid "Total assets"
+msgstr ""
+
+#: front/assets.php:169 front/assets.php:206
+msgid "Network devices"
+msgstr ""
+
+#: front/assets.php:198
+msgid "Share"
+msgstr ""
+
+#: front/assets.php
+msgid "Assets by Town"
+msgstr ""
+
+#: front/assets.php
+msgid "Assets by Manufacturer"
+msgstr ""
+
+#: front/assets.php
+msgid "No data available"
+msgstr ""
