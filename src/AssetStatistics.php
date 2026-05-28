@@ -225,4 +225,160 @@ class AssetStatistics
             'total'           => 0,
         ];
     }
+
+    /**
+     * Get top N softwares installed on computers, with optional town/manufacturer filters.
+     *
+     * @return array<int, array{id: int, name: string, count: int}>
+     */
+    public static function getTopSoftwaresByComputers(int $townId, int $manufacturerId, int $limit = 20): array
+    {
+        global $DB;
+
+        $where = [
+            'glpi_computers.is_deleted'               => 0,
+            'glpi_computers.is_template'              => 0,
+            'glpi_items_softwareversions.is_deleted'  => 0,
+            'glpi_items_softwareversions.itemtype'    => 'Computer',
+            'glpi_softwares.is_deleted'               => 0,
+            'glpi_softwares.is_template'              => 0,
+        ] + getEntitiesRestrictCriteria('glpi_computers');
+
+        if ($manufacturerId > 0) {
+            $where['glpi_computers.manufacturers_id'] = $manufacturerId;
+        }
+
+        $joins = [
+            'glpi_items_softwareversions' => [
+                'ON' => [
+                    'glpi_items_softwareversions' => 'items_id',
+                    'glpi_computers'              => 'id',
+                ],
+            ],
+            'glpi_softwareversions' => [
+                'ON' => [
+                    'glpi_softwareversions'       => 'id',
+                    'glpi_items_softwareversions' => 'softwareversions_id',
+                ],
+            ],
+            'glpi_softwares' => [
+                'ON' => [
+                    'glpi_softwares'        => 'id',
+                    'glpi_softwareversions' => 'softwares_id',
+                ],
+            ],
+        ];
+
+        if ($townId > 0) {
+            $joins['glpi_locations'] = [
+                'ON' => [
+                    'glpi_locations' => 'id',
+                    'glpi_computers' => 'locations_id',
+                ],
+            ];
+            $where['glpi_locations.id'] = $townId;
+        }
+
+        $results = [];
+        foreach (
+            $DB->request([
+                'SELECT'     => [
+                    'glpi_softwares.id',
+                    'glpi_softwares.name',
+                    'COUNT DISTINCT' => 'glpi_computers.id AS cpt',
+                ],
+                'FROM'       => 'glpi_computers',
+                'INNER JOIN' => $joins,
+                'WHERE'      => $where,
+                'GROUPBY'    => ['glpi_softwares.id', 'glpi_softwares.name'],
+                'ORDER'      => ['cpt DESC'],
+                'LIMIT'      => $limit,
+            ]) as $row
+        ) {
+            $results[] = [
+                'id'    => (int) $row['id'],
+                'name'  => (string) $row['name'],
+                'count' => (int) $row['cpt'],
+            ];
+        }
+
+        return $results;
+    }
+
+    /**
+     * Get how many computers have / don't have a specific software installed.
+     *
+     * @return array{with: int, without: int, total: int, name: string}
+     */
+    public static function getSoftwareCoverage(int $softwareId, int $townId, int $manufacturerId): array
+    {
+        global $DB;
+
+        $total = self::countAssets('glpi_computers', $townId, $manufacturerId);
+
+        if ($softwareId <= 0 || $total <= 0) {
+            return ['with' => 0, 'without' => $total, 'total' => $total, 'name' => ''];
+        }
+
+        $swRow = $DB->request([
+            'SELECT' => ['name'],
+            'FROM'   => 'glpi_softwares',
+            'WHERE'  => ['id' => $softwareId, 'is_deleted' => 0],
+        ])->current();
+        $softwareName = $swRow ? (string) $swRow['name'] : '';
+
+        $where = [
+            'glpi_computers.is_deleted'              => 0,
+            'glpi_computers.is_template'             => 0,
+            'glpi_items_softwareversions.is_deleted' => 0,
+            'glpi_items_softwareversions.itemtype'   => 'Computer',
+            'glpi_softwareversions.softwares_id'     => $softwareId,
+        ] + getEntitiesRestrictCriteria('glpi_computers');
+
+        if ($manufacturerId > 0) {
+            $where['glpi_computers.manufacturers_id'] = $manufacturerId;
+        }
+
+        $joins = [
+            'glpi_items_softwareversions' => [
+                'ON' => [
+                    'glpi_items_softwareversions' => 'items_id',
+                    'glpi_computers'              => 'id',
+                ],
+            ],
+            'glpi_softwareversions' => [
+                'ON' => [
+                    'glpi_softwareversions'       => 'id',
+                    'glpi_items_softwareversions' => 'softwareversions_id',
+                ],
+            ],
+        ];
+
+        if ($townId > 0) {
+            $joins['glpi_locations'] = [
+                'ON' => [
+                    'glpi_locations' => 'id',
+                    'glpi_computers' => 'locations_id',
+                ],
+            ];
+            $where['glpi_locations.id'] = $townId;
+        }
+
+        $iter = $DB->request([
+            'SELECT'     => ['COUNT DISTINCT' => 'glpi_computers.id AS cpt'],
+            'FROM'       => 'glpi_computers',
+            'INNER JOIN' => $joins,
+            'WHERE'      => $where,
+        ]);
+
+        $with    = (int) ($iter->current()['cpt'] ?? 0);
+        $without = max(0, $total - $with);
+
+        return [
+            'with'    => $with,
+            'without' => $without,
+            'total'   => $total,
+            'name'    => $softwareName,
+        ];
+    }
 }

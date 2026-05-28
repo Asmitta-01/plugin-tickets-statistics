@@ -795,3 +795,27 @@ msgstr "Assets by Manufacturer"
 #: front/assets.php
 msgid "No data available"
 msgstr "No data available"
+
+#: front/assets.php
+msgid "Top installed softwares"
+msgstr "Top 20 most installed softwares (computers)"
+
+#: front/assets.php
+msgid "Software coverage"
+msgstr "Software coverage"
+
+#: front/assets.php
+msgid "Select software"
+msgstr "Select a software"
+
+#: front/assets.php
+msgid "No software selected"
+msgstr "Select a software to see its coverage"
+
+#: front/assets.php
+msgid "Computers with software"
+msgstr "With software"
+
+#: front/assets.php
+msgid "Computers without software"
+msgstr "Without software"

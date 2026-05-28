@@ -801,3 +801,27 @@ msgstr "Actifs par fabricant"
 #: front/assets.php
 msgid "No data available"
 msgstr "Aucune donnée disponible"
+
+#: front/assets.php
+msgid "Top installed softwares"
+msgstr "Top 20 logiciels les plus installés (ordinateurs)"
+
+#: front/assets.php
+msgid "Software coverage"
+msgstr "Couverture logicielle"
+
+#: front/assets.php
+msgid "Select software"
+msgstr "Sélectionner un logiciel"
+
+#: front/assets.php
+msgid "No software selected"
+msgstr "Sélectionnez un logiciel pour voir sa couverture"
+
+#: front/assets.php
+msgid "Computers with software"
+msgstr "Avec le logiciel"
+
+#: front/assets.php
+msgid "Computers without software"
+msgstr "Sans le logiciel"
