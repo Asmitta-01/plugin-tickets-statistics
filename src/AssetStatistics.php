@@ -50,14 +50,14 @@ class AssetStatistics
         return (int) ($row['cpt'] ?? 0);
     }
 
-    public static function getCountsByTown(int $townId): array
+    public static function getCountsByTown(int $manufacturerId): array
     {
-        return self::buildBreakdown('town', $townId, 0);
+        return self::buildBreakdown('town', 0, $manufacturerId);
     }
 
-    public static function getCountsByManufacturer(int $manufacturerId): array
+    public static function getCountsByManufacturer(int $townId): array
     {
-        return self::buildBreakdown('manufacturer', 0, $manufacturerId);
+        return self::buildBreakdown('manufacturer', $townId, 0);
     }
 
     private static function buildBreakdown(string $dimension, int $townId, int $manufacturerId): array

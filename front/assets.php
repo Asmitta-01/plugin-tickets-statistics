@@ -24,21 +24,6 @@ if (!\Session::haveRight('dashboard', READ)) {
 $townId = (int) ($_GET['town'] ?? 0);
 $manufacturerId = (int) ($_GET['manufacturer'] ?? 0);
 
-$towns = [];
-foreach (
-    $DB->request([
-        'SELECT'  => ['town'],
-        'FROM'    => 'glpi_locations',
-        'WHERE'   => [
-            ['glpi_locations.id' => $townId],
-        ] + getEntitiesRestrictCriteria('glpi_locations'),
-        'GROUPBY' => ['town'],
-        'ORDER'   => ['town ASC'],
-    ]) as $row
-) {
-    $towns[] = (string) $row['town'];
-}
-
 $manufacturers = [];
 foreach (
     $DB->request([
