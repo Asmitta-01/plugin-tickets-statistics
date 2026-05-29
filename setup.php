@@ -25,14 +25,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  * -------------------------------------------------------------------------
- * @copyright Copyright (C) 2026 by the TicketsStatistics plugin team.
+ * @copyright Copyright (C) 2026 by Brayan Tiwa.
  * @license   MIT https://opensource.org/licenses/mit-license.php
  * @link      https://github.com/pluginsGLPI/ticketsstatistics
  * -------------------------------------------------------------------------
  */
 
 /** @phpstan-ignore theCodingMachineSafe.function (safe to assume this isn't already defined) */
-define('PLUGIN_TICKETSSTATISTICS_VERSION', '0.4.0');
+define('PLUGIN_TICKETSSTATISTICS_VERSION', '0.4.1');
 
 // Minimal GLPI version, inclusive
 /** @phpstan-ignore theCodingMachineSafe.function (safe to assume this isn't already defined) */
