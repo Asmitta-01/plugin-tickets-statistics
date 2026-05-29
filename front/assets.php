@@ -280,13 +280,13 @@ if ($showManufacturerChart) {
                             <div class="col-6">
                                 <div class="p-3 rounded" style="background:#dcfce7">
                                     <div class="fs-4 fw-bold text-success"><?= $softwareCoverage['with'] ?></div>
-                                    <div class="small text-muted"><?= __('Computers with software', 'ticketsstatistics') ?></div>
+                                    <div class="text-muted"><?= __('Computers with software', 'ticketsstatistics') ?></div>
                                 </div>
                             </div>
                             <div class="col-6">
                                 <div class="p-3 rounded" style="background:#fee2e2">
                                     <div class="fs-4 fw-bold text-danger"><?= $softwareCoverage['without'] ?></div>
-                                    <div class="small text-muted"><?= __('Computers without software', 'ticketsstatistics') ?></div>
+                                    <div class="text-muted"><?= __('Computers without software', 'ticketsstatistics') ?></div>
                                 </div>
                             </div>
                         </div>
