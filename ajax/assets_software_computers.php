@@ -10,6 +10,8 @@
 
 require_once(__DIR__ . '/../../../inc/includes.php');
 
+use GlpiPlugin\Ticketsstatistics\AssetStatistics;
+
 \Session::checkCentralAccess();
 
 header('Content-Type: application/json');
@@ -34,6 +36,7 @@ $softwareIds = array_values(array_unique(array_filter(array_map(
 ), static fn(int $id): bool => $id > 0)));
 $townId = (int) ($_GET['town'] ?? 0);
 $manufacturerId = (int) ($_GET['manufacturer'] ?? 0);
+$matchAll = !isset($_GET['match_all']) || (int) $_GET['match_all'] !== 0;
 $coverage = (string) ($_GET['coverage'] ?? '');
 $coverage = in_array($coverage, ['with', 'without'], true) ? $coverage : '';
 
@@ -95,16 +98,12 @@ if ($manufacturerId > 0) {
     $where["$computerTable.manufacturers_id"] = $manufacturerId;
 }
 
-$softwareExistsSql = sprintf(
-    "EXISTS (SELECT 1 FROM glpi_items_softwareversions isv INNER JOIN glpi_softwareversions sv ON sv.id = isv.softwareversions_id WHERE isv.items_id = %s.id AND isv.itemtype = 'Computer' AND isv.is_deleted = 0 AND sv.softwares_id IN (%s))",
-    $computerTable,
-    implode(',', $softwareIds)
-);
+$softwareMatchSql = AssetStatistics::getComputerSoftwareMatchSql($computerTable, $softwareIds, $matchAll);
 
 if ($coverage === 'with') {
-    $where[] = new \QueryExpression($softwareExistsSql);
+    $where[] = new \QueryExpression($softwareMatchSql);
 } else {
-    $where[] = new \QueryExpression('NOT (' . $softwareExistsSql . ')');
+    $where[] = new \QueryExpression('NOT (' . $softwareMatchSql . ')');
 }
 
 $title = __('Computers', 'ticketsstatistics') . ' - ' . ($coverage === 'with'

@@ -812,6 +812,14 @@ msgid "Select software"
 msgstr ""
 
 #: front/assets.php
+msgid "Match all selected software"
+msgstr ""
+
+#: front/assets.php
+msgid "If unchecked, the search matches computers having at least one selected software."
+msgstr ""
+
+#: front/assets.php
 msgid "No software selected"
 msgstr ""
 

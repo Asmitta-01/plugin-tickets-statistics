@@ -231,9 +231,16 @@ function initSoftwareCoverageAjax(chartDataNode) {
         fetchSoftwareCoverage(form, chartDataNode);
     });
 
-    const softwareInput = form.querySelector('[name="software"]');
+    const softwareInput = form.querySelector('select[name="software[]"], select[name="software"]');
     if (softwareInput) {
         softwareInput.addEventListener('change', function () {
+            fetchSoftwareCoverage(form, chartDataNode);
+        });
+    }
+
+    const matchAllInput = form.querySelector('[name="match_all"][type="checkbox"]');
+    if (matchAllInput) {
+        matchAllInput.addEventListener('change', function () {
             fetchSoftwareCoverage(form, chartDataNode);
         });
     }
@@ -265,6 +272,7 @@ function fetchSoftwareCoverage(form, chartDataNode) {
     }
 
     const params = new URLSearchParams(new FormData(form));
+    params.set('match_all', getMatchAllSelection(form) ? '1' : '0');
     fetch(ajaxUrl + '?' + params.toString(), {
         method: 'GET',
         headers: {
@@ -369,6 +377,7 @@ function openSoftwareCoverageComputersModal(coverage) {
     }
 
     const params = new URLSearchParams(new FormData(form));
+    params.set('match_all', getMatchAllSelection(form) ? '1' : '0');
     params.set('coverage', coverage);
 
     const titleNode = document.getElementById('ts-assets-computers-modal-title');
@@ -576,8 +585,10 @@ function formatComputersCount(count) {
 
 function getSelectedSoftwareIds(form) {
     const softwareIds = [];
-    const select = form.querySelector('select');
-    if (!select) return;
+    const select = form.querySelector('select[name="software[]"], select[name="software"]');
+    if (!select) {
+        return softwareIds;
+    }
 
     const options = select && select.options;
     var opt;
@@ -592,6 +603,11 @@ function getSelectedSoftwareIds(form) {
         }
     }
     return softwareIds;
+}
+
+function getMatchAllSelection(form) {
+    const checkbox = form.querySelector('[name="match_all"][type="checkbox"]');
+    return !checkbox || checkbox.checked;
 }
 
 function renderSoftwareItems(softwareItems) {

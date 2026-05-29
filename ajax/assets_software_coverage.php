@@ -25,6 +25,7 @@ header('Content-Type: application/json');
 
 $townId         = (int) ($_GET['town'] ?? 0);
 $manufacturerId = (int) ($_GET['manufacturer'] ?? 0);
+$matchAll       = !isset($_GET['match_all']) || (int) $_GET['match_all'] !== 0;
 $softwareIds    = array_values(array_unique(array_filter(array_map(
     static fn($id): int => (int) $id,
     (array) ($_GET['software'] ?? [])
@@ -44,7 +45,7 @@ if ($softwareIds === []) {
     exit;
 }
 
-$coverage = AssetStatistics::getSoftwareCoverageForSelection($softwareIds, $townId, $manufacturerId);
+$coverage = AssetStatistics::getSoftwareCoverageForSelection($softwareIds, $townId, $manufacturerId, $matchAll);
 $state = ((int) ($coverage['total'] ?? 0) > 0) ? 'has_data' : 'no_data';
 
 echo json_encode([

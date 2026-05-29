@@ -73,9 +73,10 @@ $selectedSoftwareIds = array_values(array_unique(array_filter(array_map(
     static fn($id): int => (int) $id,
     (array) ($_GET['software'] ?? [])
 ), static fn(int $id): bool => $id > 0)));
+$matchAllSelected   = !isset($_GET['match_all']) || (int) $_GET['match_all'] !== 0;
 $topSoftwares       = AssetStatistics::getTopSoftwaresByComputers($townId, $manufacturerId);
 $softwareCoverage   = $selectedSoftwareIds !== []
-    ? AssetStatistics::getSoftwareCoverageForSelection($selectedSoftwareIds, $townId, $manufacturerId)
+    ? AssetStatistics::getSoftwareCoverageForSelection($selectedSoftwareIds, $townId, $manufacturerId, $matchAllSelected)
     : ['with' => 0, 'without' => 0, 'total' => 0, 'name' => '', 'names' => [], 'software_ids' => []];
 $coverageHasData    = $selectedSoftwareIds !== [] && (int) $softwareCoverage['total'] > 0;
 $coverageMessage    = $selectedSoftwareIds !== []
@@ -267,11 +268,12 @@ if ($showManufacturerChart) {
                     <form id="ts-software-coverage-form" method="get" class="mb-3" data-ajax-url="<?= htmlspecialchars($coverageAjaxUrl, ENT_QUOTES, 'UTF-8') ?>">
                         <input type="hidden" name="town" value="<?= $townId ?>">
                         <input type="hidden" name="manufacturer" value="<?= $manufacturerId ?>">
+                        <input type="hidden" name="match_all" value="0">
                         <label class="form-label fw-semibold"><?= __('Select software', 'ticketsstatistics') ?></label>
                         <div class="d-flex gap-2 align-items-center">
                             <?php
                             \Software::dropdown([
-                                'name'                => 'software',
+                                'name'                => 'software[]',
                                 'value'               => $selectedSoftwareIds,
                                 'display_emptychoice' => true,
                                 'emptylabel'          => __('Select software', 'ticketsstatistics'),
@@ -283,6 +285,11 @@ if ($showManufacturerChart) {
                             ]);
                             ?>
                             <button type="submit" class="btn btn-primary btn-sm"><?= __('Filter', 'ticketsstatistics') ?></button>
+                        </div>
+                        <div class="form-check mt-2">
+                            <input class="form-check-input" type="checkbox" id="ts-assets-match-all" name="match_all" value="1" <?= $matchAllSelected ? 'checked' : '' ?>>
+                            <label class="form-check-label" for="ts-assets-match-all"><?= __('Match all selected software', 'ticketsstatistics') ?></label>
+                            <div class="form-text"><?= __('If unchecked, the search matches computers having at least one selected software.', 'ticketsstatistics') ?></div>
                         </div>
                     </form>
 
