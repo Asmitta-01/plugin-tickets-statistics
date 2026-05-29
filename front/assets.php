@@ -79,6 +79,7 @@ $coverageMessage    = $selectedSoftwareId > 0
     ? __('No data available', 'ticketsstatistics')
     : __('No software selected', 'ticketsstatistics');
 $coverageAjaxUrl    = $CFG_GLPI['root_doc'] . '/plugins/ticketsstatistics/ajax/assets_software_coverage.php';
+$coverageComputersAjaxUrl = $CFG_GLPI['root_doc'] . '/plugins/ticketsstatistics/ajax/assets_software_computers.php';
 
 $townChart = ['labels' => [], 'datasets' => []];
 if ($showTownChart) {
@@ -285,12 +286,14 @@ if ($showManufacturerChart) {
                             <div class="p-3 rounded" style="background:#dcfce7">
                                 <div id="ts-assets-software-with" class="fs-4 fw-bold text-success"><?= (int) $softwareCoverage['with'] ?></div>
                                 <div class="text-muted"><?= __('Computers with software', 'ticketsstatistics') ?></div>
+                                <button class="btn btn-sm btn-outline-secondary w-100 mt-3" onclick="openSoftwareCoverageComputersModal('with')"><?= __('View details', 'ticketsstatistics') ?></button>
                             </div>
                         </div>
                         <div class="col-6">
                             <div class="p-3 rounded" style="background:#fee2e2">
                                 <div id="ts-assets-software-without" class="fs-4 fw-bold text-danger"><?= (int) $softwareCoverage['without'] ?></div>
                                 <div class="text-muted"><?= __('Computers without software', 'ticketsstatistics') ?></div>
+                                <button class="btn btn-sm btn-outline-secondary w-100 mt-3" onclick="openSoftwareCoverageComputersModal('without')"><?= __('View details', 'ticketsstatistics') ?></button>
                             </div>
                         </div>
                     </div>
@@ -317,6 +320,28 @@ if ($showManufacturerChart) {
     </div>
 </div>
 
+<div class="modal fade" id="ts-assets-computers-modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="py-md-3">
+                    <h5 class="modal-title mb-0" id="ts-assets-computers-modal-title"><?= __('Computers', 'ticketsstatistics') ?></h5>
+                    <div class="text-muted small" id="ts-assets-computers-modal-count"></div>
+                </div>
+                <button class="btn btn-secondary btn-sm ms-auto" disabled id="ts-assets-computers-download-btn" data-bs-toggle="tooltip" title="<?= __('Download as CSV', 'ticketsstatistics') ?>">
+                    <i class="ti ti-file-spreadsheet me-1"></i>
+                    <?= __('Download', 'ticketsstatistics') ?>
+                </button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="<?= __('Close') ?>"></button>
+            </div>
+            <div class="modal-body">
+                <div id="ts-assets-computers-modal-alert" class="alert alert-info d-none mb-3"></div>
+                <div id="ts-assets-computers-modal-body"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <?php
 if ($showTownChart || $showManufacturerChart):
 ?>
@@ -330,6 +355,11 @@ if ($showTownChart || $showManufacturerChart):
         data-no-software-selected-label="<?= __('No software selected', 'ticketsstatistics') ?>"
         data-no-data-label="<?= __('No data available', 'ticketsstatistics') ?>"
         data-processing-label="<?= __('Processing...', 'ticketsstatistics') ?>"
+        data-software-computers-url="<?= htmlspecialchars($coverageComputersAjaxUrl, ENT_QUOTES, 'UTF-8') ?>"
+        data-loading-computers-label="<?= __('Loading computers...', 'ticketsstatistics') ?>"
+        data-no-computers-label="<?= __('No computers found for this selection.', 'ticketsstatistics') ?>"
+        data-unable-load-computers-label="<?= __('Unable to load computers.', 'ticketsstatistics') ?>"
+        data-showing-first-computers-label="<?= __('Showing the first %d computers only.', 'ticketsstatistics') ?>"
         hidden></div>
 <?php
 else:
@@ -342,6 +372,11 @@ else:
         data-no-software-selected-label="<?= __('No software selected', 'ticketsstatistics') ?>"
         data-no-data-label="<?= __('No data available', 'ticketsstatistics') ?>"
         data-processing-label="<?= __('Processing...', 'ticketsstatistics') ?>"
+        data-software-computers-url="<?= htmlspecialchars($coverageComputersAjaxUrl, ENT_QUOTES, 'UTF-8') ?>"
+        data-loading-computers-label="<?= __('Loading computers...', 'ticketsstatistics') ?>"
+        data-no-computers-label="<?= __('No computers found for this selection.', 'ticketsstatistics') ?>"
+        data-unable-load-computers-label="<?= __('Unable to load computers.', 'ticketsstatistics') ?>"
+        data-showing-first-computers-label="<?= __('Showing the first %d computers only.', 'ticketsstatistics') ?>"
         hidden></div>
 <?php
 endif;

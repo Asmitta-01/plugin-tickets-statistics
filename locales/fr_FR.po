@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: TicketsStatistics\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-04-10 11:11+0100\n"
-"PO-Revision-Date: 2026-05-28 16:16+0100\n"
+"PO-Revision-Date: 2026-05-29 08:42+0100\n"
 "Last-Translator: Codex\n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -825,3 +825,41 @@ msgstr "Avec le logiciel"
 #: front/assets.php
 msgid "Computers without software"
 msgstr "Sans le logiciel"
+
+#: front/assets.php
+msgid "Loading computers..."
+msgstr "Chargement des ordinateurs..."
+
+#: front/assets.php
+msgid "No computers found for this selection."
+msgstr "Aucun ordinateur trouve pour cette selection."
+
+#: front/assets.php
+msgid "Unable to load computers."
+msgstr "Impossible de charger les ordinateurs."
+
+#: front/assets.php
+#, php-format
+msgid "Showing the first %d computers only."
+msgstr "Affichage des %d premiers ordinateurs uniquement."
+
+#: public/js/assets.js
+msgid "Serial"
+msgstr "Numéro de série"
+
+#: public/js/assets.js
+msgid "Inventory number"
+msgstr "Numéro d'inventaire"
+
+#: public/js/assets.js
+msgid "User"
+msgstr "Utilisateur"
+
+#: public/js/assets.js
+msgid "Software"
+msgstr "Logiciel"
+
+#: ajax/assets_software_computers.php
+#, php-format
+msgid "Computer #%d"
+msgstr "Ordinateur n°%d"

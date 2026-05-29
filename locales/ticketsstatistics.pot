@@ -822,3 +822,41 @@ msgstr ""
 #: front/assets.php
 msgid "Computers without software"
 msgstr ""
+
+#: front/assets.php
+msgid "Loading computers..."
+msgstr ""
+
+#: front/assets.php
+msgid "No computers found for this selection."
+msgstr ""
+
+#: front/assets.php
+msgid "Unable to load computers."
+msgstr ""
+
+#: front/assets.php
+#, php-format
+msgid "Showing the first %d computers only."
+msgstr ""
+
+#: public/js/assets.js
+msgid "Serial"
+msgstr ""
+
+#: public/js/assets.js
+msgid "Inventory number"
+msgstr ""
+
+#: public/js/assets.js
+msgid "User"
+msgstr ""
+
+#: public/js/assets.js
+msgid "Software"
+msgstr ""
+
+#: ajax/assets_software_computers.php
+#, php-format
+msgid "Computer #%d"
+msgstr ""

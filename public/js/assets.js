@@ -1,9 +1,20 @@
 let tsSoftwareCoverageChart = null;
+let tsAssetsChartDataNode = null;
+let tsAssetsComputersModal = null;
+let tsAssetsModalComputers = [];
 
 document.addEventListener('DOMContentLoaded', function () {
     const chartDataNode = document.getElementById('ts-assets-chart-data');
     if (!chartDataNode || typeof Chart === 'undefined') {
         return;
+    }
+    tsAssetsChartDataNode = chartDataNode;
+
+    if (typeof bootstrap !== 'undefined') {
+        const modalNode = document.getElementById('ts-assets-computers-modal');
+        if (modalNode) {
+            tsAssetsComputersModal = new bootstrap.Modal(modalNode);
+        }
     }
 
     if (typeof ChartDataLabels !== 'undefined' && !window.tsAssetsChartLabelsRegistered) {
@@ -183,6 +194,15 @@ function renderCoverageDonut(canvasId, rawValue) {
         options: {
             responsive: true,
             maintainAspectRatio: true,
+            onClick: function (event, elements, chart) {
+                if (!elements || elements.length === 0) {
+                    return;
+                }
+
+                const index = elements[0].index;
+                const coverage = index === 0 ? 'with' : 'without';
+                openSoftwareCoverageComputersModal(coverage);
+            },
             plugins: {
                 legend: { position: 'bottom' },
                 datalabels: {
@@ -334,4 +354,244 @@ function applyCoverageState(payload, chartDataNode) {
         tsSoftwareCoverageChart.destroy();
         tsSoftwareCoverageChart = null;
     }
+}
+
+function openSoftwareCoverageComputersModal(coverage) {
+    if (!tsAssetsComputersModal || !tsAssetsChartDataNode) {
+        return;
+    }
+
+    const form = document.getElementById('ts-software-coverage-form');
+    const softwareInput = form ? form.querySelector('[name="software"]') : null;
+    const softwareId = parseInt((softwareInput && softwareInput.value) || '0', 10) || 0;
+    const ajaxUrl = tsAssetsChartDataNode.dataset.softwareComputersUrl || '';
+
+    if (!ajaxUrl || softwareId <= 0) {
+        return;
+    }
+
+    const params = new URLSearchParams(new FormData(form));
+    params.set('coverage', coverage);
+
+    const titleNode = document.getElementById('ts-assets-computers-modal-title');
+    const countNode = document.getElementById('ts-assets-computers-modal-count');
+    const alertNode = document.getElementById('ts-assets-computers-modal-alert');
+    const bodyNode = document.getElementById('ts-assets-computers-modal-body');
+    const downloadBtn = document.getElementById('ts-assets-computers-download-btn');
+
+    if (titleNode) {
+        titleNode.textContent = tsAssetsChartDataNode.dataset.loadingComputersLabel || 'Loading computers...';
+    }
+    if (countNode) {
+        countNode.textContent = '';
+    }
+    if (alertNode) {
+        alertNode.textContent = '';
+        alertNode.classList.add('d-none');
+    }
+    if (downloadBtn) {
+        downloadBtn.disabled = true;
+    }
+    if (bodyNode) {
+        bodyNode.innerHTML = renderComputersLoaderTable();
+    }
+
+    tsAssetsComputersModal.show();
+
+    fetch(ajaxUrl + '?' + params.toString(), {
+        method: 'GET',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json',
+        },
+    })
+        .then(function (response) {
+            if (!response.ok) {
+                throw new Error('HTTP ' + response.status);
+            }
+            return response.json();
+        })
+        .then(function (payload) {
+            tsAssetsModalComputers = payload.computers || [];
+
+            if (titleNode) {
+                titleNode.textContent = payload.title || (tsAssetsChartDataNode.dataset.softwareCoverageTitle || 'Software coverage');
+            }
+            if (countNode) {
+                countNode.textContent = formatComputersCount(payload.count || 0);
+            }
+            if (downloadBtn) {
+                downloadBtn.disabled = !tsAssetsModalComputers.length;
+                downloadBtn.onclick = downloadCoverageComputersCsv;
+            }
+
+            if (alertNode) {
+                if (payload.truncated) {
+                    const label = tsAssetsChartDataNode.dataset.showingFirstComputersLabel || 'Showing the first %d computers only.';
+                    alertNode.textContent = label.replace('%d', String(payload.limit || tsAssetsModalComputers.length));
+                    alertNode.classList.remove('d-none');
+                } else {
+                    alertNode.classList.add('d-none');
+                }
+            }
+
+            if (bodyNode) {
+                bodyNode.innerHTML = tsAssetsModalComputers.length
+                    ? renderComputersTable(tsAssetsModalComputers)
+                    : '<div class="alert alert-secondary mb-0">'
+                    + (tsAssetsChartDataNode.dataset.noComputersLabel || 'No computers found for this selection.')
+                    + '</div>';
+            }
+        })
+        .catch(function () {
+            if (titleNode) {
+                titleNode.textContent = tsAssetsChartDataNode.dataset.softwareCoverageTitle || 'Software coverage';
+            }
+            if (countNode) {
+                countNode.textContent = '';
+            }
+            if (alertNode) {
+                alertNode.classList.add('d-none');
+            }
+            if (bodyNode) {
+                bodyNode.innerHTML = '<div class="alert alert-danger mb-0">'
+                    + (tsAssetsChartDataNode.dataset.unableLoadComputersLabel || 'Unable to load computers.')
+                    + '</div>';
+            }
+        });
+}
+
+function renderComputersLoaderTable() {
+    const headers = getComputersTableHeaders();
+
+    return `
+        <div class="table-responsive">
+            <table class="table table-sm table-hover align-middle mb-0">
+                <thead>
+                    <tr>${headers.map(function (header) { return '<th>' + escapeHtml(header) + '</th>'; }).join('')}</tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="placeholder col-6"></span></td>
+                        <td><span class="placeholder col-10"></span></td>
+                        <td><span class="placeholder col-8"></span></td>
+                        <td><span class="placeholder col-8"></span></td>
+                        <td><span class="placeholder col-8"></span></td>
+                        <td><span class="placeholder col-8"></span></td>
+                        <td><span class="placeholder col-8"></span></td>
+                        <td><span class="placeholder col-8"></span></td>
+                        <td><span class="placeholder col-8"></span></td>
+                        <td><span class="placeholder col-8"></span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="placeholder col-6"></span></td>
+                        <td><span class="placeholder col-10"></span></td>
+                        <td><span class="placeholder col-8"></span></td>
+                        <td><span class="placeholder col-8"></span></td>
+                        <td><span class="placeholder col-8"></span></td>
+                        <td><span class="placeholder col-8"></span></td>
+                        <td><span class="placeholder col-8"></span></td>
+                        <td><span class="placeholder col-8"></span></td>
+                        <td><span class="placeholder col-8"></span></td>
+                        <td><span class="placeholder col-8"></span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>`;
+}
+
+function renderComputersTable(computers) {
+    const headers = getComputersTableHeaders();
+
+    const rows = computers.map(function (computer) {
+        return '<tr>'
+            + '<td>' + escapeHtml(computer.id) + '</td>'
+            + '<td><a href="' + escapeHtml(computer.url) + '" class="fw-semibold" target="_blank">' + escapeHtml(computer.name) + '</a></td>'
+            + '<td>' + escapeHtml(computer.serial) + '</td>'
+            + '<td>' + escapeHtml(computer.inventory_number) + '</td>'
+            + '<td>' + escapeHtml(computer.user) + '</td>'
+            + '<td><a href="' + escapeHtml(computer.software_url) + '" class="fw-semibold" target="_blank">' + escapeHtml(computer.software_name) + '</a></td>'
+            + '<td>' + escapeHtml(computer.manufacturer) + '</td>'
+            + '<td>' + escapeHtml(computer.town) + '</td>'
+            + '<td>' + escapeHtml(computer.state) + '</td>'
+            + '<td>' + escapeHtml(computer.last_update) + '</td>'
+            + '</tr>';
+    }).join('');
+
+    return '<div class="table-responsive">'
+        + '<table class="table table-sm table-hover align-middle mb-0">'
+        + '<thead><tr>'
+        + headers.map(function (header) { return '<th>' + escapeHtml(header) + '</th>'; }).join('')
+        + '</tr></thead>'
+        + '<tbody>' + rows + '</tbody></table></div>';
+}
+
+function downloadCoverageComputersCsv() {
+    if (!tsAssetsModalComputers.length) {
+        return;
+    }
+
+    const headers = getComputersTableHeaders();
+    const escapeValue = function (value) {
+        return '"' + String(value ?? '').replace(/"/g, '""') + '"';
+    };
+
+    const rows = tsAssetsModalComputers.map(function (computer) {
+        return [
+            computer.id,
+            computer.name,
+            computer.serial,
+            computer.inventory_number,
+            computer.user,
+            computer.software_name,
+            computer.manufacturer,
+            computer.town,
+            computer.state,
+            computer.last_update,
+        ].map(escapeValue).join(';');
+    });
+
+    const csv = [headers.map(escapeValue).join(';')].concat(rows).join('\r\n');
+    const latin1 = new Uint8Array(csv.split('').map(function (char) {
+        const code = char.charCodeAt(0);
+        return code > 255 ? '?'.charCodeAt(0) : code;
+    }));
+
+    const blob = new Blob([latin1], { type: 'text/csv;charset=iso-8859-1;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'software_coverage_computers.csv';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+}
+
+function formatComputersCount(count) {
+    return String(count) + ' ' + __('Computers', 'ticketsstatistics');
+}
+
+function getComputersTableHeaders() {
+    return [
+        __('ID', 'ticketsstatistics'),
+        __('Name', 'ticketsstatistics'),
+        __('Serial', 'ticketsstatistics'),
+        __('Inventory number', 'ticketsstatistics'),
+        __('User', 'ticketsstatistics'),
+        __('Software', 'ticketsstatistics'),
+        __('Manufacturer', 'ticketsstatistics'),
+        __('Town', 'ticketsstatistics'),
+        __('Status', 'ticketsstatistics'),
+        __('Last update', 'ticketsstatistics'),
+    ];
+}
+
+function escapeHtml(value) {
+    return String(value ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
 }
