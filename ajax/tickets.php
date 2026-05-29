@@ -93,7 +93,9 @@ $table = \Ticket::getTable();
 $cat_table = 'glpi_itilcategories';
 $loc_table = 'glpi_locations';
 $type = (string) ($_GET['type'] ?? '');
-$label = trim((string) ($_GET['label'] ?? ''));
+$rawLabel = (string) ($_GET['label'] ?? '');
+$label = $type === 'category' ? $rawLabel : trim($rawLabel);
+$clickedCategoryId = isset($_GET['category_id']) ? (int) $_GET['category_id'] : null;
 $status_group = (string) ($_GET['status_group'] ?? '');
 
 $where = ["$table.is_deleted" => 0] + getEntitiesRestrictCriteria($table);
@@ -125,8 +127,24 @@ switch ($type) {
         break;
 
     case 'category':
-        if ($label === __('None')) {
-            $where["$table.itilcategories_id"] = 0;
+        if ($clickedCategoryId !== null) {
+            if ($clickedCategoryId > 0) {
+                $where["$table.itilcategories_id"] = $clickedCategoryId;
+            } else {
+                $where[] = [
+                    'OR' => [
+                        ["$table.itilcategories_id" => 0],
+                        ["$cat_table.id" => null],
+                    ],
+                ];
+            }
+        } elseif ($label === __('None')) {
+            $where[] = [
+                'OR' => [
+                    ["$table.itilcategories_id" => 0],
+                    ["$cat_table.id" => null],
+                ],
+            ];
         } else {
             $where["$cat_table.completename"] = $label;
         }

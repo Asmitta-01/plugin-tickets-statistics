@@ -10,12 +10,12 @@
 
 require_once(__DIR__ . '/../../../inc/includes.php');
 
-Session::checkCentralAccess();
+\Session::checkCentralAccess();
 
 header('Content-Type: application/json');
 
-$DB    = DBConnection::getReadConnection();
-$table = Ticket::getTable();
+$DB    = \DBConnection::getReadConnection();
+$table = \Ticket::getTable();
 $where = ["$table.is_deleted" => 0] + getEntitiesRestrictCriteria($table);
 
 // Get the period and category filter from the request
@@ -32,11 +32,11 @@ $dateTo   = $_GET['date_to']   ?? null;
 $counters = [];
 foreach (
     [
-        'incoming' => Ticket::INCOMING,
-        'assigned' => Ticket::ASSIGNED,
-        'waiting'  => Ticket::WAITING,
-        'solved'   => Ticket::SOLVED,
-        'closed'   => Ticket::CLOSED,
+        'incoming' => \Ticket::INCOMING,
+        'assigned' => \Ticket::ASSIGNED,
+        'waiting'  => \Ticket::WAITING,
+        'solved'   => \Ticket::SOLVED,
+        'closed'   => \Ticket::CLOSED,
     ] as $key => $status
 ) {
     $iter = $DB->request([
@@ -65,7 +65,7 @@ foreach (
 }
 
 // --- By category (top 10) ---
-$category = ['labels' => [], 'values' => []];
+$category = ['labels' => [], 'ids' => [], 'values' => []];
 $categoryStats = [];
 $catTable = 'glpi_itilcategories';
 
@@ -79,6 +79,7 @@ $statusGroups = [
 foreach (
     $DB->request([
         'SELECT'    => [
+            "$catTable.id AS cat_id",
             "$catTable.completename AS cat_name",
             "$table.status AS status",
             'COUNT'  => ["$table.id AS cpt"],
@@ -92,7 +93,13 @@ foreach (
         'ORDER'     => ['cpt DESC'],
     ]) as $row
 ) {
-    $catName = $row['cat_name'] ?? __('None');
+    $catId = (int) ($row['cat_id'] ?? 0);
+    $catName = (string) ($row['cat_name'] ?? '');
+    if ($catName === '') {
+        $catName = __('None');
+    }
+
+    $catKey = $catId > 0 ? 'id_' . $catId : 'none';
     $status  = (int) $row['status'];
     $count   = (int) $row['cpt'];
 
@@ -105,23 +112,32 @@ foreach (
         }
     }
 
-    if (!isset($categoryStats[$catName])) {
-        $categoryStats[$catName] = [
+    if (!isset($categoryStats[$catKey])) {
+        $categoryStats[$catKey] = [
+            'id'          => $catId > 0 ? $catId : 0,
+            'label'       => $catName,
             'new'         => 0,
             'resolved'    => 0,
             'in_progress' => 0,
         ];
     }
 
-    $categoryStats[$catName][$group] += $count;
+    $categoryStats[$catKey][$group] += $count;
 }
 
 // Trie par total décroissant, garde top 10 et supprime les catégories à 0
-uasort($categoryStats, fn($a, $b) => array_sum($b) - array_sum($a));
-$categoryStats = array_slice(array_filter($categoryStats, fn($v) => array_sum($v) > 0), 0, 10, true);
+uasort($categoryStats, static function (array $a, array $b): int {
+    $totalA = (int) $a['new'] + (int) $a['resolved'] + (int) $a['in_progress'];
+    $totalB = (int) $b['new'] + (int) $b['resolved'] + (int) $b['in_progress'];
+    return $totalB <=> $totalA;
+});
+$categoryStats = array_slice(array_filter($categoryStats, static function (array $v): bool {
+    return ((int) $v['new'] + (int) $v['resolved'] + (int) $v['in_progress']) > 0;
+}), 0, 10, true);
 
 // Formate pour Chart.js
-$category['labels']     = array_keys($categoryStats);
+$category['labels']               = array_column($categoryStats, 'label');
+$category['ids']                  = array_column($categoryStats, 'id');
 $category['values']['new']        = array_column($categoryStats, 'new');
 $category['values']['resolved']   = array_column($categoryStats, 'resolved');
 $category['values']['in_progress'] = array_column($categoryStats, 'in_progress');

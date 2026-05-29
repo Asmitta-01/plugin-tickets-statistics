@@ -262,6 +262,9 @@ function loadCharts() {
                         openTicketsModal({
                             type: 'category',
                             label: data.category.labels[elements[0].index],
+                            category_id: Number.isInteger(data.category.ids?.[elements[0].index])
+                                ? data.category.ids[elements[0].index]
+                                : null,
                             status_group: ['new', 'resolved', 'in_progress'][elements[0].datasetIndex]
                         });
                     },
@@ -678,6 +681,10 @@ function openTicketsModal(filters) {
 
     if (filters.status_group) {
         params.set('status_group', filters.status_group);
+    }
+
+    if (filters.category_id !== undefined && filters.category_id !== null) {
+        params.set('category_id', String(filters.category_id));
     }
 
     title.textContent = __('Loading tickets...', 'ticketsstatistics');
