@@ -98,12 +98,54 @@ document.addEventListener('DOMContentLoaded', function () {
         chart.resetZoom();
     }));
 
+    initCounterCardsModalLinks();
+
     try {
         loadCharts();
     } catch (error) {
         console.error('Failed to load charts.'.error.message);
     }
 });
+
+function initCounterCardsModalLinks() {
+    const statusGroupByCounter = {
+        incoming: 'incoming',
+        assigned: 'assigned',
+        waiting: 'waiting',
+        solved_closed: 'solved_closed',
+        total: '',
+    };
+
+    const cards = document.querySelectorAll('.ts-counter-card[data-counter-key]');
+    cards.forEach(function (card) {
+        const openFromCard = function () {
+            const counterKey = card.dataset.counterKey || '';
+            const counterLabel = card.dataset.counterLabel || __('Tickets', 'ticketsstatistics');
+            const statusGroup = statusGroupByCounter[counterKey] || '';
+
+            const filters = {
+                type: 'counter',
+                label: counterLabel,
+            };
+
+            if (statusGroup) {
+                filters.status_group = statusGroup;
+            }
+
+            openTicketsModal(filters);
+        };
+
+        card.addEventListener('click', openFromCard);
+        card.addEventListener('keydown', function (event) {
+            if (event.key !== 'Enter' && event.key !== ' ') {
+                return;
+            }
+
+            event.preventDefault();
+            openFromCard();
+        });
+    });
+}
 
 function toggleCountersView(isSolved) {
     const defaultRow = document.getElementById('ts-counters-default');

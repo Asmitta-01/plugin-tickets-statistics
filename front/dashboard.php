@@ -92,9 +92,19 @@ require_once(__DIR__ . '/../../../inc/includes.php');
             ] as $c
         ): ?>
             <div class="col">
-                <div class="card text-center h-100" style="border-top: 3px solid <?= GlpiPlugin\Ticketsstatistics\TicketsStatistics::getStatusColor($c['id']) ?>">
+                <?php $color = GlpiPlugin\Ticketsstatistics\TicketsStatistics::getStatusColor($c['id']); ?>
+                <div
+                    class="card text-center h-100 ts-counter-card"
+                    style="border-top: 3px solid <?= $color ?>; cursor: pointer;"
+                    onmouseenter="this.style.boxShadow='0 1px 4px <?= $color ?>';"
+                    onmouseleave="this.style.boxShadow='0 6px 16px rgba(15, 23, 42, 0.05)';"
+                    role="button"
+                    tabindex="0"
+                    data-counter-key="<?= htmlspecialchars($c['id'], ENT_QUOTES, 'UTF-8') ?>"
+                    data-counter-label="<?= htmlspecialchars($c['label'], ENT_QUOTES, 'UTF-8') ?>"
+                    title="<?= __('Tickets', 'ticketsstatistics') ?>">
                     <div class="card-body py-3">
-                        <i class="ti <?= $c['icon'] ?> fs-1 mb-1" style="color:<?= GlpiPlugin\Ticketsstatistics\TicketsStatistics::getStatusColor($c['id']) ?>"></i>
+                        <i class="ti <?= $c['icon'] ?> fs-1 mb-1" style="color:<?= $color ?>"></i>
                         <div class="display-6 fw-bold ts-count" data-status="<?= $c['id'] ?>">—</div>
                         <div class="text-muted small w-auto">
                             <?php if ($c['id'] == 'assigned'): ?>

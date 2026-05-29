@@ -10,7 +10,7 @@
 
 require_once(__DIR__ . '/../../../inc/includes.php');
 
-Session::checkCentralAccess();
+\Session::checkCentralAccess();
 
 header('Content-Type: application/json');
 
@@ -20,9 +20,13 @@ const TICKETSSTATISTICS_MODAL_LIMIT = 100;
 function ticketsstatistics_get_status_groups(): array
 {
     return [
-        'new' => [\Ticket::INCOMING],
-        'resolved' => [\Ticket::SOLVED, \Ticket::CLOSED],
-        'in_progress' => [\Ticket::ASSIGNED, \Ticket::WAITING, \Ticket::ACCEPTED, \Ticket::OBSERVED],
+        'new'           => [\Ticket::INCOMING],
+        'incoming'      => [\Ticket::INCOMING],
+        'assigned'      => [\Ticket::ASSIGNED],
+        'waiting'       => [\Ticket::WAITING],
+        'solved_closed' => [\Ticket::SOLVED, \Ticket::CLOSED],
+        'resolved'      => [\Ticket::SOLVED, \Ticket::CLOSED],
+        'in_progress'   => [\Ticket::ASSIGNED, \Ticket::WAITING, \Ticket::ACCEPTED, \Ticket::OBSERVED],
     ];
 }
 
@@ -64,10 +68,12 @@ function ticketsstatistics_build_title(string $type, string $label, string $stat
         $parts[] = $label;
     }
 
-    if ($status_group !== '') {
+    if ($status_group !== '' && $type !== 'counter') {
         $parts[] = match ($status_group) {
-            'new' => __('New', 'ticketsstatistics'),
-            'resolved' => __('Resolved', 'ticketsstatistics'),
+            'new', 'incoming' => __('New', 'ticketsstatistics'),
+            'assigned' => __('Assigned', 'ticketsstatistics'),
+            'waiting' => __('Pending', 'ticketsstatistics'),
+            'resolved', 'solved_closed' => __('Resolved', 'ticketsstatistics'),
             'in_progress' => __('In progress', 'ticketsstatistics'),
             default => $status_group,
         };
@@ -82,7 +88,7 @@ function ticketsstatistics_json(array $payload): void
     exit;
 }
 
-$DB = DBConnection::getReadConnection();
+$DB = \DBConnection::getReadConnection();
 $table = \Ticket::getTable();
 $cat_table = 'glpi_itilcategories';
 $loc_table = 'glpi_locations';
@@ -92,10 +98,12 @@ $status_group = (string) ($_GET['status_group'] ?? '');
 
 $where = ["$table.is_deleted" => 0] + getEntitiesRestrictCriteria($table);
 $period = $_GET['period'] ?? 'last30';
+$categoryId = (int) ($_GET['category'] ?? 0);
 $dateFrom = $_GET['date_from'] ?? null;
 $dateTo   = $_GET['date_to']   ?? null;
 
 \GlpiPlugin\Ticketsstatistics\PeriodFilter::apply($where, $table, $period, $dateFrom, $dateTo);
+\GlpiPlugin\Ticketsstatistics\CategoryFilter::apply($where, $table, $categoryId);
 
 $joins = [
     $cat_table => ['ON' => [$cat_table => 'id', $table => 'itilcategories_id']],
@@ -147,6 +155,9 @@ switch ($type) {
         if (\DateTime::createFromFormat('Y-m-d', $label) !== false) {
             $where[] = new \QueryExpression("DATE($table.`closedate`) = " . $DB->quoteValue($label));
         }
+        break;
+
+    case 'counter':
         break;
 
     default:
