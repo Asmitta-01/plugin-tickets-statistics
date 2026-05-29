@@ -306,33 +306,69 @@ class AssetStatistics
     }
 
     /**
-     * Get how many computers have / don't have a specific software installed.
+     * Get how many computers have / don't have at least one selected software installed.
      *
-     * @return array{with: int, without: int, total: int, name: string}
+     * @param array<int, int|string> $softwareIds
+     * @return array{with: int, without: int, total: int, name: string, names: array<int, string>, software_ids: array<int, int>}
      */
-    public static function getSoftwareCoverage(int $softwareId, int $townId, int $manufacturerId): array
+    public static function getSoftwareCoverageForSelection(array $softwareIds, int $townId, int $manufacturerId): array
     {
         global $DB;
 
+        $normalizedIds = array_values(array_unique(array_filter(array_map(
+            static fn($id): int => (int) $id,
+            $softwareIds
+        ), static fn(int $id): bool => $id > 0)));
+
         $total = self::countAssets('glpi_computers', $townId, $manufacturerId);
 
-        if ($softwareId <= 0 || $total <= 0) {
-            return ['with' => 0, 'without' => $total, 'total' => $total, 'name' => ''];
+        if ($normalizedIds === [] || $total <= 0) {
+            return [
+                'with'         => 0,
+                'without'      => $total,
+                'total'        => $total,
+                'name'         => '',
+                'names'        => [],
+                'software_ids' => $normalizedIds,
+            ];
         }
 
-        $swRow = $DB->request([
-            'SELECT' => ['name'],
-            'FROM'   => 'glpi_softwares',
-            'WHERE'  => ['id' => $softwareId, 'is_deleted' => 0],
-        ])->current();
-        $softwareName = $swRow ? (string) $swRow['name'] : '';
+        $softwareNames = [];
+        foreach (
+            $DB->request([
+                'SELECT' => ['id', 'name'],
+                'FROM'   => 'glpi_softwares',
+                'WHERE'  => [
+                    'id'         => $normalizedIds,
+                    'is_deleted' => 0,
+                ],
+                'ORDER'  => ['name ASC'],
+            ]) as $row
+        ) {
+            $softwareNames[] = (string) ($row['name'] ?? '');
+        }
+
+        if ($softwareNames === []) {
+            return [
+                'with'         => 0,
+                'without'      => $total,
+                'total'        => $total,
+                'name'         => '',
+                'names'        => [],
+                'software_ids' => $normalizedIds,
+            ];
+        }
+
+        $softwareLabel = count($softwareNames) === 1
+            ? $softwareNames[0]
+            : implode(', ', array_slice($softwareNames, 0, 3)) . (count($softwareNames) > 3 ? '...' : '');
 
         $where = [
             'glpi_computers.is_deleted'              => 0,
             'glpi_computers.is_template'             => 0,
             'glpi_items_softwareversions.is_deleted' => 0,
             'glpi_items_softwareversions.itemtype'   => 'Computer',
-            'glpi_softwareversions.softwares_id'     => $softwareId,
+            'glpi_softwareversions.softwares_id'     => $normalizedIds,
         ] + getEntitiesRestrictCriteria('glpi_computers');
 
         if ($manufacturerId > 0) {
@@ -375,10 +411,22 @@ class AssetStatistics
         $without = max(0, $total - $with);
 
         return [
-            'with'    => $with,
-            'without' => $without,
-            'total'   => $total,
-            'name'    => $softwareName,
+            'with'         => $with,
+            'without'      => $without,
+            'total'        => $total,
+            'name'         => $softwareLabel,
+            'names'        => $softwareNames,
+            'software_ids' => $normalizedIds,
         ];
+    }
+
+    /**
+     * Backward-compatible single-software wrapper.
+     *
+     * @return array{with: int, without: int, total: int, name: string, names: array<int, string>, software_ids: array<int, int>}
+     */
+    public static function getSoftwareCoverage(int $softwareId, int $townId, int $manufacturerId): array
+    {
+        return self::getSoftwareCoverageForSelection([$softwareId], $townId, $manufacturerId);
     }
 }

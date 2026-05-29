@@ -28,13 +28,16 @@ function ticketsstatistics_assets_json(array $payload): void
     exit;
 }
 
-$softwareId = (int) ($_GET['software'] ?? 0);
+$softwareIds = array_values(array_unique(array_filter(array_map(
+    static fn($id): int => (int) $id,
+    (array) ($_GET['software'] ?? [])
+), static fn(int $id): bool => $id > 0)));
 $townId = (int) ($_GET['town'] ?? 0);
 $manufacturerId = (int) ($_GET['manufacturer'] ?? 0);
 $coverage = (string) ($_GET['coverage'] ?? '');
 $coverage = in_array($coverage, ['with', 'without'], true) ? $coverage : '';
 
-if ($softwareId <= 0 || $coverage === '') {
+if ($softwareIds === [] || $coverage === '') {
     ticketsstatistics_assets_json([
         'title'      => __('Computers', 'ticketsstatistics'),
         'count'      => 0,
@@ -50,18 +53,35 @@ $locationTable = 'glpi_locations';
 $stateTable = 'glpi_states';
 $userTable = 'glpi_users';
 
-$softwareName = '';
-$softwareRow = $DB->request([
-    'SELECT' => ['name'],
-    'FROM'   => 'glpi_softwares',
-    'WHERE'  => [
-        'id'         => $softwareId,
-        'is_deleted' => 0,
-    ],
-])->current();
-if ($softwareRow) {
-    $softwareName = (string) ($softwareRow['name'] ?? '');
+$softwareRows = [];
+foreach (
+    $DB->request([
+        'SELECT' => ['id', 'name'],
+        'FROM'   => 'glpi_softwares',
+        'WHERE'  => [
+            'id'         => $softwareIds,
+            'is_deleted' => 0,
+        ],
+        'ORDER'  => ['name ASC'],
+    ]) as $row
+) {
+    $softwareRows[(int) $row['id']] = (string) ($row['name'] ?? '');
 }
+
+if ($softwareRows === []) {
+    ticketsstatistics_assets_json([
+        'title'      => __('Computers', 'ticketsstatistics'),
+        'count'      => 0,
+        'truncated'  => false,
+        'computers'  => [],
+    ]);
+}
+
+$softwareIds = array_keys($softwareRows);
+$softwareNames = array_values($softwareRows);
+$softwareTitle = count($softwareNames) === 1
+    ? $softwareNames[0]
+    : implode(', ', array_slice($softwareNames, 0, 3)) . (count($softwareNames) > 3 ? '...' : '');
 
 $where = [
     "$computerTable.is_deleted"  => 0,
@@ -76,9 +96,9 @@ if ($manufacturerId > 0) {
 }
 
 $softwareExistsSql = sprintf(
-    "EXISTS (SELECT 1 FROM glpi_items_softwareversions isv INNER JOIN glpi_softwareversions sv ON sv.id = isv.softwareversions_id WHERE isv.items_id = %s.id AND isv.itemtype = 'Computer' AND isv.is_deleted = 0 AND sv.softwares_id = %d)",
+    "EXISTS (SELECT 1 FROM glpi_items_softwareversions isv INNER JOIN glpi_softwareversions sv ON sv.id = isv.softwareversions_id WHERE isv.items_id = %s.id AND isv.itemtype = 'Computer' AND isv.is_deleted = 0 AND sv.softwares_id IN (%s))",
     $computerTable,
-    $softwareId
+    implode(',', $softwareIds)
 );
 
 if ($coverage === 'with') {
@@ -90,8 +110,8 @@ if ($coverage === 'with') {
 $title = __('Computers', 'ticketsstatistics') . ' - ' . ($coverage === 'with'
     ? __('Computers with software', 'ticketsstatistics')
     : __('Computers without software', 'ticketsstatistics'));
-if ($softwareName !== '') {
-    $title .= ' - ' . $softwareName;
+if ($softwareTitle !== '') {
+    $title .= ' - ' . $softwareTitle;
 }
 
 $countIterator = $DB->request([
@@ -164,14 +184,75 @@ foreach (
         'serial'           => (string) ($row['serial'] ?? ''),
         'inventory_number' => (string) ($row['otherserial'] ?? ''),
         'user'             => $userName,
-        'software_name'    => $softwareName,
-        'software_url'     => $CFG_GLPI['root_doc'] . '/front/software.form.php?id=' . $softwareId,
+        'software_items'   => [],
         'manufacturer'     => (string) (($row['manufacturer_name'] ?? '') ?: __('Unknown', 'ticketsstatistics')),
         'town'             => (string) (($row['town_name'] ?? '') ?: __('Unknown', 'ticketsstatistics')),
         'state'            => (string) (($row['state_name'] ?? '') ?: __('Unknown', 'ticketsstatistics')),
         'last_update'      => \Html::convDateTime((string) ($row['date_mod'] ?? '')),
         'url'              => $CFG_GLPI['root_doc'] . '/front/computer.form.php?id=' . $computerId,
     ];
+}
+
+if ($computers !== [] && $coverage === 'with') {
+    $computerIds = array_map(static fn(array $computer): int => (int) $computer['id'], $computers);
+    $softwareByComputer = [];
+
+    foreach (
+        $DB->request([
+            'SELECT'     => [
+                'glpi_items_softwareversions.items_id',
+                'glpi_softwares.id AS software_id',
+                'glpi_softwares.name AS software_name',
+            ],
+            'FROM'       => 'glpi_items_softwareversions',
+            'INNER JOIN' => [
+                'glpi_softwareversions' => [
+                    'ON' => [
+                        'glpi_softwareversions'       => 'id',
+                        'glpi_items_softwareversions' => 'softwareversions_id',
+                    ],
+                ],
+                'glpi_softwares' => [
+                    'ON' => [
+                        'glpi_softwares'        => 'id',
+                        'glpi_softwareversions' => 'softwares_id',
+                    ],
+                ],
+            ],
+            'WHERE'      => [
+                'glpi_items_softwareversions.itemtype'   => 'Computer',
+                'glpi_items_softwareversions.is_deleted' => 0,
+                'glpi_items_softwareversions.items_id'   => $computerIds,
+                'glpi_softwareversions.softwares_id'     => $softwareIds,
+                'glpi_softwares.is_deleted'              => 0,
+                'glpi_softwares.is_template'             => 0,
+            ],
+            'GROUPBY'    => [
+                'glpi_items_softwareversions.items_id',
+                'glpi_softwares.id',
+                'glpi_softwares.name',
+            ],
+        ]) as $row
+    ) {
+        $currentComputerId = (int) ($row['items_id'] ?? 0);
+        $currentSoftwareId = (int) ($row['software_id'] ?? 0);
+        $currentSoftwareName = (string) ($row['software_name'] ?? '');
+        if ($currentComputerId <= 0 || $currentSoftwareId <= 0 || $currentSoftwareName === '') {
+            continue;
+        }
+
+        $softwareByComputer[$currentComputerId][] = [
+            'id'   => $currentSoftwareId,
+            'name' => $currentSoftwareName,
+            'url'  => $CFG_GLPI['root_doc'] . '/front/software.form.php?id=' . $currentSoftwareId,
+        ];
+    }
+
+    foreach ($computers as &$computer) {
+        $computerId = (int) ($computer['id'] ?? 0);
+        $computer['software_items'] = $softwareByComputer[$computerId] ?? [];
+    }
+    unset($computer);
 }
 
 ticketsstatistics_assets_json([

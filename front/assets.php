@@ -69,13 +69,16 @@ $assetDatasets = [
 $townBreakdown = $showTownChart ? AssetStatistics::getCountsByTown($manufacturerId) : [];
 $manufacturerBreakdown = $showManufacturerChart ? AssetStatistics::getCountsByManufacturer($townId) : [];
 
-$selectedSoftwareId = (int) ($_GET['software'] ?? 0);
+$selectedSoftwareIds = array_values(array_unique(array_filter(array_map(
+    static fn($id): int => (int) $id,
+    (array) ($_GET['software'] ?? [])
+), static fn(int $id): bool => $id > 0)));
 $topSoftwares       = AssetStatistics::getTopSoftwaresByComputers($townId, $manufacturerId);
-$softwareCoverage   = $selectedSoftwareId > 0
-    ? AssetStatistics::getSoftwareCoverage($selectedSoftwareId, $townId, $manufacturerId)
-    : ['with' => 0, 'without' => 0, 'total' => 0, 'name' => ''];
-$coverageHasData    = $selectedSoftwareId > 0 && (int) $softwareCoverage['total'] > 0;
-$coverageMessage    = $selectedSoftwareId > 0
+$softwareCoverage   = $selectedSoftwareIds !== []
+    ? AssetStatistics::getSoftwareCoverageForSelection($selectedSoftwareIds, $townId, $manufacturerId)
+    : ['with' => 0, 'without' => 0, 'total' => 0, 'name' => '', 'names' => [], 'software_ids' => []];
+$coverageHasData    = $selectedSoftwareIds !== [] && (int) $softwareCoverage['total'] > 0;
+$coverageMessage    = $selectedSoftwareIds !== []
     ? __('No data available', 'ticketsstatistics')
     : __('No software selected', 'ticketsstatistics');
 $coverageAjaxUrl    = $CFG_GLPI['root_doc'] . '/plugins/ticketsstatistics/ajax/assets_software_coverage.php';
@@ -269,12 +272,14 @@ if ($showManufacturerChart) {
                             <?php
                             \Software::dropdown([
                                 'name'                => 'software',
-                                'value'               => $selectedSoftwareId,
+                                'value'               => $selectedSoftwareIds,
                                 'display_emptychoice' => true,
                                 'emptylabel'          => __('Select software', 'ticketsstatistics'),
                                 'addicon'             => false,
                                 'comments'            => false,
                                 'class'               => 'form-select form-select-sm',
+                                'width'               => '100%',
+                                'multiple'            => true,
                             ]);
                             ?>
                             <button type="submit" class="btn btn-primary btn-sm"><?= __('Filter', 'ticketsstatistics') ?></button>
