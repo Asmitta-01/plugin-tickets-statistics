@@ -74,6 +74,11 @@ $topSoftwares       = AssetStatistics::getTopSoftwaresByComputers($townId, $manu
 $softwareCoverage   = $selectedSoftwareId > 0
     ? AssetStatistics::getSoftwareCoverage($selectedSoftwareId, $townId, $manufacturerId)
     : ['with' => 0, 'without' => 0, 'total' => 0, 'name' => ''];
+$coverageHasData    = $selectedSoftwareId > 0 && (int) $softwareCoverage['total'] > 0;
+$coverageMessage    = $selectedSoftwareId > 0
+    ? __('No data available', 'ticketsstatistics')
+    : __('No software selected', 'ticketsstatistics');
+$coverageAjaxUrl    = $CFG_GLPI['root_doc'] . '/plugins/ticketsstatistics/ajax/assets_software_coverage.php';
 
 $townChart = ['labels' => [], 'datasets' => []];
 if ($showTownChart) {
@@ -255,7 +260,7 @@ if ($showManufacturerChart) {
             <div class="card shadow-sm h-100">
                 <div class="card-header"><?= __('Software coverage', 'ticketsstatistics') ?></div>
                 <div class="card-body">
-                    <form method="get" class="mb-3">
+                    <form id="ts-software-coverage-form" method="get" class="mb-3" data-ajax-url="<?= htmlspecialchars($coverageAjaxUrl, ENT_QUOTES, 'UTF-8') ?>">
                         <input type="hidden" name="town" value="<?= $townId ?>">
                         <input type="hidden" name="manufacturer" value="<?= $manufacturerId ?>">
                         <label class="form-label fw-semibold"><?= __('Select software', 'ticketsstatistics') ?></label>
@@ -275,42 +280,40 @@ if ($showManufacturerChart) {
                         </div>
                     </form>
 
-                    <?php if ($selectedSoftwareId > 0 && $softwareCoverage['total'] > 0): ?>
-                        <div class="row g-2 text-center mt-2">
-                            <div class="col-6">
-                                <div class="p-3 rounded" style="background:#dcfce7">
-                                    <div class="fs-4 fw-bold text-success"><?= $softwareCoverage['with'] ?></div>
-                                    <div class="text-muted"><?= __('Computers with software', 'ticketsstatistics') ?></div>
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="p-3 rounded" style="background:#fee2e2">
-                                    <div class="fs-4 fw-bold text-danger"><?= $softwareCoverage['without'] ?></div>
-                                    <div class="text-muted"><?= __('Computers without software', 'ticketsstatistics') ?></div>
-                                </div>
+                    <div id="ts-assets-software-coverage-summary" class="row g-2 text-center mt-2 <?= $coverageHasData ? '' : 'd-none' ?>">
+                        <div class="col-6">
+                            <div class="p-3 rounded" style="background:#dcfce7">
+                                <div id="ts-assets-software-with" class="fs-4 fw-bold text-success"><?= (int) $softwareCoverage['with'] ?></div>
+                                <div class="text-muted"><?= __('Computers with software', 'ticketsstatistics') ?></div>
                             </div>
                         </div>
-                    <?php elseif ($selectedSoftwareId > 0): ?>
-                        <div class="text-muted text-center py-3"><?= __('No data available', 'ticketsstatistics') ?></div>
-                    <?php else: ?>
-                        <div class="text-muted text-center py-3"><?= __('No software selected', 'ticketsstatistics') ?></div>
-                    <?php endif; ?>
+                        <div class="col-6">
+                            <div class="p-3 rounded" style="background:#fee2e2">
+                                <div id="ts-assets-software-without" class="fs-4 fw-bold text-danger"><?= (int) $softwareCoverage['without'] ?></div>
+                                <div class="text-muted"><?= __('Computers without software', 'ticketsstatistics') ?></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="ts-assets-software-coverage-message" class="text-muted text-center py-3 <?= $coverageHasData ? 'd-none' : '' ?>"><?= $coverageMessage ?></div>
                 </div>
             </div>
         </div>
 
-        <?php if ($selectedSoftwareId > 0 && $softwareCoverage['total'] > 0): ?>
-            <div class="col-md-7">
-                <div class="card shadow-sm h-100">
-                    <div class="card-header">
-                        <?= __('Software coverage', 'ticketsstatistics') ?> &mdash; <?= htmlspecialchars($softwareCoverage['name'], ENT_QUOTES, 'UTF-8') ?>
-                    </div>
-                    <div class="card-body d-flex justify-content-center align-items-center" style="min-height: 220px">
-                        <canvas id="ts-assets-software-coverage-chart" style="max-width: 280px; max-height: 280px;"></canvas>
-                    </div>
+        <div id="ts-assets-software-coverage-chart-col" class="col-md-7 <?= $coverageHasData ? '' : 'd-none' ?>">
+            <div class="card shadow-sm h-100">
+                <div id="ts-assets-software-coverage-title" class="card-header">
+                    <?= __('Software coverage', 'ticketsstatistics') ?><?= $coverageHasData ? ' &mdash; ' . htmlspecialchars($softwareCoverage['name'], ENT_QUOTES, 'UTF-8') : '' ?>
+                </div>
+                <div class="card-body d-flex justify-content-center align-items-center" style="min-height: 220px">
+                    <canvas
+                        id="ts-assets-software-coverage-chart"
+                        data-label-with="<?= __('Computers with software', 'ticketsstatistics') ?>"
+                        data-label-without="<?= __('Computers without software', 'ticketsstatistics') ?>"
+                        style="max-width: 280px; max-height: 280px;"></canvas>
                 </div>
             </div>
-        <?php endif; ?>
+        </div>
     </div>
 </div>
 
@@ -323,6 +326,10 @@ if ($showTownChart || $showManufacturerChart):
         data-manufacturer-chart="<?= htmlspecialchars(json_encode($manufacturerChart, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT), ENT_QUOTES, 'UTF-8') ?>"
         data-top-softwares-chart="<?= htmlspecialchars(json_encode(['labels' => array_column($topSoftwares, 'name'), 'values' => array_column($topSoftwares, 'count')], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT), ENT_QUOTES, 'UTF-8') ?>"
         data-software-coverage-chart="<?= htmlspecialchars(json_encode($softwareCoverage, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT), ENT_QUOTES, 'UTF-8') ?>"
+        data-software-coverage-title="<?= __('Software coverage', 'ticketsstatistics') ?>"
+        data-no-software-selected-label="<?= __('No software selected', 'ticketsstatistics') ?>"
+        data-no-data-label="<?= __('No data available', 'ticketsstatistics') ?>"
+        data-processing-label="<?= __('Processing...', 'ticketsstatistics') ?>"
         hidden></div>
 <?php
 else:
@@ -331,6 +338,10 @@ else:
         id="ts-assets-chart-data"
         data-top-softwares-chart="<?= htmlspecialchars(json_encode(['labels' => array_column($topSoftwares, 'name'), 'values' => array_column($topSoftwares, 'count')], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT), ENT_QUOTES, 'UTF-8') ?>"
         data-software-coverage-chart="<?= htmlspecialchars(json_encode($softwareCoverage, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT), ENT_QUOTES, 'UTF-8') ?>"
+        data-software-coverage-title="<?= __('Software coverage', 'ticketsstatistics') ?>"
+        data-no-software-selected-label="<?= __('No software selected', 'ticketsstatistics') ?>"
+        data-no-data-label="<?= __('No data available', 'ticketsstatistics') ?>"
+        data-processing-label="<?= __('Processing...', 'ticketsstatistics') ?>"
         hidden></div>
 <?php
 endif;
