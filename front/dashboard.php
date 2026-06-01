@@ -75,9 +75,25 @@ require_once(__DIR__ . '/../../../inc/includes.php');
             </div>
         </form>
 
-        <button id='ticketsstatisticsDownloadPdfBtn' class='btn btn-primary'>
-            <i class='ti ti-download'></i> <?= __('Download PDF', 'ticketsstatistics') ?>
-        </button>
+        <div class="btn-group" id="ts-download-btn-group">
+            <button id='ticketsstatisticsDownloadPdfBtn' class='btn btn-primary'>
+                <i class='ti ti-download'></i> <?= __('Download PDF', 'ticketsstatistics') ?>
+            </button>
+            <button
+                type="button"
+                class="btn btn-primary dropdown-toggle dropdown-toggle-split"
+                data-bs-toggle="dropdown"
+                aria-haspopup="true"
+                aria-expanded="false">
+            </button>
+            <div class="dropdown-menu">
+                <a class="dropdown-item" id="ticketsstatisticsDownloadLowPdfBtn" href="#">
+                    <i class='ti ti-file-download'></i>
+                    <?= __('Download PDF in low quality', 'ticketsstatistics') ?>
+                </a>
+            </div>
+        </div>
+
     </div>
 
     <!-- Big numbers row — creation-date view -->
@@ -185,7 +201,7 @@ require_once(__DIR__ . '/../../../inc/includes.php');
                     </div>
                 </div>
                 <div class="card-body d-flex align-items-center justify-content-center">
-                    <canvas id="chart-city" style="height:250px">
+                    <canvas id="chart-city" style="max-height:250px">
                     </canvas>
                 </div>
             </div>
@@ -239,18 +255,18 @@ require_once(__DIR__ . '/../../../inc/includes.php');
             <div class="row g-3 mb-3">
                 <div class="col-md-4">
                     <div class="border-end">
-                        <canvas id="chart-city-new" style="height:280px">
+                        <canvas id="chart-city-new" style="max-height:280px">
                         </canvas>
                     </div>
                 </div>
                 <div class="col-md-4">
                     <div class="border-end">
-                        <canvas id="chart-city-resolved" style="height:280px">
+                        <canvas id="chart-city-resolved" style="max-height:280px">
                         </canvas>
                     </div>
                 </div>
                 <div class="col-md-4">
-                    <canvas id="chart-city-progress" style="height:280px">
+                    <canvas id="chart-city-progress" style="max-height:280px">
                     </canvas>
                 </div>
             </div>
@@ -270,7 +286,7 @@ require_once(__DIR__ . '/../../../inc/includes.php');
                     </button>
                 </div>
                 <div class="card-body">
-                    <canvas id="chart-perday" style="height:280px"></canvas>
+                    <canvas id="chart-perday" style="height:280px; max-height:280px"></canvas>
                 </div>
             </div>
         </div>

@@ -17,80 +17,10 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     const downloadPdfButton = document.getElementById('ticketsstatisticsDownloadPdfBtn');
-    downloadPdfButton.addEventListener('click', async function () {
-        const btn = this;
-        const btnContent = btn.innerHTML;
-        btn.disabled = true;
-        btn.innerHTML = '<i class="ti ti-loader ti-spin"></i> ' + __('Generating...', 'ticketsstatistics');
+    downloadPdfButton.addEventListener('click', exportPageToPDF);
 
-        const { jsPDF } = window.jspdf;
-
-        const content = document.getElementById('ts-content');
-
-        // Crée un bandeau "Generated on..." visible uniquement dans le clone
-        const banner = document.createElement('div');
-        banner.id = 'ts-pdf-banner';
-        banner.style.cssText = 'padding:8px 12px;background:#f8f9fa;border-bottom:1px solid #dee2e6;font-size:13px;color:#555;';
-        banner.innerHTML = `<i>Generated on ${new Date().toLocaleString()}</i>`;
-
-        const canvas = await html2canvas(content, {
-            scale: 2,
-            backgroundColor: '#ffffff',
-            useCORS: true,
-            logging: false,
-            onclone: (clonedDoc) => {
-                // Insère le bandeau en haut du contenu cloné
-                const clonedContent = clonedDoc.getElementById('ts-content');
-                clonedContent.insertBefore(banner, clonedContent.firstChild);
-
-                // Cache le bouton dans le clone
-                const clonedBtn = clonedDoc.getElementById('ticketsstatisticsDownloadPdfBtn');
-                if (clonedBtn) clonedBtn.style.display = 'none';
-            }
-        });
-
-        const pdf = new jsPDF('p', 'mm', 'a4');
-        const pageW = pdf.internal.pageSize.getWidth();
-        const pageH = pdf.internal.pageSize.getHeight();
-        const margin = 10;
-        const usableW = pageW - margin * 2;
-
-        // Découpe l'image en pages si le contenu est plus grand qu'une page A4
-        const imgW = canvas.width;
-        const imgH = canvas.height;
-        const ratio = imgW / usableW;
-        const sliceH = pageH - margin * 2; // hauteur d'une page en mm
-        const sliceHpx = sliceH * ratio;     // même hauteur en pixels
-        let offsetY = 0;
-
-        while (offsetY < imgH) {
-            if (offsetY > 0) pdf.addPage();
-
-            // Crée un canvas temporaire pour la tranche
-            const sliceCanvas = document.createElement('canvas');
-            sliceCanvas.width = imgW;
-            sliceCanvas.height = Math.min(sliceHpx, imgH - offsetY);
-
-            const ctx = sliceCanvas.getContext('2d');
-            ctx.drawImage(canvas, 0, -offsetY);
-
-            pdf.addImage(
-                sliceCanvas.toDataURL('image/png'),
-                'PNG',
-                margin,
-                margin,
-                usableW,
-                sliceCanvas.height / ratio
-            );
-
-            offsetY += sliceHpx;
-        }
-
-        pdf.save('tickets_statistics.pdf');
-
-        btn.disabled = false;
-        btn.innerHTML = btnContent;
-    });
+    const downloadLowPdfButton = document.getElementById('ticketsstatisticsDownloadLowPdfBtn');
+    downloadLowPdfButton.addEventListener('click', (ev) => exportPageToPDF(ev, true));
 
     Array.from(document.getElementsByClassName('ts-reset-chart')).forEach(el => el.addEventListener('click', function () {
         const canvas = document.getElementById(this.dataset.canvas);
@@ -106,6 +36,87 @@ document.addEventListener('DOMContentLoaded', function () {
         console.error('Failed to load charts.'.error.message);
     }
 });
+
+/**
+ * 
+ * @param {Event} event 
+ * @param {boolean} lowQuality Default `false`
+ */
+async function exportPageToPDF(event, lowQuality = false) {
+    const btn = event.currentTarget;
+    const btnContent = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="ti ti-loader ti-spin"></i> ' + __('Generating...', 'ticketsstatistics');
+
+    const { jsPDF } = window.jspdf;
+
+    const content = document.getElementById('ts-content');
+
+    // Crée un bandeau "Generated on..." visible uniquement dans le clone
+    const banner = document.createElement('div');
+    banner.id = 'ts-pdf-banner';
+    banner.style.cssText = 'padding:8px 12px;background:#f8f9fa;border-bottom:1px solid #dee2e6;font-size:13px;color:#555;';
+    banner.innerHTML = `<i>Generated on ${new Date().toLocaleString()}</i>`;
+
+    const canvas = await html2canvas(content, {
+        scale: lowQuality ? 1 : 2,
+        backgroundColor: '#ffffff',
+        useCORS: true,
+        logging: false,
+        onclone: (clonedDoc) => {
+            // Insère le bandeau en haut du contenu cloné
+            const clonedContent = clonedDoc.getElementById('ts-content');
+            clonedContent.insertBefore(banner, clonedContent.firstChild);
+
+            // Cache le bouton dans le clone
+            const clonedBtn = clonedDoc.getElementById('ts-download-btn-group');
+            if (clonedBtn) clonedBtn.style.display = 'none';
+        }
+    });
+
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const pageW = pdf.internal.pageSize.getWidth();
+    const pageH = pdf.internal.pageSize.getHeight();
+    const margin = 10;
+    const usableW = pageW - margin * 2;
+
+    // Découpe l'image en pages si le contenu est plus grand qu'une page A4
+    const imgW = canvas.width;
+    const imgH = canvas.height;
+    const ratio = imgW / usableW;
+    const sliceH = pageH - margin * 2; // hauteur d'une page en mm
+    const sliceHpx = sliceH * ratio;     // même hauteur en pixels
+    let offsetY = 0;
+
+    while (offsetY < imgH) {
+        if (offsetY > 0) pdf.addPage();
+
+        // Crée un canvas temporaire pour la tranche
+        const sliceCanvas = document.createElement('canvas');
+        sliceCanvas.width = imgW;
+        sliceCanvas.height = Math.min(sliceHpx, imgH - offsetY);
+
+        const ctx = sliceCanvas.getContext('2d');
+        ctx.drawImage(canvas, 0, -offsetY);
+
+        const imageFormat = lowQuality ? 'jpeg' : 'png';
+        pdf.addImage(
+            sliceCanvas.toDataURL('image/' + imageFormat),
+            imageFormat.toUpperCase(),
+            margin,
+            margin,
+            usableW,
+            sliceCanvas.height / ratio
+        );
+
+        offsetY += sliceHpx;
+    }
+
+    pdf.save('tickets_statistics.pdf');
+
+    btn.disabled = false;
+    btn.innerHTML = btnContent;
+}
 
 function initCounterCardsModalLinks() {
     const statusGroupByCounter = {
