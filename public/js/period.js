@@ -112,7 +112,26 @@ async function exportPageToPDF(event, lowQuality = false) {
         offsetY += sliceHpx;
     }
 
-    pdf.save('tickets_statistics.pdf');
+    const selectedPeriod = document.querySelector('#ts-period option:checked');
+    let selectedPeriodText = selectedPeriod?.textContent || '';
+    if (selectedPeriod.value === 'custom') {
+        const from = document.getElementById('ts-date-from').value;
+        const to = document.getElementById('ts-date-to').value;
+        if (from && to) {
+            const fromDate = new Date(from);
+            const toDate = new Date(to);
+            if (!isNaN(fromDate) && !isNaN(toDate)) {
+                const options = { year: 'numeric', month: 'short', day: 'numeric' };
+                const fromStr = fromDate.toLocaleDateString(undefined, options);
+                const toStr = toDate.toLocaleDateString(undefined, options);
+                selectedPeriodText = `${fromStr} - ${toStr}`;
+            }
+        }
+    }
+    const title = __('Tickets Statistics', 'ticketsstatistics') + (selectedPeriodText ? ` - ${selectedPeriodText}` : '');
+    const author = 'Brayan Tiwa';
+    pdf.setProperties({ title, author });
+    pdf.save(title + '.pdf');
 
     btn.disabled = false;
     btn.innerHTML = btnContent;
