@@ -255,18 +255,18 @@ require_once(__DIR__ . '/../../../inc/includes.php');
             <div class="row g-3 mb-3">
                 <div class="col-md-4">
                     <div class="border-end">
-                        <canvas id="chart-city-new" style="max-height:280px">
+                        <canvas id="chart-city-new" style="height:280px; max-height:280px">
                         </canvas>
                     </div>
                 </div>
                 <div class="col-md-4">
                     <div class="border-end">
-                        <canvas id="chart-city-resolved" style="max-height:280px">
+                        <canvas id="chart-city-resolved" style="height:280px; max-height:280px">
                         </canvas>
                     </div>
                 </div>
                 <div class="col-md-4">
-                    <canvas id="chart-city-progress" style="max-height:280px">
+                    <canvas id="chart-city-progress" style="height:280px; max-height:280px">
                     </canvas>
                 </div>
             </div>
