@@ -59,7 +59,7 @@ async function exportPageToPDF(event, lowQuality = false) {
     banner.innerHTML = `<i>Generated on ${new Date().toLocaleString()}</i>`;
 
     const canvas = await html2canvas(content, {
-        scale: lowQuality ? 1 : 2,
+        scale: lowQuality ? 1 : 1.3,
         backgroundColor: '#ffffff',
         useCORS: true,
         logging: false,
