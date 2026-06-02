@@ -116,7 +116,12 @@
             var col = document.createElement('div');
             col.className = 'col';
             col.innerHTML =
-                '<div class="card text-center h-100" style="border-top:3px solid ' + color + '">' +
+                '<div class="card text-center h-100"'
+                + ' data-ts-tl-counter-key="' + c.id + '"'
+                + ' data-ts-tl-counter-label="' + c.label() + '"'
+                + ' style="border-top:3px solid ' + color + ';cursor:pointer"'
+                + ' onmouseenter="this.style.boxShadow=\'0 1px 4px ' + color + '\';"'
+                + ' onmouseleave="this.style.boxShadow=\'0 6px 16px rgba(15, 23, 42, 0.05)\';">' +
                 '<div class="card-body py-3">' +
                 '<i class="ti ' + c.icon + ' fs-1 mb-1" style="color:' + color + '"></i>' +
                 '<div class="display-6 fw-bold ts-ticketlist-count" data-status="' + c.id + '">\u2014</div>' +
@@ -265,6 +270,23 @@
 
         // Initial load with default period
         loadCounters('last30');
+
+        // Bind counter cards to the tickets modal
+        if (window.tsTicketlistCardsModal && typeof window.tsTicketlistCardsModal.init === 'function') {
+            window.tsTicketlistCardsModal.init({
+                cardSelector: '#ts-counters-ticketlist [data-ts-tl-counter-key]',
+                getFilters: function () {
+                    var p = document.getElementById('ts-ticketlist-period');
+                    var df = document.getElementById('ts-ticketlist-date-from');
+                    var dt = document.getElementById('ts-ticketlist-date-to');
+                    return {
+                        period: p ? p.value : 'last30',
+                        date_from: df ? df.value : '',
+                        date_to: dt ? dt.value : ''
+                    };
+                }
+            });
+        }
     }
 
     // Patch already-rendered label text once the locale domain arrives.

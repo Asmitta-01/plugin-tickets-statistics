@@ -133,7 +133,12 @@ function plugin_ticketsstatistics_pre_item_list(array $params): void
         $statusId = htmlspecialchars($c['id'], ENT_QUOTES, 'UTF-8');
         $label    = htmlspecialchars($c['label'], ENT_QUOTES, 'UTF-8');
         echo '<div class="col">';
-        echo '<div class="card text-center h-100" style="border-top: 3px solid ' . $color . '">';
+        echo '<div class="card text-center h-100"'
+            . ' data-ts-tl-counter-key="' . $statusId . '"'
+            . ' data-ts-tl-counter-label="' . $label . '"'
+            . ' style="border-top: 3px solid ' . $color . '; cursor: pointer"'
+            . ' onmouseenter="this.style.boxShadow=\'0 1px 4px ' . $color . '\';"'
+            . ' onmouseleave="this.style.boxShadow=\'0 6px 16px rgba(15, 23, 42, 0.05)\';">';
         echo '<div class="card-body py-3">';
         echo '<i class="ti ' . $icon . ' fs-1 mb-1" style="color:' . $color . '"></i>';
         echo '<div class="display-6 fw-bold ts-ticketlist-count" data-status="' . $statusId . '">—</div>';
@@ -174,7 +179,7 @@ function plugin_ticketsstatistics_pre_item_list(array $params): void
     $encodedBaseUrl = json_encode($CFG_GLPI['root_doc'] . '/plugins/ticketsstatistics/ajax/data.php');
     echo <<<JS
     <script>
-    (function () {
+    document.addEventListener('DOMContentLoaded', function () {
         var baseUrl = {$encodedBaseUrl};
 
         function removeGlpiMiniDashboard() {
@@ -261,7 +266,24 @@ function plugin_ticketsstatistics_pre_item_list(array $params): void
 
         // Initial load
         loadCounters('last30');
-    })();
+
+        // Bind counter cards to the tickets modal (shared module)
+        if (window.tsTicketlistCardsModal && typeof window.tsTicketlistCardsModal.init === 'function') {
+            window.tsTicketlistCardsModal.init({
+                cardSelector: '#ts-counters-ticketlist [data-ts-tl-counter-key]',
+                getFilters: function () {
+                    var p  = document.getElementById('ts-ticketlist-period');
+                    var df = document.getElementById('ts-ticketlist-date-from');
+                    var dt = document.getElementById('ts-ticketlist-date-to');
+                    return {
+                        period:    p  ? p.value  : 'last30',
+                        date_from: df ? df.value : '',
+                        date_to:   dt ? dt.value : ''
+                    };
+                }
+            });
+        }
+    });
     </script>
     JS;
 }

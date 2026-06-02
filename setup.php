@@ -62,13 +62,18 @@ function plugin_init_ticketsstatistics(): void
     $PLUGIN_HOOKS[\Glpi\Plugin\Hooks::CHANGE_PROFILE]['ticketsstatistics'] = 'plugin_ticketsstatistics_change_profile';
     if ($isGLPI11) {
         $PLUGIN_HOOKS[\Glpi\Plugin\Hooks::PRE_ITEM_LIST]['ticketsstatistics'] = 'plugin_ticketsstatistics_pre_item_list';
-    } elseif (
+    }
+    if (
         \Session::getCurrentInterface() === 'central'
         && strpos($uri, 'front/ticket.php') !== false
     ) {
-        // GLPI 10: PRE_ITEM_LIST does not exist; inject the counters widget via JS instead.
-        $PLUGIN_HOOKS[\Glpi\Plugin\Hooks::ADD_JAVASCRIPT]['ticketsstatistics'][] = 'public/js/ticketlist-glpi10.js';
+        $PLUGIN_HOOKS[\Glpi\Plugin\Hooks::ADD_JAVASCRIPT]['ticketsstatistics'][] = $pluginAssetsRoot . 'js/ticketlist-cards-modal.js';
+        if (!$isGLPI11) {
+            // GLPI 10: PRE_ITEM_LIST does not exist; inject the counters widget via JS instead.
+            $PLUGIN_HOOKS[\Glpi\Plugin\Hooks::ADD_JAVASCRIPT]['ticketsstatistics'][] = 'public/js/ticketlist-glpi10.js';
+        }
     }
+
     if (\Session::haveRight("dashboard", READ)) {
         $PLUGIN_HOOKS[\Glpi\Plugin\Hooks::REDEFINE_MENUS]['ticketsstatistics'] = 'plugin_ticketsstatistics_redefine_menus';
         $PLUGIN_HOOKS[\Glpi\Plugin\Hooks::DISPLAY_CENTRAL]['ticketsstatistics'] = 'plugin_ticketsstatistics_display_central';
