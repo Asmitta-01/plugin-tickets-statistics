@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: TicketsStatistics\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-04-10 11:11+0100\n"
-"PO-Revision-Date: 2026-06-05 11:30+0100\n"
+"PO-Revision-Date: 2026-06-05 12:32+0100\n"
 "Last-Translator: Codex\n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -114,8 +114,8 @@ msgid "Total tickets received in the period"
 msgstr "Total de tickets reçus dans la période sélectionnée"
 
 #: front/dashboard.php:110
-msgid "Open tickets sent to MISSC"
-msgstr "Tickets ouverts envoyés au MISSC"
+msgid "Tickets sent to MISSC"
+msgstr "Tickets envoyés au MISSC"
 
 #: front/dashboard.php:79 front/dashboard.php:88 front/dashboard.php:93
 #: front/dashboard.php:135

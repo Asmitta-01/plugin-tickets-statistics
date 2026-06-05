@@ -107,7 +107,7 @@ require_once(__DIR__ . '/../../../inc/includes.php');
         ];
         if (\Plugin::isPluginActive('cfaomobility')) {
             // Insert the MISSC counter before the 'Resolved / Closed' counter
-            array_splice($bigCounters, 3, 0, [['id' => 'missc',  'label' => __('MISSC', 'cfaomobility'),  'tooltip' => __('Open tickets sent to MISSC', 'ticketsstatistics'), 'icon' => 'ti-notebook']]);
+            array_splice($bigCounters, 3, 0, [['id' => 'missc',  'label' => __('MISSC', 'cfaomobility'),  'tooltip' => __('Tickets sent to MISSC', 'ticketsstatistics'), 'icon' => 'ti-notebook']]);
         }
         ?>
 

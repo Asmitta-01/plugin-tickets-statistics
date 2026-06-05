@@ -60,7 +60,6 @@ if ($includeMissc) {
             $misscTable => ['ON' => [$misscTable => 'tickets_id', $table => 'id']]
         ],
         'WHERE' => $where + [
-            "$misscTable.missc_status" => ['new', 'in_progress'],
             "NOT" => ["$misscTable.missc_number" => null],
             "$misscTable.missc_number" => ['<>', '']
         ],

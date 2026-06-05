@@ -116,7 +116,7 @@ msgid "Total tickets received in the period"
 msgstr ""
 
 #: front/dashboard.php:110
-msgid "Open tickets sent to MISSC"
+msgid "Tickets sent to MISSC"
 msgstr ""
 
 #: front/dashboard.php:79 front/dashboard.php:88 front/dashboard.php:93
