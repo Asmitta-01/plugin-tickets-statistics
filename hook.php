@@ -91,6 +91,10 @@ function plugin_ticketsstatistics_pre_item_list(array $params): void
         ['id' => 'solved_closed', 'label' => __('Resolved / Closed', 'ticketsstatistics'), 'icon' => 'ti-checkbox'],
         ['id' => 'total',         'label' => __('Total tickets', 'ticketsstatistics'),      'icon' => 'ti-archive'],
     ];
+    if (\Plugin::isPluginActive('cfaomobility')) {
+        // Insert the MISSC counter before the 'Resolved / Closed' counter
+        array_splice($counters, 3, 0, [['id' => 'missc',  'label' => __('MISSC', 'cfaomobility'), 'icon' => 'ti-notebook']]);
+    }
 
     $periods = \GlpiPlugin\Ticketsstatistics\PeriodFilter::getAvailablePeriods();
 

@@ -21,6 +21,7 @@
         incoming: '#49bf4d',
         assigned: '#49bf4d',
         waiting: '#ffa500',
+        missc: '#ff8000',
         solved_closed: '#C00000',
         total: '#555555'
     };
@@ -34,6 +35,11 @@
         { id: 'solved_closed', label: function () { return __('Resolved / Closed', 'ticketsstatistics'); }, icon: 'ti-checkbox' },
         { id: 'total', label: function () { return __('Total tickets', 'ticketsstatistics'); }, icon: 'ti-archive' }
     ];
+
+    if (window.GLPI_PLUGINS_PATH && window.GLPI_PLUGINS_PATH['cfaomobility']) {
+        // Insert the MISSC counter before the 'Resolved / Closed' counter
+        counters.splice(3, 0, { id: 'missc', label: function () { return __('MISSC', 'cfaomobility'); }, icon: 'ti-notebook' });
+    }
 
     // Period selector options
     var periods = [
