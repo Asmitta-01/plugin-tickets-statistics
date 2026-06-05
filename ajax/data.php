@@ -61,6 +61,8 @@ if ($includeMissc) {
         ],
         'WHERE' => $where + [
             "$misscTable.missc_status" => ['new', 'in_progress'],
+            "NOT" => ["$misscTable.missc_number" => null],
+            "$misscTable.missc_number" => ['<>', '']
         ],
     ]);
     $counters['missc'] = (int) $iter->current()['cpt'];
