@@ -24,6 +24,7 @@ function ticketsstatistics_get_status_groups(): array
         'incoming'      => [\Ticket::INCOMING],
         'assigned'      => [\Ticket::ASSIGNED],
         'waiting'       => [\Ticket::WAITING],
+        'missc'         => [\Ticket::INCOMING, \Ticket::ASSIGNED, \Ticket::WAITING], // Statuses of tickets sent to MISSC
         'solved_closed' => [\Ticket::SOLVED, \Ticket::CLOSED],
         'resolved'      => [\Ticket::SOLVED, \Ticket::CLOSED],
         'in_progress'   => [\Ticket::ASSIGNED, \Ticket::WAITING, \Ticket::ACCEPTED, \Ticket::OBSERVED],
@@ -176,6 +177,14 @@ switch ($type) {
         break;
 
     case 'counter':
+        if ($status_group === 'missc') {
+            $misscTable = 'glpi_plugin_cfaomobility_misscs';
+            if ($DB->tableExists($misscTable)) {
+                $joins[$misscTable] = ['ON' => [$misscTable => 'tickets_id', $table => 'id']];
+                $where["$misscTable.missc_status"] = ['new', 'in_progress'];
+            }
+            break;
+        }
         break;
 
     default:

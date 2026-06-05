@@ -64,6 +64,10 @@ msgstr ""
 msgid "Download PDF"
 msgstr ""
 
+#: front/dashboard.php:92
+msgid "Download PDF in low quality"
+msgstr ""
+
 #: front/dashboard.php:57 public/js/period.js:232 public/js/period.js:299
 #: ajax/tickets.php:111 public/js/period.js:257 public/js/period.js:335
 #: front/dashboard.php:64 front/dashboard.php:122 front/dashboard.php:190
@@ -89,6 +93,30 @@ msgstr ""
 
 #: front/dashboard.php:61 front/dashboard.php:68 src/TicketCityExport.php:49
 msgid "Closed"
+msgstr ""
+
+#: front/dashboard.php:102
+msgid "Tickets still in New status"
+msgstr ""
+
+#: front/dashboard.php:103
+msgid "Assigned tickets"
+msgstr ""
+
+#: front/dashboard.php:104
+msgid "Pending tickets"
+msgstr ""
+
+#: front/dashboard.php:105
+msgid "Resolved or closed tickets"
+msgstr ""
+
+#: front/dashboard.php:106
+msgid "Total tickets received in the period"
+msgstr ""
+
+#: front/dashboard.php:110
+msgid "Open tickets sent to MISSC"
 msgstr ""
 
 #: front/dashboard.php:79 front/dashboard.php:88 front/dashboard.php:93

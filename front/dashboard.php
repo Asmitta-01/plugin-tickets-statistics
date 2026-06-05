@@ -98,15 +98,20 @@ require_once(__DIR__ . '/../../../inc/includes.php');
 
     <!-- Big numbers row — creation-date view -->
     <div class="row g-3 mb-4" id="ts-counters-default">
-        <?php foreach (
-            [
-                ['id' => 'incoming', 'label' => __('New'),     'icon' => 'ti-ticket'],
-                ['id' => 'assigned', 'label' => __('Assigned'), 'icon' => 'ti-users'],
-                ['id' => 'waiting',  'label' => __('Pending'),  'icon' => 'ti-player-pause'],
-                ['id' => 'solved_closed',   'label' => __('Resolved / Closed', 'ticketsstatistics'),   'icon' => 'ti-checkbox'],
-                ['id' => 'total',   'label' => __('Total tickets', 'ticketsstatistics'),   'icon' => 'ti-archive'],
-            ] as $c
-        ): ?>
+        <?php $bigCounters = [
+            ['id' => 'incoming', 'label' => __('New'), 'tooltip' => __('Tickets still in New status', 'ticketsstatistics'), 'icon' => 'ti-ticket'],
+            ['id' => 'assigned', 'label' => __('Assigned'), 'tooltip' => __('Assigned tickets', 'ticketsstatistics'), 'icon' => 'ti-users'],
+            ['id' => 'waiting', 'label' => __('Pending'),  'tooltip' => __('Pending tickets', 'ticketsstatistics'), 'icon' => 'ti-player-pause'],
+            ['id' => 'solved_closed',   'label' => __('Resolved / Closed', 'ticketsstatistics'),   'tooltip' => __('Resolved or closed tickets', 'ticketsstatistics'), 'icon' => 'ti-checkbox'],
+            ['id' => 'total', 'label' => __('Total tickets', 'ticketsstatistics'),   'tooltip' => __('Total tickets received in the period', 'ticketsstatistics'), 'icon' => 'ti-archive'],
+        ];
+        if (\Plugin::isPluginActive('cfaomobility')) {
+            // Insert the MISSC counter before the 'Resolved / Closed' counter
+            array_splice($bigCounters, 3, 0, [['id' => 'missc',  'label' => __('MISSC', 'cfaomobility'),  'tooltip' => __('Open tickets sent to MISSC', 'ticketsstatistics'), 'icon' => 'ti-notebook']]);
+        }
+        ?>
+
+        <?php foreach ($bigCounters as $c): ?>
             <div class="col">
                 <?php $color = GlpiPlugin\Ticketsstatistics\TicketsStatistics::getStatusColor($c['id']); ?>
                 <div
@@ -117,14 +122,15 @@ require_once(__DIR__ . '/../../../inc/includes.php');
                     role="button"
                     tabindex="0"
                     data-counter-key="<?= htmlspecialchars($c['id'], ENT_QUOTES, 'UTF-8') ?>"
-                    data-counter-label="<?= htmlspecialchars($c['label'], ENT_QUOTES, 'UTF-8') ?>"
-                    title="<?= __('Tickets', 'ticketsstatistics') ?>">
+                    data-counter-label="<?= htmlspecialchars($c['label'], ENT_QUOTES, 'UTF-8') ?>">
                     <div class="card-body py-3">
                         <i class="ti <?= $c['icon'] ?> fs-1 mb-1" style="color:<?= $color ?>"></i>
                         <div class="display-6 fw-bold ts-count" data-status="<?= $c['id'] ?>">—</div>
-                        <div class="text-muted small w-auto">
+                        <div class="text-muted small w-auto" title="<?= $c['tooltip'] ?>" data-bs-toggle="tooltip">
                             <?php if ($c['id'] == 'assigned'): ?>
-                                <i class="itilstatus far fa-circle assigned me-1" title="<?= Ticket::getStatus(Ticket::ASSIGNED) ?>" data-bs-toggle="tooltip"></i>
+                                <i class="itilstatus far fa-circle assigned me-1"></i>
+                            <?php elseif ($c['id'] == 'missc'): ?>
+                                <i class="far fa-circle me-1" style="color:<?= $color ?>;"></i>
                             <?php endif; ?>
                             <?= $c['label'] ?>
                         </div>

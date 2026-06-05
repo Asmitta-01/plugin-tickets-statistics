@@ -143,6 +143,7 @@ function initCounterCardsModalLinks() {
         assigned: 'assigned',
         waiting: 'waiting',
         solved_closed: 'solved_closed',
+        missc: 'missc',
         total: '',
     };
 

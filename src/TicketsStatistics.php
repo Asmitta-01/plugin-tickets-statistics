@@ -39,6 +39,7 @@ class TicketsStatistics
             'incoming' => '#49bf4d',
             'assigned' => '#49bf4d',
             'waiting' => '#ffa500',
+            'missc' => '#ff8000',
             'solved_closed' => '#C00000',
             'total' => '#555555',
         ];

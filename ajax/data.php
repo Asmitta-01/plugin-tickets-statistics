@@ -18,6 +18,9 @@ $DB    = \DBConnection::getReadConnection();
 $table = \Ticket::getTable();
 $where = ["$table.is_deleted" => 0] + getEntitiesRestrictCriteria($table);
 
+$misscTable = 'glpi_plugin_cfaomobility_misscs';
+$includeMissc = $DB->tableExists($misscTable) && \Plugin::isPluginActive('cfaomobility');
+
 // Get the period and category filter from the request
 $period = $_GET['period'] ?? 'last30';
 $categoryId = (int) ($_GET['category'] ?? 0);
@@ -48,6 +51,20 @@ foreach (
 }
 $counters['total'] = array_sum($counters);
 $counters['solved_closed'] = $counters['solved'] + $counters['closed'];
+
+if ($includeMissc) {
+    $iter = $DB->request([
+        'COUNT' => 'cpt',
+        'FROM'  => $table,
+        'LEFT JOIN' => [
+            $misscTable => ['ON' => [$misscTable => 'tickets_id', $table => 'id']]
+        ],
+        'WHERE' => $where + [
+            "$misscTable.missc_status" => ['new', 'in_progress'],
+        ],
+    ]);
+    $counters['missc'] = (int) $iter->current()['cpt'];
+}
 
 // --- By priority ---
 $priority = ['labels' => [], 'values' => []];
