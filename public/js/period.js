@@ -228,40 +228,99 @@ function loadCharts() {
 
             Chart.register(ChartDataLabels);
 
-            // Priority donut
-            new Chart(document.getElementById('chart-priority'), {
-                type: 'doughnut',
-                data: {
-                    labels: data.priority.labels,
-                    datasets: [{
-                        data: data.priority.values,
-                        backgroundColor: [
-                            '#e74c3c', '#e67e22', '#f1c40f', '#2ecc71', '#3498db', '#9b59b6'
-                        ]
-                    }]
-                },
-                options: {
-                    onClick: function (_, elements) {
-                        if (!elements.length) {
-                            return;
-                        }
+            // Missc donut
+            if (data.misscs) {
+                new Chart(document.getElementById('chart-missc'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: data.misscs.labels.map(label => {
+                            switch (label) {
+                                case 'new': return __('New', 'ticketsstatistics');
+                                case 'in_progress': return __('In progress', 'ticketsstatistics');
+                                case 'resolved': return __('Resolved / Closed', 'ticketsstatistics');
+                                default: return label;
+                            }
+                        }),
+                        datasets: [{
+                            data: data.misscs.values,
+                            backgroundColor: ['#49bf4d', '#ffa500', '#c00000'],
+                            hoverOffset: 12
+                        }]
+                    },
+                    options: {
+                        onClick: function (_, elements) {
+                            if (!elements.length) {
+                                return;
+                            }
 
-                        openTicketsModal({
-                            type: 'priority',
-                            label: data.priority.labels[elements[0].index]
-                        });
-                    },
-                    plugins: {
-                        legend: {
-                            position: 'right'
+                            openTicketsModal({
+                                type: 'missc',
+                                status_group: data.misscs.labels[elements[0].index]
+                            });
                         },
-                        datalabels: {
-                            color: '#fff',
-                        }
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    usePointStyle: true,
+                                    pointStyle: 'circle',
+                                },
+                                onClick: function (e, legendItem, legend) {
+                                    const index = legendItem.index;
+                                    openTicketsModal({
+                                        type: 'missc',
+                                        status_group: data.misscs.labels[index]
+                                    });
+                                }
+                            },
+                            datalabels: {
+                                color: '#fff',
+                                formatter: function (value, context) {
+                                    return value > 0 ? value : '';
+                                }
+                            }
+                        },
+                        maintainAspectRatio: false
+                    }
+                });
+            }
+
+            // Priority donut
+            if (document.getElementById('chart-priority') !== null) {
+                new Chart(document.getElementById('chart-priority'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: data.priority.labels,
+                        datasets: [{
+                            data: data.priority.values,
+                            backgroundColor: [
+                                '#e74c3c', '#e67e22', '#f1c40f', '#2ecc71', '#3498db', '#9b59b6'
+                            ]
+                        }]
                     },
-                    maintainAspectRatio: false
-                }
-            });
+                    options: {
+                        onClick: function (_, elements) {
+                            if (!elements.length) {
+                                return;
+                            }
+
+                            openTicketsModal({
+                                type: 'priority',
+                                label: data.priority.labels[elements[0].index]
+                            });
+                        },
+                        plugins: {
+                            legend: {
+                                position: 'right'
+                            },
+                            datalabels: {
+                                color: '#fff',
+                            }
+                        },
+                        maintainAspectRatio: false
+                    }
+                });
+            }
 
             // Category bar
             new Chart(document.getElementById('chart-category'), {

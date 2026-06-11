@@ -186,6 +186,13 @@ switch ($type) {
             break;
         }
         break;
+    case 'missc':
+        $misscTable = 'glpi_plugin_cfaomobility_misscs';
+        if ($DB->tableExists($misscTable)) {
+            $joins[$misscTable] = ['ON' => [$misscTable => 'tickets_id', $table => 'id']];
+            $where["$misscTable.missc_number"] = ['<>', ''];
+            break;
+        }
 
     default:
         ticketsstatistics_json([

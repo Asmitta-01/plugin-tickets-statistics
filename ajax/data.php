@@ -67,6 +67,43 @@ if ($includeMissc) {
     $counters['missc'] = (int) $iter->current()['cpt'];
 }
 
+if ($includeMissc) {
+    // Total tickets with a missc number + breakdown by status
+    $misscs = [
+        'labels' => ['new', 'in_progress', 'resolved'],
+        'values' => [0, 0, 0],
+    ];
+    foreach (
+        $DB->request([
+            'SELECT' => [
+                "$table.status",
+                'COUNT DISTINCT'  => "$table.id AS cpt",
+            ],
+            'FROM'  => $table,
+            'LEFT JOIN' => [
+                $misscTable => ['ON' => [$misscTable => 'tickets_id', $table => 'id']]
+            ],
+            'WHERE' => $where + [
+                "NOT" => ["$misscTable.missc_number" => null],
+                "$misscTable.missc_number" => ['<>', '']
+            ],
+            'GROUPBY' => "$table.status",
+        ]) as $row
+    ) {
+        $status = (int) $row['status'];
+        $count  = (int) $row['cpt'];
+        $label = 'in_progress';
+        if (in_array($status, [\Ticket::INCOMING], true)) {
+            $label = 'new';
+        } elseif (in_array($status, [\Ticket::SOLVED, \Ticket::CLOSED], true)) {
+            $label = 'resolved';
+        }
+
+        $labelIndex = array_search($label, $misscs['labels']);
+        $misscs['values'][$labelIndex] += $count;
+    }
+}
+
 // --- By priority ---
 $priority = ['labels' => [], 'values' => []];
 foreach (
@@ -368,4 +405,4 @@ $solvedView = [
     'avg_ttr'            => $solvedAvgTtr,
 ];
 
-echo json_encode(compact('counters', 'priority', 'category', 'cityData', 'perday', 'resolution', 'solvedView'));
+echo json_encode(compact('counters', 'priority', 'misscs', 'category', 'cityData', 'perday', 'resolution', 'solvedView'));

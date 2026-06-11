@@ -13,6 +13,7 @@ require_once(__DIR__ . '/../../../inc/includes.php');
 \Session::checkCentralAccess();
 
 \Html::header(__('Tickets Statistics', 'ticketsstatistics'), '', 'helpdesk');
+$includeMissc = \Plugin::isPluginActive('cfaomobility');
 ?>
 
 <div class="container-fluid mt-3" id="ts-content">
@@ -105,7 +106,7 @@ require_once(__DIR__ . '/../../../inc/includes.php');
             ['id' => 'solved_closed',   'label' => __('Resolved / Closed', 'ticketsstatistics'),   'tooltip' => __('Resolved or closed tickets', 'ticketsstatistics'), 'icon' => 'ti-checkbox'],
             ['id' => 'total', 'label' => __('Total tickets', 'ticketsstatistics'),   'tooltip' => __('Total tickets received in the period', 'ticketsstatistics'), 'icon' => 'ti-archive'],
         ];
-        if (\Plugin::isPluginActive('cfaomobility')) {
+        if ($includeMissc) {
             // Insert the MISSC counter before the 'Resolved / Closed' counter
             array_splice($bigCounters, 3, 0, [['id' => 'missc',  'label' => __('MISSC', 'cfaomobility'),  'tooltip' => __('Tickets sent to MISSC', 'ticketsstatistics'), 'icon' => 'ti-notebook']]);
         }
@@ -166,10 +167,10 @@ require_once(__DIR__ . '/../../../inc/includes.php');
         <div class="col-md-4">
             <div class="card shadow-sm h-100">
                 <div class="card-header d-flex align-items-center justify-content-between">
-                    <?= __('Tickets by priority', 'ticketsstatistics') ?>
+                    <?= $includeMissc ? __('Tickets sent to MISSC', 'ticketsstatistics') . ' (' . __('Status', 'ticketsstatistics') . ')' : __('Tickets by priority', 'ticketsstatistics') ?>
                 </div>
                 <div class="card-body d-flex align-items-center justify-content-center">
-                    <canvas id="chart-priority" style="max-height:280px">
+                    <canvas id="<?= $includeMissc ? 'chart-missc' : 'chart-priority' ?>" style="height:280px; max-height:280px">
                     </canvas>
                 </div>
             </div>
