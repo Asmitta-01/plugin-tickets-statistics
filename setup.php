@@ -32,7 +32,7 @@
  */
 
 /** @phpstan-ignore theCodingMachineSafe.function (safe to assume this isn't already defined) */
-define('PLUGIN_TICKETSSTATISTICS_VERSION', '0.4.1');
+define('PLUGIN_TICKETSSTATISTICS_VERSION', '0.4.2');
 
 // Minimal GLPI version, inclusive
 /** @phpstan-ignore theCodingMachineSafe.function (safe to assume this isn't already defined) */
@@ -97,7 +97,8 @@ function plugin_init_ticketsstatistics(): void
 
         $periodJsPath = GLPI_ROOT . '/plugins/ticketsstatistics/public/js/period.js';
         $version = file_exists($periodJsPath) ? filemtime($periodJsPath) : md5(PLUGIN_TICKETSSTATISTICS_VERSION);
-        $PLUGIN_HOOKS[\Glpi\Plugin\Hooks::ADD_JAVASCRIPT]['ticketsstatistics'][] = $pluginAssetsRoot . 'js/period.js?version=' . $version;
+        $ext = $isGLPI11 ? '?version=' . $version : '';
+        $PLUGIN_HOOKS[\Glpi\Plugin\Hooks::ADD_JAVASCRIPT]['ticketsstatistics'][] = $pluginAssetsRoot . 'js/period.js' . $ext;
     }
 
     // Central dashboard stats widget JS
