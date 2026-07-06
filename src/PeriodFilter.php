@@ -109,10 +109,10 @@ class PeriodFilter
                 $where[] = new \QueryExpression("YEAR($table.`date`) = YEAR(CURDATE()) - 1");
                 break;
             case 'custom':
-                if ($dateFrom && \DateTime::createFromFormat('Y-m-d', $dateFrom) !== false) {
+                if ($dateFrom && self::isValidDate($dateFrom)) {
                     $where[] = new \QueryExpression("$table.`date` >= '$dateFrom'");
                 }
-                if ($dateTo && \DateTime::createFromFormat('Y-m-d', $dateTo) !== false) {
+                if ($dateTo && self::isValidDate($dateTo)) {
                     $where[] = new \QueryExpression("$table.`date` <= '$dateTo 23:59:59'");
                 }
                 break;
@@ -152,10 +152,10 @@ class PeriodFilter
                 $where[] = new \Glpi\DBAL\QueryExpression("YEAR($col) = YEAR(CURDATE()) - 1");
                 break;
             case 'custom':
-                if ($dateFrom && \DateTime::createFromFormat('Y-m-d', $dateFrom) !== false) {
+                if ($dateFrom && self::isValidDate($dateFrom)) {
                     $where[] = new \Glpi\DBAL\QueryExpression("$col >= '$dateFrom'");
                 }
-                if ($dateTo && \DateTime::createFromFormat('Y-m-d', $dateTo) !== false) {
+                if ($dateTo && self::isValidDate($dateTo)) {
                     $where[] = new \Glpi\DBAL\QueryExpression("$col <= '$dateTo 23:59:59'");
                 }
                 break;
@@ -167,7 +167,7 @@ class PeriodFilter
 
     public static function applySolvedDateBackward(array &$where, string $table, string $period, ?string $dateFrom = null, ?string $dateTo = null): void
     {
-        $col = "COALESCE(NULLIF($table.`solvedate`, '0000-00-00 00:00:00'), $table.`closedate`)";
+        $col = "COALESCE(NULLIF(`$table`.`solvedate`, '0000-00-00 00:00:00'), `$table`.`closedate`)";
 
         switch ($period) {
             case 'last7':
@@ -186,16 +186,21 @@ class PeriodFilter
                 $where[] = new \QueryExpression("YEAR($col) = YEAR(CURDATE()) - 1");
                 break;
             case 'custom':
-                if ($dateFrom && \DateTime::createFromFormat('Y-m-d', $dateFrom) !== false) {
+                if ($dateFrom && self::isValidDate($dateFrom)) {
                     $where[] = new \QueryExpression("$col >= '$dateFrom'");
                 }
-                if ($dateTo && \DateTime::createFromFormat('Y-m-d', $dateTo) !== false) {
-                    $where[] = new \QueryExpression("$col <= '$dateTo 23:59:59'");
+                if ($dateTo && self::isValidDate($dateTo)) {
+                    $where[] = new \QueryExpression("$col < DATE_ADD('$dateTo', INTERVAL 1 DAY)");
                 }
                 break;
             default:
                 $where[] = new \QueryExpression("$col >= DATE_SUB(NOW(), INTERVAL 30 DAY)");
                 break;
         }
+    }
+
+    private static function isValidDate(string $date): bool
+    {
+        return \DateTime::createFromFormat('Y-m-d', $date) !== false;
     }
 }

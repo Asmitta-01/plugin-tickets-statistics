@@ -28,6 +28,15 @@ $categoryId = (int) ($_GET['category'] ?? 0);
 $dateFrom = $_GET['date_from'] ?? null;
 $dateTo   = $_GET['date_to']   ?? null;
 
+$isValidCustomDate = static function (?string $date): bool {
+    if (!is_string($date)) {
+        return false;
+    }
+
+    $dt = \DateTime::createFromFormat('Y-m-d', $date);
+    return $dt !== false && $dt->format('Y-m-d') === $date;
+};
+
 \GlpiPlugin\Ticketsstatistics\PeriodFilter::apply($where, $table, $period, $dateFrom, $dateTo);
 \GlpiPlugin\Ticketsstatistics\CategoryFilter::apply($where, $table, $categoryId);
 
@@ -282,6 +291,16 @@ $closedWhere = array_merge($where, [
     ),
 ]);
 
+if ($period === 'custom') {
+    $resolvedCol = "COALESCE(NULLIF($table.`solvedate`, '0000-00-00 00:00:00'), $table.`closedate`)";
+    if ($isValidCustomDate($dateFrom)) {
+        $closedWhere[] = new \QueryExpression("$resolvedCol >= '$dateFrom 00:00:00'");
+    }
+    if ($isValidCustomDate($dateTo)) {
+        $closedWhere[] = new \QueryExpression("$resolvedCol <= '$dateTo 23:59:59'");
+    }
+}
+
 $closedByDay = [];
 foreach (
     $DB->request([
@@ -316,6 +335,16 @@ $resolutionWhere = array_merge($where, [
         "($table.`solve_delay_stat` != 0 OR $table.`close_delay_stat` != 0)"
     ),
 ]);
+
+if ($period === 'custom') {
+    $resolvedCol = "COALESCE(NULLIF($table.`solvedate`, '0000-00-00 00:00:00'), $table.`closedate`)";
+    if ($isValidCustomDate($dateFrom)) {
+        $resolutionWhere[] = new \QueryExpression("$resolvedCol >= '$dateFrom 00:00:00'");
+    }
+    if ($isValidCustomDate($dateTo)) {
+        $resolutionWhere[] = new \QueryExpression("$resolvedCol <= '$dateTo 23:59:59'");
+    }
+}
 
 $resolutionRows = [];
 foreach (
@@ -379,17 +408,16 @@ $solvedTTRWhere = array_merge($solvedWhere, [
 ]);
 
 $solvedResolutionRows = [];
-foreach (
-    $DB->request([
-        'SELECT' => [
-            "$table.id",
-            "$table.solve_delay_stat",
-            "$table.close_delay_stat",
-        ],
-        'FROM'  => $table,
-        'WHERE' => $solvedTTRWhere,
-    ]) as $row
-) {
+$solvedResolutionIter = $DB->request([
+    'SELECT' => [
+        "$table.id",
+        "$table.solve_delay_stat",
+        "$table.close_delay_stat",
+    ],
+    'FROM'  => $table,
+    'WHERE' => $solvedTTRWhere,
+]);
+foreach ($solvedResolutionIter as $row) {
     $seconds = (int) $row['solve_delay_stat'] ?: (int) $row['close_delay_stat'];
     if ($seconds <= 0) continue;
     $solvedResolutionRows[] = round($seconds / 3600, 2);

@@ -2,7 +2,7 @@
 
 TicketsStatistics adds a dedicated reporting dashboard to GLPI for helpdesk ticket activity.
 
-Current release: 0.4.0
+Current release: 0.4.3
 
 The plugin provides:
 
@@ -19,6 +19,41 @@ The plugin provides:
 - software analytics on computers: top installed softwares and coverage (with/without selected software)
 - **stats widget embedded in the GLPI central dashboard** (Tab 0): ticket status doughnut, top requesters bar chart, tickets by town bar chart, and assets by type doughnut — all filterable by period
 - **resolved period view**: a toggle switch on the counters row (available on the main dashboard, the ticket list, and the central widget) that switches the big-number cards from the default creation-date view to a solved-date view showing tickets resolved/closed in the period, tickets opened in the period, and the average TTR for tickets resolved in that period
+
+## Data displayed (what each value means)
+
+This section explains the meaning of the values shown in the dashboard.
+
+- Period and category filters apply to all dashboard values.
+- In the default view, the period filter is based on ticket creation date (`tickets.date`).
+- In resolved period view, the period filter is based on resolved/closed date (`COALESCE(solvedate, closedate)`).
+
+### Counters (default view)
+
+- New, Assigned, Pending, Resolved/Closed: number of tickets currently in those statuses within the selected scope.
+- Total tickets: sum of status counters in the selected scope.
+- MISSC (when `cfaomobility` is active): number of tickets with a non-empty MISSC number.
+
+### Opened vs Closed per day
+
+- Opened per day: count of tickets by creation day (`DATE(tickets.date)`).
+- Closed per day: count of tickets by resolution/closure day (`DATE(COALESCE(solvedate, closedate))`).
+- Days shown are the union of both day sets. A day can have opened = 0 and closed > 0 (or the reverse).
+- In custom period mode, closed-per-day values are also bounded by the selected custom range on resolved/closed date.
+
+### TTR (Time To Resolution)
+
+- Ticket duration source: `solve_delay_stat`, or `close_delay_stat` when solve delay is missing/zero.
+- Unit displayed: hours.
+- Daily TTR value: average of all valid ticket durations for that resolved/closed day.
+- Global average: average of all valid ticket durations in the selected scope, repeated as a baseline across all days.
+- In custom period mode, TTR values are bounded by the selected custom range on resolved/closed date.
+
+### Resolved period view counters
+
+- Resolved / Closed in period: tickets in status Resolved or Closed whose resolved/closed date is in the selected period.
+- Opened in period: tickets whose creation date is in the selected period.
+- Avg TTR: average resolution time (hours) for tickets resolved/closed in the selected period.
 
 ## Compatibility
 
