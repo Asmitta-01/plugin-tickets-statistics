@@ -368,6 +368,10 @@ msgstr ""
 msgid "Close"
 msgstr ""
 
+#: front/dashboard.php:309
+msgid "Time to resolve tickets created in the selected period, grouped by resolution date"
+msgstr ""
+
 #: src/TicketCityExport.php:34
 msgid "Assigned to"
 msgstr ""

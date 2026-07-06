@@ -306,6 +306,7 @@ $includeMissc = \Plugin::isPluginActive('cfaomobility');
                 <div class="card-header d-flex align-items-center justify-content-between">
                     <div>
                         <?= __('Average TTR', 'ticketsstatistics') . ' (' . GlpiPlugin\Ticketsstatistics\PeriodFilter::getPeriodLabel($period) . ')' ?>
+                        <span data-bs-toggle="tooltip" title="<?= __('Time to resolve tickets created in the selected period, grouped by resolution date', 'ticketsstatistics') ?>" class="ms-1"><i class="ti ti-info-circle align-bottom"></i></span>
                     </div>
                     <button data-bs-toggle="tooltip" title="<?= __('Reset the zoom', 'ticketsstatistics') ?>" class="btn btn-sm btn-outline-secondary ts-reset-chart" data-canvas="chart-resolution">
                         <?= __('Reset', 'ticketsstatistics') ?>
