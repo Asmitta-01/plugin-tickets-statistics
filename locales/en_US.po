@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: TicketsStatistics\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-04-10 11:11+0100\n"
-"PO-Revision-Date: 2026-07-06 17:01+0100\n"
+"PO-Revision-Date: 2026-07-08 08:15+0100\n"
 "Last-Translator: Codex\n"
 "Language-Team: English\n"
 "Language: en_US\n"
@@ -151,9 +151,17 @@ msgstr "Tickets opened per day"
 msgid "Last 7 days"
 msgstr "Last 7 days"
 
-#: src/TicketsStatistics.php:32 src/TicketsStatistics.php:39 src/PeriodFilter.php:12
+#: src/PeriodFilter.php:12
+msgid "This month"
+msgstr "This month"
+
+#: src/TicketsStatistics.php:32 src/TicketsStatistics.php:39 src/PeriodFilter.php:13
 msgid "Last 30 days"
 msgstr "Last 30 days"
+
+#: src/PeriodFilter.php:14
+msgid "Last month"
+msgstr "Mois dernier"
 
 #: src/TicketsStatistics.php:33 src/TicketsStatistics.php:40 src/PeriodFilter.php:13
 msgid "Last 90 days"

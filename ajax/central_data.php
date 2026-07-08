@@ -24,11 +24,11 @@ $DB    = DBConnection::getReadConnection();
 $table = Ticket::getTable();
 $where = ["$table.is_deleted" => 0] + getEntitiesRestrictCriteria($table);
 
-$period = $_GET['period'] ?? 'last30';
+$period = $_GET['period'] ?? 'thismonth';
 // Only predefined periods are accepted; 'custom' is not offered here.
-$allowedPeriods = ['last7', 'last30', 'last90', 'thisyear', 'lastyear'];
-if (!in_array($period, $allowedPeriods, true)) {
-    $period = 'last30';
+$allowedPeriods = array_keys(\GlpiPlugin\Ticketsstatistics\PeriodFilter::getAvailablePeriods());
+if (!in_array($period, $allowedPeriods, true) || $period === 'custom') {
+    $period = 'thismonth';
 }
 
 \GlpiPlugin\Ticketsstatistics\PeriodFilter::apply($where, $table, $period);

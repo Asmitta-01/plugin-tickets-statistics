@@ -9,7 +9,9 @@ class PeriodFilter
     {
         return [
             'last7' => __('Last 7 days', 'ticketsstatistics'),
+            'thismonth' => __('This month', 'ticketsstatistics'),
             'last30' => __('Last 30 days', 'ticketsstatistics'),
+            'lastmonth' => __('Last month', 'ticketsstatistics'),
             'last90' => __('Last 90 days', 'ticketsstatistics'),
             'thisyear' => __('This year', 'ticketsstatistics'),
             'lastyear' => __('Last year', 'ticketsstatistics'),
@@ -27,7 +29,9 @@ class PeriodFilter
      *
      * Supported periods:
      * - 'last7':   Last 7 days
+     * - 'thismonth': Current month
      * - 'last30':  Last 30 days
+     * - 'lastmonth': Previous month
      * - 'last90':  Last 90 days
      * - 'thisyear': Current year
      * - 'lastyear': Previous year
@@ -53,8 +57,14 @@ class PeriodFilter
             case 'last7':
                 $where[] = new \Glpi\DBAL\QueryExpression("$table.`date` >= DATE_SUB(NOW(), INTERVAL 7 DAY)");
                 break;
+            case 'thismonth':
+                $where[] = new \Glpi\DBAL\QueryExpression("MONTH($table.`date`) = MONTH(CURDATE()) AND YEAR($table.`date`) = YEAR(CURDATE())");
+                break;
             case 'last30':
                 $where[] = new \Glpi\DBAL\QueryExpression("$table.`date` >= DATE_SUB(NOW(), INTERVAL 30 DAY)");
+                break;
+            case 'lastmonth':
+                $where[] = new \Glpi\DBAL\QueryExpression("MONTH($table.`date`) = MONTH(CURDATE()) - 1 AND YEAR($table.`date`) = YEAR(CURDATE())");
                 break;
             case 'last90':
                 $where[] = new \Glpi\DBAL\QueryExpression("$table.`date` >= DATE_SUB(NOW(), INTERVAL 90 DAY)");
@@ -96,8 +106,14 @@ class PeriodFilter
             case 'last7':
                 $where[] = new \QueryExpression("$table.`date` >= DATE_SUB(NOW(), INTERVAL 7 DAY)");
                 break;
+            case 'thismonth':
+                $where[] = new \QueryExpression("MONTH($table.`date`) = MONTH(CURDATE()) AND YEAR($table.`date`) = YEAR(CURDATE())");
+                break;
             case 'last30':
                 $where[] = new \QueryExpression("$table.`date` >= DATE_SUB(NOW(), INTERVAL 30 DAY)");
+                break;
+            case 'lastmonth':
+                $where[] = new \QueryExpression("MONTH($table.`date`) = MONTH(CURDATE()) - 1 AND YEAR($table.`date`) = YEAR(CURDATE())");
                 break;
             case 'last90':
                 $where[] = new \QueryExpression("$table.`date` >= DATE_SUB(NOW(), INTERVAL 90 DAY)");
@@ -123,7 +139,7 @@ class PeriodFilter
     }
 
     /**
-     * Same as apply() but filters on the resolved/closed date instead of the creation date.
+     * Same as `apply()` but filters on the resolved/closed date instead of the creation date.
      * Uses COALESCE(NULLIF(solvedate, '0000-00-00 00:00:00'), closedate) as the date column.
      */
     public static function applySolvedDate(array &$where, string $table, string $period, ?string $dateFrom = null, ?string $dateTo = null): void
@@ -139,8 +155,14 @@ class PeriodFilter
             case 'last7':
                 $where[] = new \Glpi\DBAL\QueryExpression("$col >= DATE_SUB(NOW(), INTERVAL 7 DAY)");
                 break;
+            case 'thismonth':
+                $where[] = new \Glpi\DBAL\QueryExpression("MONTH($col) = MONTH(CURDATE()) AND YEAR($col) = YEAR(CURDATE())");
+                break;
             case 'last30':
                 $where[] = new \Glpi\DBAL\QueryExpression("$col >= DATE_SUB(NOW(), INTERVAL 30 DAY)");
+                break;
+            case 'lastmonth':
+                $where[] = new \Glpi\DBAL\QueryExpression("MONTH($col) = MONTH(CURDATE()) - 1 AND YEAR($col) = YEAR(CURDATE())");
                 break;
             case 'last90':
                 $where[] = new \Glpi\DBAL\QueryExpression("$col >= DATE_SUB(NOW(), INTERVAL 90 DAY)");
@@ -173,8 +195,14 @@ class PeriodFilter
             case 'last7':
                 $where[] = new \QueryExpression("$col >= DATE_SUB(NOW(), INTERVAL 7 DAY)");
                 break;
+            case 'thismonth':
+                $where[] = new \QueryExpression("MONTH($col) = MONTH(CURDATE()) AND YEAR($col) = YEAR(CURDATE())");
+                break;
             case 'last30':
                 $where[] = new \QueryExpression("$col >= DATE_SUB(NOW(), INTERVAL 30 DAY)");
+                break;
+            case 'lastmonth':
+                $where[] = new \QueryExpression("MONTH($col) = MONTH(CURDATE()) - 1 AND YEAR($col) = YEAR(CURDATE())");
                 break;
             case 'last90':
                 $where[] = new \QueryExpression("$col >= DATE_SUB(NOW(), INTERVAL 90 DAY)");

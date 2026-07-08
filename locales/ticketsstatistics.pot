@@ -154,13 +154,21 @@ msgstr ""
 msgid "Last 7 days"
 msgstr ""
 
-#: src/TicketsStatistics.php:32 src/TicketsStatistics.php:39
 #: src/PeriodFilter.php:12
+msgid "This month"
+msgstr ""
+
+#: src/TicketsStatistics.php:32 src/TicketsStatistics.php:39
+#: src/PeriodFilter.php:13
 msgid "Last 30 days"
 msgstr ""
 
+#: src/PeriodFilter.php:14
+msgid "Last month"
+msgstr ""
+
 #: src/TicketsStatistics.php:33 src/TicketsStatistics.php:40
-#: src/PeriodFilter.php:13
+#: src/PeriodFilter.php:15
 msgid "Last 90 days"
 msgstr ""
 

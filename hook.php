@@ -106,7 +106,7 @@ function plugin_ticketsstatistics_pre_item_list(array $params): void
     echo '<label for="ts-ticketlist-period" class="form-label mb-0 fw-semibold small">' . __('Period', 'ticketsstatistics') . '</label>';
     echo '<select class="form-select form-select-sm w-auto" id="ts-ticketlist-period">';
     foreach ($periods as $value => $label) {
-        $sel = ($value === 'last30') ? ' selected' : '';
+        $sel = ($value === 'thismonth') ? ' selected' : '';
         echo '<option value="' . htmlspecialchars($value, ENT_QUOTES, 'UTF-8') . '"' . $sel . '>' . htmlspecialchars($label, ENT_QUOTES, 'UTF-8') . '</option>';
     }
     echo '</select>';
@@ -269,7 +269,7 @@ function plugin_ticketsstatistics_pre_item_list(array $params): void
         });
 
         // Initial load
-        loadCounters('last30');
+        loadCounters('thismonth');
 
         // Bind counter cards to the tickets modal (shared module)
         if (window.tsTicketlistCardsModal && typeof window.tsTicketlistCardsModal.init === 'function') {
@@ -280,7 +280,7 @@ function plugin_ticketsstatistics_pre_item_list(array $params): void
                     var df = document.getElementById('ts-ticketlist-date-from');
                     var dt = document.getElementById('ts-ticketlist-date-to');
                     return {
-                        period:    p  ? p.value  : 'last30',
+                        period:    p  ? p.value  : 'thismonth',
                         date_from: df ? df.value : '',
                         date_to:   dt ? dt.value : ''
                     };
@@ -342,7 +342,7 @@ function plugin_ticketsstatistics_display_central(): void
     echo '<label for="ts-c-period" class="form-label mb-0 ms-3">' . htmlspecialchars(__('Period', 'ticketsstatistics'), ENT_QUOTES, 'UTF-8') . '</label>';
     echo '<select id="ts-c-period" class="form-select form-select-sm w-auto">';
     foreach ($periods as $value => $label) {
-        $selected = ($value === 'last30') ? ' selected' : '';
+        $selected = ($value === 'thismonth') ? ' selected' : '';
         echo '<option value="' . htmlspecialchars($value, ENT_QUOTES, 'UTF-8') . '"' . $selected . '>'
             . htmlspecialchars($label, ENT_QUOTES, 'UTF-8')
             . '</option>';

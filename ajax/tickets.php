@@ -100,7 +100,7 @@ $clickedCategoryId = isset($_GET['category_id']) ? (int) $_GET['category_id'] : 
 $status_group = (string) ($_GET['status_group'] ?? '');
 
 $where = ["$table.is_deleted" => 0] + getEntitiesRestrictCriteria($table);
-$period = $_GET['period'] ?? 'last30';
+$period = $_GET['period'] ?? 'thismonth';
 $categoryId = (int) ($_GET['category'] ?? 0);
 $dateFrom = $_GET['date_from'] ?? null;
 $dateTo   = $_GET['date_to']   ?? null;

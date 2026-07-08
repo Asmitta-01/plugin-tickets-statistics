@@ -44,7 +44,9 @@
     // Period selector options
     var periods = [
         { value: 'last7', label: function () { return __('Last 7 days', 'ticketsstatistics'); } },
-        { value: 'last30', label: function () { return __('Last 30 days', 'ticketsstatistics'); }, selected: true },
+        { value: 'thismonth', label: function () { return __('This month', 'ticketsstatistics'); }, selected: true },
+        { value: 'last30', label: function () { return __('Last 30 days', 'ticketsstatistics'); } },
+        { value: 'lastmonth', label: function () { return __('Last month', 'ticketsstatistics'); } },
         { value: 'last90', label: function () { return __('Last 90 days', 'ticketsstatistics'); } },
         { value: 'thisyear', label: function () { return __('This year', 'ticketsstatistics'); } },
         { value: 'lastyear', label: function () { return __('Last year', 'ticketsstatistics'); } },
@@ -275,7 +277,7 @@
         }
 
         // Initial load with default period
-        loadCounters('last30');
+        loadCounters('thismonth');
 
         // Bind counter cards to the tickets modal
         if (window.tsTicketlistCardsModal && typeof window.tsTicketlistCardsModal.init === 'function') {
@@ -286,7 +288,7 @@
                     var df = document.getElementById('ts-ticketlist-date-from');
                     var dt = document.getElementById('ts-ticketlist-date-to');
                     return {
-                        period: p ? p.value : 'last30',
+                        period: p ? p.value : 'thismonth',
                         date_from: df ? df.value : '',
                         date_to: dt ? dt.value : ''
                     };

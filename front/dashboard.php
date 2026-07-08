@@ -30,7 +30,7 @@ $includeMissc = \Plugin::isPluginActive('cfaomobility');
 
     <!-- Filter row -->
     <?php
-    $period = $_GET['period'] ?? 'last30';
+    $period = $_GET['period'] ?? 'thismonth';
     ?>
     <div class="d-flex align-items-center justify-content-between mb-3 alert alert-secondary">
         <form class="row align-items-end" method="get" id="ts-filter-form">

@@ -10,7 +10,7 @@
  * options.cardSelector  – CSS selector for the clickable card elements.
  *                         Defaults to '[data-ts-tl-counter-key]'.
  * options.getFilters    – function() → { period, date_from, date_to }
- *                         Defaults to last30 with no custom dates.
+ *                         Defaults to thismonth with no custom dates.
  * -------------------------------------------------------------------------
  */
 (function () {
@@ -182,7 +182,7 @@
 
         // Build request params
         var filters = typeof getFilters === 'function' ? (getFilters() || {}) : {};
-        var period = filters.period || 'last30';
+        var period = filters.period || 'thismonth';
         var statusGroup = Object.prototype.hasOwnProperty.call(STATUS_GROUP_MAP, counterKey)
             ? STATUS_GROUP_MAP[counterKey]
             : counterKey;
@@ -252,7 +252,7 @@
         var selector = opts.cardSelector || '[data-ts-tl-counter-key]';
         var getFilters = typeof opts.getFilters === 'function'
             ? opts.getFilters
-            : function () { return { period: 'last30', date_from: '', date_to: '' }; };
+            : function () { return { period: 'thismonth', date_from: '', date_to: '' }; };
 
         document.querySelectorAll(selector).forEach(function (card) {
             if (card.getAttribute('data-ts-tl-modal-bound') === '1') {

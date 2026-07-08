@@ -19,7 +19,7 @@ $table = \Ticket::getTable();
 $where = ["$table.is_deleted" => 0] + getEntitiesRestrictCriteria($table);
 
 // Get the period and category filter from the request
-$period = $_GET['period'] ?? 'last30';
+$period = $_GET['period'] ?? 'thismonth';
 $categoryId = (int) ($_GET['category'] ?? 0);
 
 $dateFrom = $_GET['date_from'] ?? null;
