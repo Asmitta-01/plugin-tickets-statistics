@@ -348,8 +348,8 @@ if ($period === 'custom' || $period === 'lastmonth') {
     if ($period === 'lastmonth') {
         $lastMonthStart = (new \DateTime('first day of last month'))->format('Y-m-d');
         $lastMonthEnd = (new \DateTime('last day of last month'))->format('Y-m-d');
-        $closedWhere[] = new \QueryExpression("$resolvedCol >= '$lastMonthStart 00:00:00'");
-        $closedWhere[] = new \QueryExpression("$resolvedCol <= '$lastMonthEnd 23:59:59'");
+        $resolutionWhere[] = new \QueryExpression("$resolvedCol >= '$lastMonthStart 00:00:00'");
+        $resolutionWhere[] = new \QueryExpression("$resolvedCol <= '$lastMonthEnd 23:59:59'");
     } else {
         if ($isValidCustomDate($dateFrom)) {
             $resolutionWhere[] = new \QueryExpression("$resolvedCol >= '$dateFrom 00:00:00'");
