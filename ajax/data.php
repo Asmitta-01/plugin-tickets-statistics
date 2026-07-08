@@ -291,13 +291,20 @@ $closedWhere = array_merge($where, [
     ),
 ]);
 
-if ($period === 'custom') {
+if ($period === 'custom' || $period === 'lastmonth') {
     $resolvedCol = "COALESCE(NULLIF($table.`solvedate`, '0000-00-00 00:00:00'), $table.`closedate`)";
-    if ($isValidCustomDate($dateFrom)) {
-        $closedWhere[] = new \QueryExpression("$resolvedCol >= '$dateFrom 00:00:00'");
-    }
-    if ($isValidCustomDate($dateTo)) {
-        $closedWhere[] = new \QueryExpression("$resolvedCol <= '$dateTo 23:59:59'");
+    if ($period === 'lastmonth') {
+        $lastMonthStart = (new \DateTime('first day of last month'))->format('Y-m-d');
+        $lastMonthEnd = (new \DateTime('last day of last month'))->format('Y-m-d');
+        $closedWhere[] = new \QueryExpression("$resolvedCol >= '$lastMonthStart 00:00:00'");
+        $closedWhere[] = new \QueryExpression("$resolvedCol <= '$lastMonthEnd 23:59:59'");
+    } else {
+        if ($isValidCustomDate($dateFrom)) {
+            $closedWhere[] = new \QueryExpression("$resolvedCol >= '$dateFrom 00:00:00'");
+        }
+        if ($isValidCustomDate($dateTo)) {
+            $closedWhere[] = new \QueryExpression("$resolvedCol <= '$dateTo 23:59:59'");
+        }
     }
 }
 
@@ -336,13 +343,20 @@ $resolutionWhere = array_merge($where, [
     ),
 ]);
 
-if ($period === 'custom') {
+if ($period === 'custom' || $period === 'lastmonth') {
     $resolvedCol = "COALESCE(NULLIF($table.`solvedate`, '0000-00-00 00:00:00'), $table.`closedate`)";
-    if ($isValidCustomDate($dateFrom)) {
-        $resolutionWhere[] = new \QueryExpression("$resolvedCol >= '$dateFrom 00:00:00'");
-    }
-    if ($isValidCustomDate($dateTo)) {
-        $resolutionWhere[] = new \QueryExpression("$resolvedCol <= '$dateTo 23:59:59'");
+    if ($period === 'lastmonth') {
+        $lastMonthStart = (new \DateTime('first day of last month'))->format('Y-m-d');
+        $lastMonthEnd = (new \DateTime('last day of last month'))->format('Y-m-d');
+        $closedWhere[] = new \QueryExpression("$resolvedCol >= '$lastMonthStart 00:00:00'");
+        $closedWhere[] = new \QueryExpression("$resolvedCol <= '$lastMonthEnd 23:59:59'");
+    } else {
+        if ($isValidCustomDate($dateFrom)) {
+            $resolutionWhere[] = new \QueryExpression("$resolvedCol >= '$dateFrom 00:00:00'");
+        }
+        if ($isValidCustomDate($dateTo)) {
+            $resolutionWhere[] = new \QueryExpression("$resolvedCol <= '$dateTo 23:59:59'");
+        }
     }
 }
 
