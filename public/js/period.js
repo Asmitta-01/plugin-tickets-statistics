@@ -149,7 +149,8 @@ function initCounterCardsModalLinks() {
 
     const cards = document.querySelectorAll('.ts-counter-card[data-counter-key]');
     cards.forEach(function (card) {
-        const openFromCard = function () {
+        const openFromCard = function (e) {
+            e.preventDefault();
             const counterKey = card.dataset.counterKey || '';
             const counterLabel = card.dataset.counterLabel || __('Tickets', 'ticketsstatistics');
             const statusGroup = statusGroupByCounter[counterKey] || '';
@@ -164,7 +165,7 @@ function initCounterCardsModalLinks() {
                 filters.status_group = statusGroup;
             }
 
-            openTicketsModal(filters);
+            openTicketsModal(filters, true);
         };
 
         card.addEventListener('click', openFromCard);
@@ -759,7 +760,7 @@ function fillTownsTable(data) {
     tbody.innerHTML = rows;
 }
 
-function openTicketsModal(filters) {
+function openTicketsModal(filters, openFullListPage = false) {
     const root = CFG_GLPI.root_doc;
     const params = new URLSearchParams(document.location.search);
     const title = document.getElementById('ts-tickets-modal-title');
@@ -798,6 +799,7 @@ function openTicketsModal(filters) {
 
             const fullListBtn = document.getElementById('ts-tickets-modal-full-btn');
             fullListBtn.disabled = !payload.tickets.length;
+
             fullListBtn.onclick = function () {
                 const req = new URLSearchParams();
                 req.set('period', params.get('period') || 'thismonth');
@@ -830,12 +832,16 @@ function openTicketsModal(filters) {
                             ? window.location.origin + data.url
                             : data.url;
 
-                        window.open(targetUrl, '_blank', 'noopener');
+                        window.open(targetUrl, '_self', 'noopener');
                     })
                     .catch((e) => {
                         console.error('Error fetching full list URL:', e);
                     });
             };
+            if (openFullListPage && payload.tickets.length) {
+                fullListBtn.click();
+                return;
+            }
 
             window.tsModalTickets = payload.tickets;
             const downloadBtn = document.getElementById('ts-tickets-download-btn');

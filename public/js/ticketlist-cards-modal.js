@@ -163,9 +163,6 @@
     // Core: open the modal and fetch the ticket list
     // -----------------------------------------------------------------
     function openModal(counterKey, label, getFilters) {
-        openFullList(counterKey, label, getFilters);
-        return; // Il est préférable pour le moment d'ouvrir directement la liste complète plutôt que le modal avec les 100 premiers tickets.
-
         var modalEl = getOrCreateModal();
         var bsModal = bootstrap.Modal.getOrCreateInstance(modalEl);
 
@@ -279,12 +276,10 @@
                     fullUrl = window.location.origin + fullUrl;
                 }
 
-                window.open(new URL(fullUrl));
+                window.open(new URL(fullUrl), '_self');
             })
-            .catch(function () {
-                if (popup) {
-                    popup.close();
-                }
+            .catch(function (e) {
+                console.error('Error fetching full list URL:', e);
             });
     }
 
@@ -319,7 +314,8 @@
             var handler = function () {
                 var key = card.getAttribute('data-ts-tl-counter-key') || '';
                 var label = card.getAttribute('data-ts-tl-counter-label') || __('Tickets', 'ticketsstatistics');
-                openModal(key, label, getFilters);
+                // openModal(key, label, getFilters);
+                openFullList(key, label, getFilters);
             };
 
             card.addEventListener('click', handler);
