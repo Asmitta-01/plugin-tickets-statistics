@@ -93,26 +93,27 @@ $statusGroups = [
     'resolved'      => [\Ticket::SOLVED, \Ticket::CLOSED],
     'solved_closed' => [\Ticket::SOLVED, \Ticket::CLOSED],
     'in_progress'   => [\Ticket::ASSIGNED, \Ticket::WAITING, \Ticket::ACCEPTED, \Ticket::OBSERVED],
-    'missc'         => [\Ticket::INCOMING, \Ticket::ASSIGNED, \Ticket::WAITING, \Ticket::SOLVED, \Ticket::CLOSED],
+    'missc'         => [],
     'total'         => [],
     ''              => [],
 ];
 
 $group = array_key_exists($counterKey, $statusGroups) ? $counterKey : '';
 $statuses = $statusGroups[$group];
+$isMissc = ($group === 'missc');
 
 [$from, $toExclusive] = ticketsstatistics_get_period_bounds($period, $dateFrom, $dateTo);
 
 $criteria = [];
 
-if (count($statuses) === 1) {
+if (!$isMissc && count($statuses) === 1) {
     $criteria[] = [
         'field'      => 12, // Status
         'searchtype' => 'equals',
         'value'      => $statuses[0],
         'link'       => 'AND',
     ];
-} elseif (count($statuses) > 1) {
+} elseif (!$isMissc && count($statuses) > 1) {
     $first = true;
     foreach ($statuses as $status) {
         $criteria[] = [
@@ -123,6 +124,15 @@ if (count($statuses) === 1) {
         ];
         $first = false;
     }
+}
+
+if ($isMissc) {
+    $criteria[] = [
+        'field'      => 5200, // MISSC Number
+        'searchtype' => 'notcontains',
+        'value'      => '^$',
+        'link'       => 'AND',
+    ];
 }
 
 if ($from !== null) {
