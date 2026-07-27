@@ -316,7 +316,8 @@
             var handler = function () {
                 var key = card.getAttribute('data-ts-tl-counter-key') || '';
                 var label = card.getAttribute('data-ts-tl-counter-label') || __('Tickets', 'ticketsstatistics');
-                openModal(key, label, getFilters);
+                // openModal(key, label, getFilters);
+                openFullList(key, label, getFilters);
             };
 
             card.addEventListener('click', handler);
