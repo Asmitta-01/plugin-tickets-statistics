@@ -576,6 +576,10 @@ msgstr ""
 msgid "Tickets by Town"
 msgstr ""
 
+#: public/js/ticketlist-cards-modal.js
+msgid "Open full list"
+msgstr ""
+
 #: hook.php
 msgid "Tickets by Town (Top 10)"
 msgstr ""

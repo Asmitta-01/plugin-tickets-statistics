@@ -32,7 +32,7 @@
  */
 
 /** @phpstan-ignore theCodingMachineSafe.function (safe to assume this isn't already defined) */
-define('PLUGIN_TICKETSSTATISTICS_VERSION', '0.4.4');
+define('PLUGIN_TICKETSSTATISTICS_VERSION', '0.4.5');
 
 // Minimal GLPI version, inclusive
 /** @phpstan-ignore theCodingMachineSafe.function (safe to assume this isn't already defined) */
@@ -158,7 +158,7 @@ function plugin_version_ticketsstatistics(): array
         'name'           => 'TicketsStatistics',
         'version'        => PLUGIN_TICKETSSTATISTICS_VERSION,
         'author'         => 'Brayan Tiwa',
-        'license'        => 'GPLv2+',
+        'license'        => 'MIT',
         'homepage'       => '',
         'requirements'   => [
             'glpi' => [

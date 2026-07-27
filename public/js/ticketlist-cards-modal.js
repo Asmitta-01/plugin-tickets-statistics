@@ -51,6 +51,9 @@
             '<div class="text-muted small" id="' + MODAL_ID + '-count"></div>' +
             '</div>' +
             '<div class="d-flex align-items-center gap-2 ms-auto me-2">' +
+            '<button class="btn btn-sm btn-outline-primary" id="' + MODAL_ID + '-full-btn">' +
+            '<i class="ti ti-link me-1"></i>' + escapeHtml(__('Open full list', 'ticketsstatistics')) +
+            '</button>' +
             '<button class="btn btn-sm btn-outline-secondary" id="' + MODAL_ID + '-dl-btn" disabled>' +
             '<i class="ti ti-download me-1"></i>CSV' +
             '</button>' +
@@ -168,6 +171,7 @@
         var alertEl = document.getElementById(MODAL_ID + '-alert');
         var bodyEl = document.getElementById(MODAL_ID + '-body');
         var dlBtn = document.getElementById(MODAL_ID + '-dl-btn');
+        var fullBtn = document.getElementById(MODAL_ID + '-full-btn');
 
         // Reset state
         titleEl.textContent = __('Loading tickets...', 'ticketsstatistics');
@@ -177,6 +181,11 @@
         bodyEl.innerHTML = renderLoader();
         dlBtn.disabled = true;
         dlBtn.onclick = null;
+        if (fullBtn) {
+            fullBtn.onclick = function () {
+                openFullList(counterKey, label, getFilters);
+            };
+        }
 
         bsModal.show();
 
@@ -232,6 +241,47 @@
                 bodyEl.innerHTML = '<div class="alert alert-danger mb-0">'
                     + escapeHtml(__('Unable to load tickets.', 'ticketsstatistics'))
                     + '</div>';
+            });
+    }
+
+    //-----------------------------------------------------------------
+    // Ouverture d'une nouvelle page pour voir la liste complète des tickets (sans limite de 100)
+    //-----------------------------------------------------------------
+    function openFullList(counterKey, label, getFilters) {
+        var filters = typeof getFilters === 'function' ? (getFilters() || {}) : {};
+        var period = filters.period || 'thismonth';
+
+        var req = new URLSearchParams();
+        req.set('counter_key', counterKey || '');
+        req.set('period', period);
+        if (period === 'custom') {
+            if (filters.date_from) {
+                req.set('date_from', filters.date_from);
+            }
+            if (filters.date_to) {
+                req.set('date_to', filters.date_to);
+            }
+        }
+
+        var root = CFG_GLPI.root_doc;
+        fetch(root + '/plugins/ticketsstatistics/ajax/tickets_full_list_url.php?' + req.toString())
+            .then(function (r) { return r.json(); })
+            .then(function (payload) {
+                if (!payload || !payload.url) {
+                    return;
+                }
+
+                var fullUrl = payload.url;
+                if (fullUrl.charAt(0) === '/') {
+                    fullUrl = window.location.origin + fullUrl;
+                }
+
+                window.open(new URL(fullUrl));
+            })
+            .catch(function () {
+                if (popup) {
+                    popup.close();
+                }
             });
     }
 

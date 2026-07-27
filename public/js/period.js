@@ -157,6 +157,7 @@ function initCounterCardsModalLinks() {
             const filters = {
                 type: 'counter',
                 label: counterLabel,
+                counter_key: counterKey,
             };
 
             if (statusGroup) {
@@ -794,6 +795,47 @@ function openTicketsModal(filters) {
                 alertBox.textContent = __('Showing the first 100 tickets only.', 'ticketsstatistics');
                 alertBox.classList.remove('d-none');
             }
+
+            const fullListBtn = document.getElementById('ts-tickets-modal-full-btn');
+            fullListBtn.disabled = !payload.tickets.length;
+            fullListBtn.onclick = function () {
+                const req = new URLSearchParams();
+                req.set('period', params.get('period') || 'thismonth');
+
+                const dateFrom = params.get('date_from');
+                const dateTo = params.get('date_to');
+                if (dateFrom) {
+                    req.set('date_from', dateFrom);
+                }
+                if (dateTo) {
+                    req.set('date_to', dateTo);
+                }
+
+                if (filters.counter_key) {
+                    req.set('counter_key', filters.counter_key);
+                } else if (filters.type === 'counter') {
+                    req.set('counter_key', filters.status_group || 'total');
+                } else if (filters.status_group) {
+                    req.set('counter_key', filters.status_group);
+                }
+
+                fetch(root + '/plugins/ticketsstatistics/ajax/tickets_full_list_url.php?' + req.toString())
+                    .then(r => r.json())
+                    .then(data => {
+                        if (!data?.url) {
+                            return;
+                        }
+
+                        const targetUrl = data.url.startsWith('/')
+                            ? window.location.origin + data.url
+                            : data.url;
+
+                        window.open(targetUrl, '_blank', 'noopener');
+                    })
+                    .catch((e) => {
+                        console.error('Error fetching full list URL:', e);
+                    });
+            };
 
             window.tsModalTickets = payload.tickets;
             const downloadBtn = document.getElementById('ts-tickets-download-btn');

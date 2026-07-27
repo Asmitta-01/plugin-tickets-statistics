@@ -328,10 +328,16 @@ $includeMissc = \Plugin::isPluginActive('cfaomobility');
                     <h5 class="modal-title mb-0" id="ts-tickets-modal-title"><?= __('Tickets', 'ticketsstatistics') ?></h5>
                     <div class="text-muted small" id="ts-tickets-modal-count"></div>
                 </div>
-                <button class="btn btn-secondary btn-sm ms-auto" disabled id="ts-tickets-download-btn" data-bs-toggle="tooltip" title="<?= __('Download as CSV', 'ticketsstatistics') ?>">
-                    <i class="ti ti-file-spreadsheet me-1"></i>
-                    <?= __('Download', 'ticketsstatistics') ?>
-                </button>
+                <div class="d-flex align-items-center gap-2 ms-auto me-2">
+                    <button class="btn btn-sm btn-outline-primary" id="ts-tickets-modal-full-btn">
+                        <i class="ti ti-external-link me-1"></i>
+                        <?= __('Open full list', 'ticketsstatistics') ?>
+                    </button>
+                    <button class="btn btn-secondary btn-sm ms-auto" disabled id="ts-tickets-download-btn" data-bs-toggle="tooltip" title="<?= __('Download as CSV', 'ticketsstatistics') ?>">
+                        <i class="ti ti-file-spreadsheet me-1"></i>
+                        <?= __('Download', 'ticketsstatistics') ?>
+                    </button>
+                </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="<?= __('Close') ?>"></button>
             </div>
             <div class="modal-body">

@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: TicketsStatistics\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-04-10 11:11+0100\n"
-"PO-Revision-Date: 2026-07-08 08:15+0100\n"
+"PO-Revision-Date: 2026-07-27 07:40+0100\n"
 "Last-Translator: Codex\n"
 "Language-Team: English\n"
 "Language: en_US\n"
@@ -547,6 +547,10 @@ msgstr "Top Requesters"
 #: hook.php public/js/central_stats.js
 msgid "Tickets by Town"
 msgstr "Tickets by Town"
+
+#: public/js/ticketlist-cards-modal.js
+msgid "Open full list"
+msgstr "Open full list"
 
 #: hook.php
 msgid "Tickets by Town (Top 10)"
