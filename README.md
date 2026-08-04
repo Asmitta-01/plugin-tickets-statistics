@@ -2,7 +2,7 @@
 
 TicketsStatistics adds a dedicated reporting dashboard to GLPI for helpdesk ticket activity.
 
-Current release: 0.4.3
+Current release: 0.5.0
 
 The plugin provides:
 
@@ -33,6 +33,9 @@ This section explains the meaning of the values shown in the dashboard.
 - New, Assigned, Pending, Resolved/Closed: number of tickets currently in those statuses within the selected scope.
 - Total tickets: sum of status counters in the selected scope.
 - MISSC (when `cfaomobility` is active): number of tickets with a non-empty MISSC number.
+- Global open statuses switch (enabled by default): New, Assigned, and Pending counters are computed globally (without period filtering), while still respecting entity/category restrictions.
+- When this switch is disabled, New, Assigned, and Pending counters use the selected period like the other counters.
+- Cards click behavior is consistent with the switch: modal results and "Open full list" use the same global-vs-period logic (including GLPI 10 ticket-list widget).
 
 ### Opened vs Closed per day
 
