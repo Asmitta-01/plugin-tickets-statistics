@@ -31,6 +31,7 @@ $includeMissc = \Plugin::isPluginActive('cfaomobility');
     <!-- Filter row -->
     <?php
     $period = $_GET['period'] ?? 'thismonth';
+    $openStatusesGlobal = !isset($_GET['open_statuses_global']) || (int) $_GET['open_statuses_global'] === 1;
     ?>
     <div class="d-flex align-items-center justify-content-between mb-3 alert alert-secondary">
         <form class="row align-items-end" method="get" id="ts-filter-form">
@@ -72,6 +73,11 @@ $includeMissc = \Plugin::isPluginActive('cfaomobility');
                 <div class="form-check form-switch mb-0">
                     <input class="form-check-input" type="checkbox" role="switch" id="ts-view-solved">
                     <label class="form-check-label fw-semibold" for="ts-view-solved"><?= __('Resolved period view', 'ticketsstatistics') ?></label>
+                </div>
+                <div class="form-check form-switch mb-0" data-bs-toggle="tooltip" data-bs-placement="top" title="<?= __('If enabled, the open statuses will not consider the selected period', 'ticketsstatistics') ?>">
+                    <input type="hidden" name="open_statuses_global" value="0">
+                    <input class="form-check-input" type="checkbox" role="switch" id="ts-open-statuses-global" name="open_statuses_global" value="1" <?= $openStatusesGlobal ? 'checked' : '' ?>>
+                    <label class="form-check-label fw-semibold" for="ts-open-statuses-global"><?= __('Global open statuses', 'ticketsstatistics') ?></label>
                 </div>
             </div>
         </form>

@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: TicketsStatistics\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-04-10 11:11+0100\n"
-"PO-Revision-Date: 2026-07-27 07:40+0100\n"
+"PO-Revision-Date: 2026-08-04 09:19+0100\n"
 "Last-Translator: Codex\n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -107,6 +107,14 @@ msgstr "Tickets résolus ou fermés"
 #: front/dashboard.php:106
 msgid "Total tickets received in the period"
 msgstr "Total de tickets reçus dans la période sélectionnée"
+
+#: front/dashboard.php:78 public/js/ticketlist-glpi10.js:113
+msgid "If enabled, the open statuses will not consider the selected period"
+msgstr "Si activé, les statuts ouverts ne tiennent pas compte de la période sélectionnée"
+
+#: front/dashboard.php:80 public/js/ticketlist-glpi10.js:116
+msgid "Global open statuses"
+msgstr "Statuts ouverts globaux"
 
 #: front/dashboard.php:110
 msgid "Tickets sent to MISSC"

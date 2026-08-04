@@ -16,6 +16,16 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    const openStatusesGlobal = document.getElementById('ts-open-statuses-global');
+    if (openStatusesGlobal) {
+        openStatusesGlobal.addEventListener('change', function () {
+            const filterForm = document.getElementById('ts-filter-form');
+            if (filterForm) {
+                filterForm.submit();
+            }
+        });
+    }
+
     const downloadPdfButton = document.getElementById('ticketsstatisticsDownloadPdfBtn');
     downloadPdfButton.addEventListener('click', exportPageToPDF);
 
@@ -803,6 +813,10 @@ function openTicketsModal(filters, openFullListPage = false) {
             fullListBtn.onclick = function () {
                 const req = new URLSearchParams();
                 req.set('period', params.get('period') || 'thismonth');
+                const openStatusesGlobal = params.get('open_statuses_global');
+                if (openStatusesGlobal !== null) {
+                    req.set('open_statuses_global', openStatusesGlobal);
+                }
 
                 const dateFrom = params.get('date_from');
                 const dateTo = params.get('date_to');

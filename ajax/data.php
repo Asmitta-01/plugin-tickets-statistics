@@ -27,6 +27,7 @@ $categoryId = (int) ($_GET['category'] ?? 0);
 
 $dateFrom = $_GET['date_from'] ?? null;
 $dateTo   = $_GET['date_to']   ?? null;
+$openStatusesGlobal = !isset($_GET['open_statuses_global']) || (int) $_GET['open_statuses_global'] === 1;
 
 $isValidCustomDate = static function (?string $date): bool {
     if (!is_string($date)) {
@@ -58,8 +59,33 @@ foreach (
     ]);
     $counters[$key] = (int) $iter->current()['cpt'];
 }
-$counters['total'] = array_sum($counters);
+$totalIter = $DB->request([
+    'COUNT' => 'cpt',
+    'FROM'  => $table,
+    'WHERE' => $where,
+]);
+$counters['total'] = (int) $totalIter->current()['cpt'];
 $counters['solved_closed'] = $counters['solved'] + $counters['closed'];
+
+if ($openStatusesGlobal) {
+    $globalWhere = ["$table.is_deleted" => 0] + getEntitiesRestrictCriteria($table);
+    \GlpiPlugin\Ticketsstatistics\CategoryFilter::apply($globalWhere, $table, $categoryId);
+
+    foreach (
+        [
+            'incoming' => \Ticket::INCOMING,
+            'assigned' => \Ticket::ASSIGNED,
+            'waiting'  => \Ticket::WAITING,
+        ] as $key => $status
+    ) {
+        $iter = $DB->request([
+            'COUNT' => 'cpt',
+            'FROM'  => $table,
+            'WHERE' => $globalWhere + ["$table.status" => $status],
+        ]);
+        $counters[$key] = (int) $iter->current()['cpt'];
+    }
+}
 
 if ($includeMissc) {
     $iter = $DB->request([

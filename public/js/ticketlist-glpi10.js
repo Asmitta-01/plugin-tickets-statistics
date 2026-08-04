@@ -103,6 +103,14 @@
             '<label class="form-check-label fw-semibold" for="ts-ticketlist-view-solved">' + __('Resolved period view', 'ticketsstatistics') + '</label>';
         toolbar.appendChild(switchWrap);
 
+        var openSwitchWrap = document.createElement('div');
+        openSwitchWrap.className = 'form-check form-switch mb-0 ms-2';
+        openSwitchWrap.title = __('If enabled, the open statuses will not consider the selected period', 'ticketsstatistics');
+        openSwitchWrap.innerHTML =
+            '<input class="form-check-input" type="checkbox" role="switch" id="ts-ticketlist-open-statuses-global" checked>' +
+            '<label class="form-check-label fw-semibold" for="ts-ticketlist-open-statuses-global">' + __('Global open statuses', 'ticketsstatistics') + '</label>';
+        toolbar.appendChild(openSwitchWrap);
+
         wrapper.appendChild(toolbar);
 
         // --- Cards row ---
@@ -186,14 +194,22 @@
     // -----------------------------------------------------------------
     // Fetch counters from AJAX endpoint and populate the cards
     // -----------------------------------------------------------------
-    function loadCounters(period, dateFrom, dateTo) {
+    function loadCounters(period, dateFrom, dateTo, openStatusesGlobal) {
         var spinner = document.getElementById('ts-ticketlist-spinner');
         if (spinner) {
             spinner.classList.remove('d-none');
             spinner.classList.add('d-flex');
         }
 
+        var useGlobalOpenStatuses = true;
+        if (openStatusesGlobal !== undefined && openStatusesGlobal !== null) {
+            useGlobalOpenStatuses = typeof openStatusesGlobal === 'string'
+                ? openStatusesGlobal === '1'
+                : !!openStatusesGlobal;
+        }
+
         var url = baseUrl + '?period=' + encodeURIComponent(period);
+        url += '&open_statuses_global=' + (useGlobalOpenStatuses ? '1' : '0');
         if (period === 'custom') {
             if (dateFrom) { url += '&date_from=' + encodeURIComponent(dateFrom); }
             if (dateTo) { url += '&date_to=' + encodeURIComponent(dateTo); }
@@ -250,6 +266,11 @@
         var dateFrom = document.getElementById('ts-ticketlist-date-from');
         var dateTo = document.getElementById('ts-ticketlist-date-to');
         var applyBtn = document.getElementById('ts-ticketlist-apply');
+        var openStatusesGlobalSwitch = document.getElementById('ts-ticketlist-open-statuses-global');
+
+        var getOpenStatusesGlobalValue = function () {
+            return openStatusesGlobalSwitch ? openStatusesGlobalSwitch.checked : true;
+        };
 
         periodSel.addEventListener('change', function () {
             if (this.value === 'custom') {
@@ -258,13 +279,24 @@
             } else {
                 customDiv.classList.add('d-none');
                 customDiv.classList.remove('d-flex');
-                loadCounters(this.value);
+                loadCounters(this.value, '', '', getOpenStatusesGlobalValue());
             }
         });
 
         applyBtn.addEventListener('click', function () {
-            loadCounters('custom', dateFrom.value, dateTo.value);
+            loadCounters('custom', dateFrom.value, dateTo.value, getOpenStatusesGlobalValue());
         });
+
+        if (openStatusesGlobalSwitch) {
+            openStatusesGlobalSwitch.addEventListener('change', function () {
+                var periodValue = periodSel ? periodSel.value : 'thismonth';
+                if (periodValue === 'custom') {
+                    loadCounters('custom', dateFrom.value, dateTo.value, this.checked);
+                } else {
+                    loadCounters(periodValue, '', '', this.checked);
+                }
+            });
+        }
 
         var viewSolvedSwitch = document.getElementById('ts-ticketlist-view-solved');
         if (viewSolvedSwitch) {
@@ -277,7 +309,7 @@
         }
 
         // Initial load with default period
-        loadCounters('thismonth');
+        loadCounters('thismonth', '', '', getOpenStatusesGlobalValue());
 
         // Bind counter cards to the tickets modal
         if (window.tsTicketlistCardsModal && typeof window.tsTicketlistCardsModal.init === 'function') {
@@ -290,7 +322,8 @@
                     return {
                         period: p ? p.value : 'thismonth',
                         date_from: df ? df.value : '',
-                        date_to: dt ? dt.value : ''
+                        date_to: dt ? dt.value : '',
+                        open_statuses_global: getOpenStatusesGlobalValue() ? '1' : '0'
                     };
                 }
             });
@@ -321,6 +354,12 @@
         });
         var switchLabel = document.querySelector('label[for="ts-ticketlist-view-solved"]');
         if (switchLabel) { switchLabel.textContent = __('Resolved period view', 'ticketsstatistics'); }
+        var openSwitchLabel = document.querySelector('label[for="ts-ticketlist-open-statuses-global"]');
+        if (openSwitchLabel) { openSwitchLabel.textContent = __('Global open statuses', 'ticketsstatistics'); }
+        var openSwitchWrap = document.getElementById('ts-ticketlist-open-statuses-global');
+        if (openSwitchWrap && openSwitchWrap.parentElement) {
+            openSwitchWrap.parentElement.title = __('If enabled, the open statuses will not consider the selected period', 'ticketsstatistics');
+        }
     }
 
     // Detect when the ticketsstatistics domain is loaded by trying to translate

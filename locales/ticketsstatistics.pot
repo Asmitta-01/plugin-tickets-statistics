@@ -115,6 +115,14 @@ msgstr ""
 msgid "Total tickets received in the period"
 msgstr ""
 
+#: front/dashboard.php:78 public/js/ticketlist-glpi10.js:113
+msgid "If enabled, the open statuses will not consider the selected period"
+msgstr ""
+
+#: front/dashboard.php:80 public/js/ticketlist-glpi10.js:116
+msgid "Global open statuses"
+msgstr ""
+
 #: front/dashboard.php:110
 msgid "Tickets sent to MISSC"
 msgstr ""

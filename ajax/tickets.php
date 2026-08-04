@@ -98,6 +98,7 @@ $rawLabel = (string) ($_GET['label'] ?? '');
 $label = $type === 'category' ? $rawLabel : trim($rawLabel);
 $clickedCategoryId = isset($_GET['category_id']) ? (int) $_GET['category_id'] : null;
 $status_group = (string) ($_GET['status_group'] ?? '');
+$openStatusesGlobal = !isset($_GET['open_statuses_global']) || (int) $_GET['open_statuses_global'] === 1;
 
 $where = ["$table.is_deleted" => 0] + getEntitiesRestrictCriteria($table);
 $period = $_GET['period'] ?? 'thismonth';
@@ -105,7 +106,10 @@ $categoryId = (int) ($_GET['category'] ?? 0);
 $dateFrom = $_GET['date_from'] ?? null;
 $dateTo   = $_GET['date_to']   ?? null;
 
-\GlpiPlugin\Ticketsstatistics\PeriodFilter::apply($where, $table, $period, $dateFrom, $dateTo);
+$isOpenStatusCounter = $type === 'counter' && in_array($status_group, ['new', 'incoming', 'assigned', 'waiting'], true);
+if (!$openStatusesGlobal || !$isOpenStatusCounter) {
+    \GlpiPlugin\Ticketsstatistics\PeriodFilter::apply($where, $table, $period, $dateFrom, $dateTo);
+}
 \GlpiPlugin\Ticketsstatistics\CategoryFilter::apply($where, $table, $categoryId);
 
 $joins = [

@@ -9,7 +9,7 @@
  *
  * options.cardSelector  – CSS selector for the clickable card elements.
  *                         Defaults to '[data-ts-tl-counter-key]'.
- * options.getFilters    – function() → { period, date_from, date_to }
+ * options.getFilters    – function() → { period, date_from, date_to, open_statuses_global }
  *                         Defaults to thismonth with no custom dates.
  * -------------------------------------------------------------------------
  */
@@ -200,6 +200,9 @@
         params.set('type', 'counter');
         params.set('label', label || '');
         params.set('period', period);
+        if (filters.open_statuses_global !== undefined && filters.open_statuses_global !== null) {
+            params.set('open_statuses_global', String(filters.open_statuses_global));
+        }
         if (period === 'custom') {
             if (filters.date_from) { params.set('date_from', filters.date_from); }
             if (filters.date_to) { params.set('date_to', filters.date_to); }
@@ -254,6 +257,9 @@
         var req = new URLSearchParams();
         req.set('counter_key', counterKey || '');
         req.set('period', period);
+        if (filters.open_statuses_global !== undefined && filters.open_statuses_global !== null) {
+            req.set('open_statuses_global', String(filters.open_statuses_global));
+        }
         if (period === 'custom') {
             if (filters.date_from) {
                 req.set('date_from', filters.date_from);
@@ -293,14 +299,14 @@
      *
      * @param {object} options
      * @param {string}   [options.cardSelector]  CSS selector for card elements.
-     * @param {function} [options.getFilters]    Returns { period, date_from, date_to }.
+    * @param {function} [options.getFilters]    Returns { period, date_from, date_to, open_statuses_global }.
      */
     function init(options) {
         var opts = options || {};
         var selector = opts.cardSelector || '[data-ts-tl-counter-key]';
         var getFilters = typeof opts.getFilters === 'function'
             ? opts.getFilters
-            : function () { return { period: 'thismonth', date_from: '', date_to: '' }; };
+            : function () { return { period: 'thismonth', date_from: '', date_to: '', open_statuses_global: '1' }; };
 
         document.querySelectorAll(selector).forEach(function (card) {
             if (card.getAttribute('data-ts-tl-modal-bound') === '1') {

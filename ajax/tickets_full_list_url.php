@@ -84,6 +84,7 @@ $counterKey = (string) ($_GET['counter_key'] ?? '');
 $period     = (string) ($_GET['period'] ?? 'thismonth');
 $dateFrom   = $_GET['date_from'] ?? null;
 $dateTo     = $_GET['date_to'] ?? null;
+$openStatusesGlobal = !isset($_GET['open_statuses_global']) || (int) $_GET['open_statuses_global'] === 1;
 
 $statusGroups = [
     'new'           => [\Ticket::INCOMING],
@@ -101,6 +102,7 @@ $statusGroups = [
 $group = array_key_exists($counterKey, $statusGroups) ? $counterKey : '';
 $statuses = $statusGroups[$group];
 $isMissc = ($group === 'missc');
+$isOpenStatusCounter = in_array($group, ['new', 'incoming', 'assigned', 'waiting'], true);
 
 [$from, $toExclusive] = ticketsstatistics_get_period_bounds($period, $dateFrom, $dateTo);
 
@@ -135,22 +137,24 @@ if ($isMissc) {
     ];
 }
 
-if ($from !== null) {
-    $criteria[] = [
-        'field'      => 15, // Creation date
-        'searchtype' => 'morethan',
-        'value'      => $from,
-        'link'       => 'AND',
-    ];
-}
+if (!$openStatusesGlobal || !$isOpenStatusCounter) {
+    if ($from !== null) {
+        $criteria[] = [
+            'field'      => 15, // Creation date
+            'searchtype' => 'morethan',
+            'value'      => $from,
+            'link'       => 'AND',
+        ];
+    }
 
-if ($toExclusive !== null) {
-    $criteria[] = [
-        'field'      => 15, // Creation date
-        'searchtype' => 'lessthan',
-        'value'      => $toExclusive,
-        'link'       => 'AND',
-    ];
+    if ($toExclusive !== null) {
+        $criteria[] = [
+            'field'      => 15, // Creation date
+            'searchtype' => 'lessthan',
+            'value'      => $toExclusive,
+            'link'       => 'AND',
+        ];
+    }
 }
 
 $url = '/front/ticket.php?' . \Toolbox::append_params([
