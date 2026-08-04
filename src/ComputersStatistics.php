@@ -146,6 +146,34 @@ class ComputersStatistics
         return $latest;
     }
 
+    public static function getOperatingSystemIDByName(string $name): int
+    {
+        global $DB;
+        $iterator = $DB->request([
+            'SELECT' => ['id'],
+            'FROM'   => 'glpi_operatingsystemversions',
+            'WHERE'  => [
+                'name' => $name,
+            ],
+        ]);
+        $id = count($iterator) ? $iterator->current()['id'] : -1;
+        return $id;
+    }
+
+    public static function getTownIdByName(string $name): int
+    {
+        global $DB;
+        $iterator = $DB->request([
+            'SELECT' => ['id'],
+            'FROM'   => 'glpi_locations',
+            'WHERE'  => [
+                'name' => $name,
+            ],
+        ]);
+        $id = count($iterator) ? $iterator->current()['id'] : -1;
+        return $id;
+    }
+
     /**
      * @return array<int, array<int, string>>
      */

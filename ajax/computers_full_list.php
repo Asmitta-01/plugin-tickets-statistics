@@ -18,67 +18,95 @@ if (!\Session::haveRight('dashboard', READ)) {
 }
 
 global $CFG_GLPI;
+$scope = (string) ($_GET['scope'] ?? '');
+$counterKey = (string) ($_GET['counter_key'] ?? '');
+$version = trim((string) ($_GET['version'] ?? ''));
+$kbCode = trim((string) ($_GET['kb_code'] ?? ''));
+$townId = (int) ($_GET['town_id'] ?? 0);
 
-$resolved = ComputersStatistics::resolveComputersScope([
-    'scope' => $_GET['scope'] ?? '',
-    'counter_key' => $_GET['counter_key'] ?? '',
-    'version' => $_GET['version'] ?? '',
-    'town' => $_GET['town'] ?? '',
-    'kb_code' => $_GET['kb_code'] ?? '',
-    'town_id' => (int) ($_GET['town_id'] ?? 0),
-]);
-
-$rows = $resolved['rows'];
 $criteria = [];
+$addCriterion = static function (int $field, string $searchtype, string|int $value, string $link = 'AND') use (&$criteria): void {
+    if ((string) $value === '') {
+        return;
+    }
 
-if ($rows === []) {
     $criteria[] = [
-        'field' => 2,
-        'searchtype' => 'equals',
-        'value' => -1,
-        'link' => 'AND',
+        'field' => $field,
+        'searchtype' => $searchtype,
+        'value' => $value,
+        'link' => $link,
     ];
-} else {
+};
+
+if ($townId > 0 && $scope !== 'kb') {
+    // Location field in Computer search options.
+    $addCriterion(3, 'equals', $townId);
+}
+
+if ($scope === 'counter') {
+    if ($counterKey === 'windows') {
+        $addCriterion(45, 'contains', 'Microsoft Windows 11');
+    } elseif ($counterKey === 'latest_version' || $counterKey === 'to_update') {
+        $latestVersion = ComputersStatistics::getLatestWindowsVersion(
+            ComputersStatistics::getLatestWindowsComputers($townId)
+        );
+        $addCriterion(45, 'contains', 'Microsoft Windows 11');
+        if ($latestVersion !== '') {
+            // Get OperatingSystemVersion ID for the latest version to filter by.
+            $osVersionId = ComputersStatistics::getOperatingSystemIDByName($latestVersion);
+            $addCriterion(46, $counterKey === 'to_update' ? 'notequals' : 'equals', $osVersionId);
+        }
+    } elseif ($counterKey === 'kb_total') {
+        // This counter opens a KB summary modal; full list does not apply directly.
+        $addCriterion(2, 'equals', -1);
+    }
+} elseif ($scope === 'version' || $scope === 'town_version') {
+    $addCriterion(45, 'contains', 'Microsoft Windows 11');
+    $osVersionId = ComputersStatistics::getOperatingSystemIDByName($version);
+    $addCriterion(46, 'equals', $osVersionId);
+    if ($scope === 'town_version' && $townId == 0) {
+        $town = $_GET['town'] ?? '';
+        if ($town !== '') {
+            $townId = ComputersStatistics::getTownIdByName($town);
+            $addCriterion(3, 'equals', $townId);
+        }
+    }
+} elseif ($scope === 'kb') {
+    // KB is tracked via installed software; Computer search options do not expose a direct KB field.
+    // Use an ID criteria fallback for this scope.
+    $resolved = ComputersStatistics::resolveComputersScope([
+        'scope' => $scope,
+        'counter_key' => $counterKey,
+        'version' => $version,
+        'town' => $_GET['town'] ?? '',
+        'kb_code' => $kbCode,
+        'town_id' => $townId,
+    ]);
+
     $first = true;
-    foreach ($rows as $row) {
+    foreach ($resolved['rows'] as $row) {
         $id = (int) ($row['id'] ?? 0);
         if ($id <= 0) {
             continue;
         }
 
-        $criteria[] = [
-            'field' => 2,
-            'searchtype' => 'equals',
-            'value' => $id,
-            'link' => $first ? 'AND' : 'OR',
-        ];
+        $addCriterion(2, 'equals', $id, $first ? 'AND' : 'OR');
         $first = false;
     }
 }
 
-$target = $CFG_GLPI['root_doc'] . '/front/computer.php';
-?>
-<!doctype html>
-<html>
+if ($criteria === []) {
+    $addCriterion(2, 'equals', -1);
+}
 
-<head>
-    <meta charset="utf-8">
-    <title><?php echo htmlspecialchars(__('Computers', 'ticketsstatistics'), ENT_QUOTES, 'UTF-8'); ?></title>
-</head>
+$params = [];
 
-<body>
-    <form id="ts-computers-full-list-form" method="post" action="<?php echo htmlspecialchars($target, ENT_QUOTES, 'UTF-8'); ?>">
-        <input type="hidden" name="reset" value="reset">
-        <?php foreach ($criteria as $i => $criterion): ?>
-            <input type="hidden" name="criteria[<?php echo (int) $i; ?>][field]" value="<?php echo (int) $criterion['field']; ?>">
-            <input type="hidden" name="criteria[<?php echo (int) $i; ?>][searchtype]" value="<?php echo htmlspecialchars((string) $criterion['searchtype'], ENT_QUOTES, 'UTF-8'); ?>">
-            <input type="hidden" name="criteria[<?php echo (int) $i; ?>][value]" value="<?php echo htmlspecialchars((string) $criterion['value'], ENT_QUOTES, 'UTF-8'); ?>">
-            <input type="hidden" name="criteria[<?php echo (int) $i; ?>][link]" value="<?php echo htmlspecialchars((string) $criterion['link'], ENT_QUOTES, 'UTF-8'); ?>">
-        <?php endforeach; ?>
-    </form>
-    <script>
-        document.getElementById('ts-computers-full-list-form').submit();
-    </script>
-</body>
+foreach ($criteria as $i => $criterion) {
+    $params[sprintf('criteria[%d][field]', (int) $i)] = (string) $criterion['field'];
+    $params[sprintf('criteria[%d][searchtype]', (int) $i)] = (string) $criterion['searchtype'];
+    $params[sprintf('criteria[%d][value]', (int) $i)] = (string) $criterion['value'];
+    $params[sprintf('criteria[%d][link]', (int) $i)] = (string) $criterion['link'];
+}
 
-</html>
+$target = $CFG_GLPI['root_doc'] . '/front/computer.php?' . http_build_query($params);
+\Html::redirect($target);
