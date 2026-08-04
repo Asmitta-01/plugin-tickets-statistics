@@ -1,8 +1,12 @@
 # TicketsStatistics GLPI plugin
 
+![Version](https://img.shields.io/badge/version-0.6.0-2563eb)
+![PHP](https://img.shields.io/badge/PHP-8.3%20%7C%208.4%20%7C%208.5-777bb4)
+![GLPI](https://img.shields.io/badge/GLPI-10.0.16%20to%2011.0.6-0ea5e9)
+
 TicketsStatistics adds a dedicated reporting dashboard to GLPI for helpdesk ticket activity.
 
-Current release: 0.5.0
+Current release: 0.6.0
 
 The plugin provides:
 
@@ -19,6 +23,13 @@ The plugin provides:
 - software analytics on computers: top installed softwares and coverage (with/without selected software)
 - **stats widget embedded in the GLPI central dashboard** (Tab 0): ticket status doughnut, top requesters bar chart, tickets by town bar chart, and assets by type doughnut — all filterable by period
 - **resolved period view**: a toggle switch on the counters row (available on the main dashboard, the ticket list, and the central widget) that switches the big-number cards from the default creation-date view to a solved-date view showing tickets resolved/closed in the period, tickets opened in the period, and the average TTR for tickets resolved in that period
+- **open statuses global mode**: New / Assigned / Pending cards can be computed globally (outside period) while other cards remain period-based; behavior is consistent in cards, modal lists and full-list opening
+- **computers statistics page** with town filter:
+  - cards: Windows 11 computers, latest Windows version (auto-detected), computers to update, total KB patches deployed
+  - charts: Windows by OS version, Windows by site and OS version (stacked), latest KB patches and installations
+  - interactions: click on cards/charts opens detail modals, with CSV export and GLPI full-list opening when applicable
+- **GLPI-native full-list integration**: full list now opens `computer.php` with GLPI `criteria[...]` URL parameters so GLPI search engine handles filtering directly
+- **refactoring**: shared computers helpers moved from procedural ajax helper to class-based service in `src/ComputersStatistics.php`
 
 ## Data displayed (what each value means)
 
@@ -64,6 +75,7 @@ This plugin targets:
 
 - GLPI 10.0.16 and newer in the 10.x series
 - GLPI 11.0.6 or older in the 11.x series
+- PHP 8.3, 8.4 and 8.5
 
 ### Notes & versions specificities
 
