@@ -222,6 +222,75 @@ class ComputersStatistics
     }
 
     /**
+     * @return array<int, array{kb_code: string, installations: int}>
+     */
+    public static function getKbInstallationsSummary(int $townId): array
+    {
+        $DB = \DBConnection::getReadConnection();
+
+        $where = [
+            'glpi_computers.is_deleted'                    => 0,
+            'glpi_computers.is_template'                   => 0,
+            'glpi_items_softwareversions.itemtype'         => 'Computer',
+            'glpi_items_softwareversions.is_deleted'       => 0,
+            'glpi_items_softwareversions.is_deleted_item'  => 0,
+        ] + self::getEntitiesRestrictCriteria('glpi_computers');
+
+        if ($townId > 0) {
+            $where['glpi_computers.locations_id'] = $townId;
+        }
+
+        $where[] = new \QueryExpression("glpi_softwares.name REGEXP '^KB[0-9]+$'");
+
+        $summary = [];
+        foreach (
+            $DB->request([
+                'SELECT'     => [
+                    'glpi_softwares.name AS kb_code',
+                    'COUNT DISTINCT' => 'glpi_computers.id AS installations',
+                    'MAX' => 'glpi_items_softwareversions.id AS last_rel_id',
+                ],
+                'FROM'       => 'glpi_computers',
+                'INNER JOIN' => [
+                    'glpi_items_softwareversions' => [
+                        'ON' => [
+                            'glpi_items_softwareversions' => 'items_id',
+                            'glpi_computers'              => 'id',
+                        ],
+                    ],
+                    'glpi_softwareversions' => [
+                        'ON' => [
+                            'glpi_softwareversions'       => 'id',
+                            'glpi_items_softwareversions' => 'softwareversions_id',
+                        ],
+                    ],
+                    'glpi_softwares' => [
+                        'ON' => [
+                            'glpi_softwares'        => 'id',
+                            'glpi_softwareversions' => 'softwares_id',
+                        ],
+                    ],
+                ],
+                'WHERE'      => $where,
+                'GROUPBY'    => ['glpi_softwares.name'],
+                'ORDER'      => ['last_rel_id DESC'],
+            ]) as $row
+        ) {
+            $kbCode = trim((string) ($row['kb_code'] ?? ''));
+            if ($kbCode === '') {
+                continue;
+            }
+
+            $summary[] = [
+                'kb_code' => $kbCode,
+                'installations' => (int) ($row['installations'] ?? 0),
+            ];
+        }
+
+        return $summary;
+    }
+
+    /**
      * @param array<string, mixed> $input
      * @return array{title: string, rows: array<int, array<string, mixed>>}
      */

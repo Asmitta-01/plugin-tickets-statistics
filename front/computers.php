@@ -28,6 +28,7 @@ global $CFG_GLPI;
 $computersAjaxUrl = $CFG_GLPI['root_doc'] . '/plugins/ticketsstatistics/ajax/computers.php';
 $computersExportUrl = $CFG_GLPI['root_doc'] . '/plugins/ticketsstatistics/ajax/computers_export.php';
 $computersFullListUrl = $CFG_GLPI['root_doc'] . '/plugins/ticketsstatistics/ajax/computers_full_list.php';
+$computersKbSummaryUrl = $CFG_GLPI['root_doc'] . '/plugins/ticketsstatistics/ajax/computers_kb_summary.php';
 
 $latestVersionLabel = $counters['latest_version'] !== ''
     ? sprintf(__('Computers on latest Windows version (%s)', 'ticketsstatistics'), $counters['latest_version'])
@@ -195,6 +196,7 @@ $latestVersionLabel = $counters['latest_version'] !== ''
     data-computers-ajax-url="<?= htmlspecialchars($computersAjaxUrl, ENT_QUOTES, 'UTF-8') ?>"
     data-computers-export-url="<?= htmlspecialchars($computersExportUrl, ENT_QUOTES, 'UTF-8') ?>"
     data-computers-full-list-url="<?= htmlspecialchars($computersFullListUrl, ENT_QUOTES, 'UTF-8') ?>"
+    data-computers-kb-summary-url="<?= htmlspecialchars($computersKbSummaryUrl, ENT_QUOTES, 'UTF-8') ?>"
     data-loading-computers-label="<?= __('Loading computers...', 'ticketsstatistics') ?>"
     data-no-computers-label="<?= __('No computers found for this selection.', 'ticketsstatistics') ?>"
     data-unable-load-computers-label="<?= __('Unable to load computers.', 'ticketsstatistics') ?>"

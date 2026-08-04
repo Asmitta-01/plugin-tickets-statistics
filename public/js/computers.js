@@ -87,6 +87,21 @@ document.addEventListener('DOMContentLoaded', function () {
             + '</tr></thead><tbody>' + rows + '</tbody></table></div>';
     };
 
+    const renderKbRowsTable = function (rows) {
+        const tableRows = rows.map(function (row) {
+            return '<tr>'
+                + '<td>' + escapeHtml(row.kb_code || '') + '</td>'
+                + '<td>' + escapeHtml(row.installations || 0) + '</td>'
+                + '</tr>';
+        }).join('');
+
+        return '<div class="table-responsive"><table class="table table-sm table-hover align-middle mb-0">'
+            + '<thead><tr>'
+            + '<th>' + escapeHtml(__('KB patches', 'ticketsstatistics')) + '</th>'
+            + '<th>' + escapeHtml(__('Installations', 'ticketsstatistics')) + '</th>'
+            + '</tr></thead><tbody>' + tableRows + '</tbody></table></div>';
+    };
+
     const openComputersModal = function (scopeFilters) {
         if (!modal) {
             return;
@@ -171,9 +186,83 @@ document.addEventListener('DOMContentLoaded', function () {
             });
     };
 
+    const openKbSummaryModal = function () {
+        if (!modal) {
+            return;
+        }
+
+        const titleNode = document.getElementById('ts-computers-modal-title');
+        const countNode = document.getElementById('ts-computers-modal-count');
+        const alertNode = document.getElementById('ts-computers-modal-alert');
+        const bodyNode = document.getElementById('ts-computers-modal-body');
+        const downloadBtn = document.getElementById('ts-computers-modal-download-btn');
+        const fullBtn = document.getElementById('ts-computers-modal-full-btn');
+
+        if (titleNode) {
+            titleNode.textContent = dataEl.dataset.loadingComputersLabel || __('Loading computers...', 'ticketsstatistics');
+        }
+        if (countNode) {
+            countNode.textContent = '';
+        }
+        if (alertNode) {
+            alertNode.classList.add('d-none');
+            alertNode.textContent = '';
+        }
+        if (downloadBtn) {
+            downloadBtn.disabled = true;
+            downloadBtn.onclick = null;
+        }
+        if (fullBtn) {
+            fullBtn.disabled = true;
+            fullBtn.onclick = null;
+        }
+        if (bodyNode) {
+            bodyNode.innerHTML = renderLoader();
+        }
+
+        modal.show();
+
+        const query = toQuery({ town_id: String(getTownFilterValue()) });
+        fetch((dataEl.dataset.computersKbSummaryUrl || '') + '?' + query)
+            .then(function (response) { return response.json(); })
+            .then(function (payload) {
+                const rows = Array.isArray(payload.kbs) ? payload.kbs : [];
+                const kbCount = payload.count || rows.length;
+
+                if (titleNode) {
+                    titleNode.textContent = payload.title || __('Total KB patches deployed', 'ticketsstatistics');
+                }
+                if (countNode) {
+                    countNode.textContent = kbCount === 1 ? '1 KB' : kbCount + ' KB';
+                }
+                if (bodyNode) {
+                    bodyNode.innerHTML = rows.length > 0
+                        ? renderKbRowsTable(rows)
+                        : '<div class="alert alert-secondary mb-0">' + escapeHtml(dataEl.dataset.noComputersLabel || __('No computers found for this selection.', 'ticketsstatistics')) + '</div>';
+                }
+            })
+            .catch(function () {
+                if (titleNode) {
+                    titleNode.textContent = __('Total KB patches deployed', 'ticketsstatistics');
+                }
+                if (countNode) {
+                    countNode.textContent = '';
+                }
+                if (bodyNode) {
+                    bodyNode.innerHTML = '<div class="alert alert-danger mb-0">' + escapeHtml(dataEl.dataset.unableLoadComputersLabel || __('Unable to load computers.', 'ticketsstatistics')) + '</div>';
+                }
+            });
+    };
+
     document.querySelectorAll('.ts-computers-card[data-counter-key]').forEach(function (card) {
         card.addEventListener('click', function () {
-            openComputersModal({ scope: 'counter', counter_key: card.dataset.counterKey || '' });
+            const counterKey = card.dataset.counterKey || '';
+            if (counterKey === 'kb_total') {
+                openKbSummaryModal();
+                return;
+            }
+
+            openComputersModal({ scope: 'counter', counter_key: counterKey });
         });
     });
 
