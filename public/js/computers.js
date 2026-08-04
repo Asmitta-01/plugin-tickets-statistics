@@ -23,6 +23,12 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     };
 
+    Array.from(document.getElementsByClassName('ts-reset-chart')).forEach(el => el.addEventListener('click', function () {
+        const canvas = document.getElementById(this.dataset.canvas);
+        const chart = Chart.getChart(canvas);
+        chart.resetZoom();
+    }));
+
     const versionChartData = parseJson(dataEl.dataset.versionChart) || { labels: [], values: [] };
     const townVersionChartData = parseJson(dataEl.dataset.townVersionChart) || { labels: [], versions: [], values: {} };
     const kbChartData = parseJson(dataEl.dataset.kbChart) || { labels: [], values: [] };
@@ -377,6 +383,24 @@ document.addEventListener('DOMContentLoaded', function () {
                     legend: {
                         position: 'bottom',
                     },
+                    zoom: {
+                        pan: {
+                            enabled: true,
+                            mode: 'xy',
+                        },
+                        zoom: {
+                            wheel: {
+                                enabled: true,
+                            },
+                            pinch: {
+                                enabled: true
+                            },
+                            mode: 'xy',
+                        },
+                        limits: {
+                            y: { min: 0, max: 700 },
+                        },
+                    },
                     datalabels: {
                         color: '#fff',
                         formatter: function (value) {
@@ -391,6 +415,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     y: {
                         stacked: true,
                         beginAtZero: true,
+                        min: 0,
                         ticks: {
                             precision: 0,
                         },
@@ -429,6 +454,24 @@ document.addEventListener('DOMContentLoaded', function () {
                 plugins: {
                     legend: {
                         display: false,
+                    },
+                    zoom: {
+                        pan: {
+                            enabled: true,
+                            mode: 'xy',
+                        },
+                        zoom: {
+                            wheel: {
+                                enabled: true,
+                            },
+                            pinch: {
+                                enabled: true
+                            },
+                            mode: 'xy',
+                        },
+                        limits: {
+                            y: { min: 0, max: 700 },
+                        },
                     },
                     datalabels: {
                         anchor: 'end',

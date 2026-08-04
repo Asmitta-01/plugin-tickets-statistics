@@ -127,6 +127,8 @@ function plugin_init_ticketsstatistics(): void
 
     if (strpos($uri, "plugins/ticketsstatistics/front/computers.php") !== false) {
         $PLUGIN_HOOKS[\Glpi\Plugin\Hooks::ADD_JAVASCRIPT]['ticketsstatistics'][] = $pluginAssetsRoot . 'js/chart.umd.min.js';
+        $PLUGIN_HOOKS[\Glpi\Plugin\Hooks::ADD_JAVASCRIPT]['ticketsstatistics'][] = $pluginAssetsRoot . 'js/hammerjs@2.0.8.js';
+        $PLUGIN_HOOKS[\Glpi\Plugin\Hooks::ADD_JAVASCRIPT]['ticketsstatistics'][] = $pluginAssetsRoot . 'js/chartjs-plugin-zoom.min.js';
         $PLUGIN_HOOKS[\Glpi\Plugin\Hooks::ADD_JAVASCRIPT]['ticketsstatistics'][] = $pluginAssetsRoot . 'js/chartjs-plugin-datalabels.min.js';
         $PLUGIN_HOOKS[\Glpi\Plugin\Hooks::ADD_JAVASCRIPT]['ticketsstatistics'][] = $pluginAssetsRoot . 'js/computers.js';
     }

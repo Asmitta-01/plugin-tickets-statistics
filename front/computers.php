@@ -132,7 +132,12 @@ $latestVersionLabel = $counters['latest_version'] !== ''
 
         <div class="col-lg-7">
             <div class="card shadow-sm h-100">
-                <div class="card-header"><?= __('Windows machines by site and OS version', 'ticketsstatistics') ?></div>
+                <div class="card-header d-flex align-items-center justify-content-between">
+                    <span><?= __('Windows machines by site and OS version', 'ticketsstatistics') ?></span>
+                    <button data-bs-toggle="tooltip" title="<?= __('Reset the zoom', 'ticketsstatistics') ?>" class="btn btn-sm btn-outline-secondary ms-2 ts-reset-chart" data-canvas="ts-computers-town-version-chart">
+                        <?= __('Reset', 'ticketsstatistics') ?>
+                    </button>
+                </div>
                 <div class="card-body d-flex align-items-center justify-content-center">
                     <?php if (!empty($versionsByTown['labels']) && !empty($versionsByTown['versions'])): ?>
                         <canvas id="ts-computers-town-version-chart" style="height:320px; max-height:320px"></canvas>
@@ -147,7 +152,12 @@ $latestVersionLabel = $counters['latest_version'] !== ''
     <div class="row g-3 mb-3">
         <div class="col-12">
             <div class="card shadow-sm h-100">
-                <div class="card-header"><?= __('Latest KB patches and installations', 'ticketsstatistics') ?></div>
+                <div class="card-header d-flex align-items-center justify-content-between">
+                    <span><?= __('Latest KB patches and installations', 'ticketsstatistics') ?></span>
+                    <button data-bs-toggle="tooltip" title="<?= __('Reset the zoom', 'ticketsstatistics') ?>" class="btn btn-sm btn-outline-secondary ms-2 ts-reset-chart" data-canvas="ts-computers-kb-chart">
+                        <?= __('Reset', 'ticketsstatistics') ?>
+                    </button>
+                </div>
                 <div class="card-body d-flex align-items-center justify-content-center">
                     <?php if (!empty($latestKb['labels'])): ?>
                         <canvas id="ts-computers-kb-chart" style="height:320px; max-height:320px"></canvas>
