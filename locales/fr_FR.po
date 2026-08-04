@@ -39,6 +39,54 @@ msgstr "Consulter les statistiques des techniciens"
 msgid "Technicians Stats"
 msgstr "Statistiques des techniciens"
 
+#: front/assets.php:127
+msgid "View computers OS statistics"
+msgstr "Voir les statistiques OS des ordinateurs"
+
+#: front/assets.php:128
+msgid "Computers Stats"
+msgstr "Statistiques des ordinateurs"
+
+#: front/computers.php:25 front/computers.php:32
+msgid "Computers Statistics"
+msgstr "Statistiques des ordinateurs"
+
+#: front/computers.php:36
+msgid "Back to assets dashboard"
+msgstr "Retour au tableau de bord des actifs"
+
+#: front/computers.php:70
+msgid "Computers on Windows 11"
+msgstr "Ordinateurs sous Windows 11"
+
+#: front/computers.php:81
+msgid "Computers on Windows 11 25H2"
+msgstr "Ordinateurs sous Windows 11 25H2"
+
+#: front/computers.php:92
+msgid "Computers to update"
+msgstr "Ordinateurs à mettre à jour"
+
+#: front/computers.php:103
+msgid "Total KB patches deployed"
+msgstr "Total des correctifs KB déployés"
+
+#: front/computers.php:114
+msgid "Windows machines by OS version"
+msgstr "Machines Windows par version d'OS"
+
+#: front/computers.php:127
+msgid "Windows machines by site and OS version"
+msgstr "Machines Windows par site et version d'OS"
+
+#: front/computers.php:143
+msgid "Latest KB patches and installations"
+msgstr "Derniers correctifs KB et leurs installations"
+
+#: public/js/computers.js:107
+msgid "Installations"
+msgstr "Installations"
+
 #: front/dashboard.php:31 front/dashboard.php:35 hook.php:101
 msgid "Period"
 msgstr "Période"

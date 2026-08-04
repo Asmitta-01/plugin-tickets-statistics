@@ -2,6 +2,8 @@
 
 namespace GlpiPlugin\Ticketsstatistics;
 
+use DbUtils;
+
 class AssetStatistics
 {
     private const ASSET_TABLES = [
@@ -9,6 +11,22 @@ class AssetStatistics
         'network_devices' => 'glpi_networkequipments',
         'monitors' => 'glpi_monitors',
     ];
+
+    /**
+     * Get entity restriction criteria for a given table, optionally using recursive entity restrictions.
+     * If is_recursive is true, the criteria will include all entities under the current entity in the hierarchy.
+     */
+    private static function getEntitiesRestrictCriteria(string $table, bool $isRecursive = false): array
+    {
+        if ($isRecursive) {
+            $dbu = new DbUtils();
+            $current_entity_id = \Session::getActiveEntity();
+            $children = $dbu->getSonsOf('glpi_entities', $current_entity_id);
+            return getEntitiesRestrictCriteria($table, value: $children);
+        }
+
+        return getEntitiesRestrictCriteria($table);
+    }
 
     /**
      * Count assets for one asset table with optional town/manufacturer filters.
@@ -460,5 +478,318 @@ class AssetStatistics
     public static function getSoftwareCoverage(int $softwareId, int $townId, int $manufacturerId): array
     {
         return self::getSoftwareCoverageForSelection([$softwareId], $townId, $manufacturerId, true);
+    }
+
+    /**
+     * Compute OS counters for computers using the latest Windows 11 softwareversion per computer.
+     *
+     * @return array{windows: int, windows_25h2: int, to_update: int, kb_total: int}
+     */
+    public static function getWindowsOsCounters(int $townId): array
+    {
+        $latestWindows = self::getLatestWindowsByComputer($townId);
+        $windows = 0;
+        $windows25h2 = 0;
+
+        foreach ($latestWindows as $row) {
+            $windows++;
+            $versionOs = (string) ($row['version_os'] ?? '');
+            if (stripos($versionOs, '25H2') !== false) {
+                $windows25h2++;
+            }
+        }
+
+        return [
+            'windows' => $windows,
+            'windows_25h2' => $windows25h2,
+            'to_update' => max(0, $windows - $windows25h2),
+            'kb_total' => self::countDeployedKb($townId),
+        ];
+    }
+
+    /**
+     * @return array{labels: array<int, string>, values: array<int, int>}
+     */
+    public static function getWindowsVersionsBreakdown(int $townId): array
+    {
+        $counts = [];
+        foreach (self::getLatestWindowsByComputer($townId) as $row) {
+            $version = trim((string) ($row['version_os'] ?? ''));
+            if ($version === '') {
+                $version = __('Unknown', 'ticketsstatistics');
+            }
+
+            if (!isset($counts[$version])) {
+                $counts[$version] = 0;
+            }
+            $counts[$version]++;
+        }
+
+        arsort($counts);
+
+        return [
+            'labels' => array_keys($counts),
+            'values' => array_values($counts),
+        ];
+    }
+
+    /**
+     * @return array{labels: array<int, string>, versions: array<int, string>, values: array<string, array<int, int>>}
+     */
+    public static function getWindowsVersionsByTown(int $townId): array
+    {
+        $byTown = [];
+        $versionsSet = [];
+
+        foreach (self::getLatestWindowsByComputer($townId) as $row) {
+            $town = trim((string) ($row['town'] ?? ''));
+            if ($town === '') {
+                $town = __('Unknown', 'ticketsstatistics');
+            }
+
+            $version = trim((string) ($row['version_os'] ?? ''));
+            if ($version === '') {
+                $version = __('Unknown', 'ticketsstatistics');
+            }
+
+            if (!isset($byTown[$town])) {
+                $byTown[$town] = [];
+            }
+            if (!isset($byTown[$town][$version])) {
+                $byTown[$town][$version] = 0;
+            }
+
+            $byTown[$town][$version]++;
+            $versionsSet[$version] = true;
+        }
+
+        uasort($byTown, static function (array $left, array $right): int {
+            $leftTotal = array_sum($left);
+            $rightTotal = array_sum($right);
+            $byTotal = $rightTotal <=> $leftTotal;
+            if ($byTotal !== 0) {
+                return $byTotal;
+            }
+
+            return 0;
+        });
+
+        $labels = array_keys($byTown);
+        $versions = array_keys($versionsSet);
+        natcasesort($versions);
+        $versions = array_values($versions);
+
+        $values = [];
+        foreach ($versions as $version) {
+            $values[$version] = [];
+            foreach ($labels as $town) {
+                $values[$version][] = (int) ($byTown[$town][$version] ?? 0);
+            }
+        }
+
+        return [
+            'labels' => $labels,
+            'versions' => $versions,
+            'values' => $values,
+        ];
+    }
+
+    /**
+     * Return latest KB patches with their installation counts.
+     *
+     * @return array{labels: array<int, string>, values: array<int, int>}
+     */
+    public static function getLatestKbInstallations(int $townId, int $limit = 10): array
+    {
+        global $DB;
+
+        $where = [
+            'glpi_computers.is_deleted'                    => 0,
+            'glpi_computers.is_template'                   => 0,
+            'glpi_items_softwareversions.itemtype'         => 'Computer',
+            'glpi_items_softwareversions.is_deleted'       => 0,
+            'glpi_items_softwareversions.is_deleted_item'  => 0,
+        ] + self::getEntitiesRestrictCriteria('glpi_computers', true);
+
+        if ($townId > 0) {
+            $where['glpi_computers.locations_id'] = $townId;
+        }
+
+        $where[] = new \QueryExpression("glpi_softwares.name REGEXP '^KB[0-9]+$'");
+
+        $labels = [];
+        $values = [];
+        foreach (
+            $DB->request([
+                'SELECT'     => [
+                    'glpi_softwares.name AS kb_code',
+                    'COUNT DISTINCT' => 'glpi_computers.id AS installs',
+                    'MAX' => 'glpi_items_softwareversions.id AS last_rel_id',
+                ],
+                'FROM'       => 'glpi_computers',
+                'INNER JOIN' => [
+                    'glpi_items_softwareversions' => [
+                        'ON' => [
+                            'glpi_items_softwareversions' => 'items_id',
+                            'glpi_computers'              => 'id',
+                        ],
+                    ],
+                    'glpi_softwareversions' => [
+                        'ON' => [
+                            'glpi_softwareversions'       => 'id',
+                            'glpi_items_softwareversions' => 'softwareversions_id',
+                        ],
+                    ],
+                    'glpi_softwares' => [
+                        'ON' => [
+                            'glpi_softwares'        => 'id',
+                            'glpi_softwareversions' => 'softwares_id',
+                        ],
+                    ],
+                ],
+                'WHERE'      => $where,
+                'GROUPBY'    => ['glpi_softwares.name'],
+                'ORDER'      => ['last_rel_id DESC'],
+                'LIMIT'      => max(1, $limit),
+            ]) as $row
+        ) {
+            $labels[] = (string) ($row['kb_code'] ?? '');
+            $values[] = (int) ($row['installs'] ?? 0);
+        }
+
+        return [
+            'labels' => $labels,
+            'values' => $values,
+        ];
+    }
+
+    /**
+     * @return array<int, array{computer_id: int, version_os: string, town: string}>
+     */
+    private static function getLatestWindowsByComputer(int $townId): array
+    {
+        global $DB;
+
+        $where = [
+            'glpi_computers.is_deleted'                    => 0,
+            'glpi_computers.is_template'                   => 0,
+            'glpi_items_softwareversions.itemtype'         => 'Computer',
+            'glpi_items_softwareversions.is_deleted'       => 0,
+            'glpi_items_softwareversions.is_deleted_item'  => 0,
+            'glpi_softwares.name'                          => ['LIKE', 'Microsoft Windows 11%'],
+        ] + self::getEntitiesRestrictCriteria('glpi_computers', true);
+
+        if ($townId > 0) {
+            $where['glpi_computers.locations_id'] = $townId;
+        }
+
+        $rows = $DB->request([
+            'SELECT'     => [
+                'glpi_computers.id AS computer_id',
+                'glpi_softwareversions.name AS version_os',
+                'glpi_locations.town',
+                'glpi_items_softwareversions.id AS rel_id',
+            ],
+            'FROM'       => 'glpi_computers',
+            'INNER JOIN' => [
+                'glpi_items_softwareversions' => [
+                    'ON' => [
+                        'glpi_items_softwareversions' => 'items_id',
+                        'glpi_computers'              => 'id',
+                    ],
+                ],
+                'glpi_softwareversions' => [
+                    'ON' => [
+                        'glpi_softwareversions'       => 'id',
+                        'glpi_items_softwareversions' => 'softwareversions_id',
+                    ],
+                ],
+                'glpi_softwares' => [
+                    'ON' => [
+                        'glpi_softwares'        => 'id',
+                        'glpi_softwareversions' => 'softwares_id',
+                    ],
+                ],
+                'glpi_locations' => [
+                    'ON' => [
+                        'glpi_locations' => 'id',
+                        'glpi_computers' => 'locations_id',
+                    ],
+                ],
+            ],
+            'WHERE'      => $where,
+            'ORDER'      => [
+                'glpi_computers.id ASC',
+                'glpi_items_softwareversions.id DESC',
+            ],
+        ]);
+
+        $result = [];
+        $seenComputers = [];
+
+        foreach ($rows as $row) {
+            $computerId = (int) ($row['computer_id'] ?? 0);
+            if ($computerId <= 0 || isset($seenComputers[$computerId])) {
+                continue;
+            }
+
+            $seenComputers[$computerId] = true;
+            $result[] = [
+                'computer_id' => $computerId,
+                'version_os'  => (string) ($row['version_os'] ?? ''),
+                'town'        => (string) ($row['town'] ?? ''),
+            ];
+        }
+
+        return $result;
+    }
+
+    private static function countDeployedKb(int $townId): int
+    {
+        global $DB;
+
+        $where = [
+            'glpi_computers.is_deleted'                    => 0,
+            'glpi_computers.is_template'                   => 0,
+            'glpi_items_softwareversions.itemtype'         => 'Computer',
+            'glpi_items_softwareversions.is_deleted'       => 0,
+            'glpi_items_softwareversions.is_deleted_item'  => 0,
+        ] + self::getEntitiesRestrictCriteria('glpi_computers', true);
+
+        if ($townId > 0) {
+            $where['glpi_computers.locations_id'] = $townId;
+        }
+
+        $where[] = new \QueryExpression("glpi_softwares.name REGEXP '^KB[0-9]+$'");
+
+        $iter = $DB->request([
+            'SELECT'     => [
+                'COUNT DISTINCT' => 'glpi_softwares.name AS cpt',
+            ],
+            'FROM'       => 'glpi_computers',
+            'INNER JOIN' => [
+                'glpi_items_softwareversions' => [
+                    'ON' => [
+                        'glpi_items_softwareversions' => 'items_id',
+                        'glpi_computers'              => 'id',
+                    ],
+                ],
+                'glpi_softwareversions' => [
+                    'ON' => [
+                        'glpi_softwareversions'       => 'id',
+                        'glpi_items_softwareversions' => 'softwareversions_id',
+                    ],
+                ],
+                'glpi_softwares' => [
+                    'ON' => [
+                        'glpi_softwares'        => 'id',
+                        'glpi_softwareversions' => 'softwares_id',
+                    ],
+                ],
+            ],
+            'WHERE'      => $where,
+        ]);
+
+        return (int) ($iter->current()['cpt'] ?? 0);
     }
 }

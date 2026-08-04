@@ -125,6 +125,12 @@ function plugin_init_ticketsstatistics(): void
         $PLUGIN_HOOKS[\Glpi\Plugin\Hooks::ADD_JAVASCRIPT]['ticketsstatistics'][] = $pluginAssetsRoot . 'js/assets.js';
     }
 
+    if (strpos($uri, "plugins/ticketsstatistics/front/computers.php") !== false) {
+        $PLUGIN_HOOKS[\Glpi\Plugin\Hooks::ADD_JAVASCRIPT]['ticketsstatistics'][] = $pluginAssetsRoot . 'js/chart.umd.min.js';
+        $PLUGIN_HOOKS[\Glpi\Plugin\Hooks::ADD_JAVASCRIPT]['ticketsstatistics'][] = $pluginAssetsRoot . 'js/chartjs-plugin-datalabels.min.js';
+        $PLUGIN_HOOKS[\Glpi\Plugin\Hooks::ADD_JAVASCRIPT]['ticketsstatistics'][] = $pluginAssetsRoot . 'js/computers.js';
+    }
+
     // Check for pending redirect after session is ready  
     if (isset($_SESSION['plugin_redirect'])) {
         $redirect = $_SESSION['plugin_redirect'];
