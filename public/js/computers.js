@@ -4,6 +4,13 @@ document.addEventListener('DOMContentLoaded', function () {
         return;
     }
 
+    let modal = null;
+    let lastFilters = null;
+    const modalNode = document.getElementById('ts-computers-modal');
+    if (modalNode && typeof bootstrap !== 'undefined') {
+        modal = bootstrap.Modal.getOrCreateInstance(modalNode);
+    }
+
     const parseJson = function (value) {
         if (!value) {
             return null;
@@ -19,6 +26,160 @@ document.addEventListener('DOMContentLoaded', function () {
     const versionChartData = parseJson(dataEl.dataset.versionChart) || { labels: [], values: [] };
     const townVersionChartData = parseJson(dataEl.dataset.townVersionChart) || { labels: [], versions: [], values: {} };
     const kbChartData = parseJson(dataEl.dataset.kbChart) || { labels: [], values: [] };
+    const getTownFilterValue = function () {
+        const input = document.querySelector('#ts-computers-town select');
+        return input ? (parseInt(input.value || '0', 10) || 0) : 0;
+    };
+
+    const buildScopeParams = function (extra) {
+        const params = Object.assign({}, extra || {});
+        params.town_id = String(getTownFilterValue());
+        return params;
+    };
+
+    const toQuery = function (obj) {
+        const params = new URLSearchParams();
+        Object.keys(obj).forEach(function (key) {
+            const value = obj[key];
+            if (value !== undefined && value !== null && value !== '') {
+                params.set(key, String(value));
+            }
+        });
+        return params.toString();
+    };
+
+    const renderLoader = function () {
+        return '<p class="text-center my-4">'
+            + '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>'
+            + escapeHtml(dataEl.dataset.loadingComputersLabel || __('Loading computers...', 'ticketsstatistics'))
+            + '</p>';
+    };
+
+    const formatCount = function (count) {
+        return count === 1 ? '1 ' + __('computer', 'ticketsstatistics') : count + ' ' + __('computers', 'ticketsstatistics');
+    };
+
+    const renderComputersTable = function (computers) {
+        const rows = computers.map(function (computer) {
+            const kbCodes = Array.isArray(computer.kb_codes) ? computer.kb_codes.join(', ') : '';
+            return '<tr>'
+                + '<td>' + escapeHtml(computer.id) + '</td>'
+                + '<td><a href="' + escapeHtml(computer.url || '#') + '" target="_blank" class="fw-semibold">' + escapeHtml(computer.name || '') + '</a></td>'
+                + '<td>' + escapeHtml(computer.version_os || '') + '</td>'
+                + '<td>' + escapeHtml(kbCodes) + '</td>'
+                + '<td>' + escapeHtml(computer.serial || '') + '</td>'
+                + '<td>' + escapeHtml(computer.inventory_number || '') + '</td>'
+                + '<td>' + escapeHtml(computer.town || '') + '</td>'
+                + '<td>' + escapeHtml(computer.last_update || '') + '</td>'
+                + '</tr>';
+        }).join('');
+
+        return '<div class="table-responsive"><table class="table table-sm table-hover align-middle mb-0">'
+            + '<thead><tr>'
+            + '<th>' + escapeHtml(__('ID', 'ticketsstatistics')) + '</th>'
+            + '<th>' + escapeHtml(__('Name', 'ticketsstatistics')) + '</th>'
+            + '<th>' + escapeHtml(__('OS version', 'ticketsstatistics')) + '</th>'
+            + '<th>' + escapeHtml(__('KB patches', 'ticketsstatistics')) + '</th>'
+            + '<th>' + escapeHtml(__('Serial number', 'ticketsstatistics')) + '</th>'
+            + '<th>' + escapeHtml(__('Inventory number', 'ticketsstatistics')) + '</th>'
+            + '<th>' + escapeHtml(__('Town', 'ticketsstatistics')) + '</th>'
+            + '<th>' + escapeHtml(__('Last update', 'ticketsstatistics')) + '</th>'
+            + '</tr></thead><tbody>' + rows + '</tbody></table></div>';
+    };
+
+    const openComputersModal = function (scopeFilters) {
+        if (!modal) {
+            return;
+        }
+
+        lastFilters = buildScopeParams(scopeFilters);
+
+        const titleNode = document.getElementById('ts-computers-modal-title');
+        const countNode = document.getElementById('ts-computers-modal-count');
+        const alertNode = document.getElementById('ts-computers-modal-alert');
+        const bodyNode = document.getElementById('ts-computers-modal-body');
+        const downloadBtn = document.getElementById('ts-computers-modal-download-btn');
+        const fullBtn = document.getElementById('ts-computers-modal-full-btn');
+
+        if (titleNode) {
+            titleNode.textContent = dataEl.dataset.loadingComputersLabel || __('Loading computers...', 'ticketsstatistics');
+        }
+        if (countNode) {
+            countNode.textContent = '';
+        }
+        if (alertNode) {
+            alertNode.classList.add('d-none');
+            alertNode.textContent = '';
+        }
+        if (bodyNode) {
+            bodyNode.innerHTML = renderLoader();
+        }
+        if (downloadBtn) {
+            downloadBtn.disabled = false;
+            downloadBtn.onclick = function () {
+                const q = toQuery(lastFilters || {});
+                window.open((dataEl.dataset.computersExportUrl || '') + '?' + q, '_blank');
+            };
+        }
+        if (fullBtn) {
+            fullBtn.onclick = function () {
+                const q = toQuery(lastFilters || {});
+                window.open((dataEl.dataset.computersFullListUrl || '') + '?' + q, '_blank');
+            };
+        }
+
+        modal.show();
+
+        const query = toQuery(lastFilters);
+        fetch((dataEl.dataset.computersAjaxUrl || '') + '?' + query)
+            .then(function (response) { return response.json(); })
+            .then(function (payload) {
+                if (titleNode) {
+                    titleNode.textContent = payload.title || __('Computers', 'ticketsstatistics');
+                }
+                if (countNode) {
+                    countNode.textContent = formatCount(payload.count || 0);
+                }
+                if (alertNode) {
+                    if (payload.truncated) {
+                        const label = dataEl.dataset.showingFirstComputersLabel || __('Showing the first %d computers only.', 'ticketsstatistics');
+                        alertNode.textContent = label.replace('%d', String(payload.limit || 100));
+                        alertNode.classList.remove('d-none');
+                    } else {
+                        alertNode.classList.add('d-none');
+                    }
+                }
+                if (bodyNode) {
+                    bodyNode.innerHTML = Array.isArray(payload.computers) && payload.computers.length > 0
+                        ? renderComputersTable(payload.computers)
+                        : '<div class="alert alert-secondary mb-0">' + escapeHtml(dataEl.dataset.noComputersLabel || __('No computers found for this selection.', 'ticketsstatistics')) + '</div>';
+                }
+            })
+            .catch(function () {
+                if (titleNode) {
+                    titleNode.textContent = __('Computers', 'ticketsstatistics');
+                }
+                if (countNode) {
+                    countNode.textContent = '';
+                }
+                if (alertNode) {
+                    alertNode.classList.add('d-none');
+                }
+                if (bodyNode) {
+                    bodyNode.innerHTML = '<div class="alert alert-danger mb-0">' + escapeHtml(dataEl.dataset.unableLoadComputersLabel || __('Unable to load computers.', 'ticketsstatistics')) + '</div>';
+                }
+            });
+    };
+
+    document.querySelectorAll('.ts-computers-card[data-counter-key]').forEach(function (card) {
+        card.addEventListener('click', function () {
+            openComputersModal({ scope: 'counter', counter_key: card.dataset.counterKey || '' });
+        });
+    });
+
+    const escapeHtml = function (value) {
+        return String(value == null ? '' : value);
+    };
 
     const versionColorMap = {};
     const colorForVersion = function (version, indexFallback) {
@@ -53,6 +214,16 @@ document.addEventListener('DOMContentLoaded', function () {
                 }],
             },
             options: {
+                onClick: function (_, elements) {
+                    if (!elements || !elements.length) {
+                        return;
+                    }
+                    const index = elements[0].index;
+                    openComputersModal({
+                        scope: 'version',
+                        version: versionChartData.labels[index] || '',
+                    });
+                },
                 maintainAspectRatio: false,
                 plugins: {
                     legend: {
@@ -98,6 +269,19 @@ document.addEventListener('DOMContentLoaded', function () {
                 datasets: datasets,
             },
             options: {
+                onClick: function (_, elements) {
+                    if (!elements || !elements.length) {
+                        return;
+                    }
+                    const point = elements[0];
+                    const townLabel = townVersionChartData.labels[point.index] || '';
+                    const versionLabel = townVersionChartData.versions[point.datasetIndex] || '';
+                    openComputersModal({
+                        scope: 'town_version',
+                        town: townLabel,
+                        version: versionLabel,
+                    });
+                },
                 maintainAspectRatio: false,
                 plugins: {
                     legend: {
@@ -141,6 +325,16 @@ document.addEventListener('DOMContentLoaded', function () {
                 }],
             },
             options: {
+                onClick: function (_, elements) {
+                    if (!elements || !elements.length) {
+                        return;
+                    }
+                    const index = elements[0].index;
+                    openComputersModal({
+                        scope: 'kb',
+                        kb_code: kbChartData.labels[index] || '',
+                    });
+                },
                 maintainAspectRatio: false,
                 plugins: {
                     legend: {

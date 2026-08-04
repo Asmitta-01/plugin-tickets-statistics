@@ -101,6 +101,22 @@ msgstr ""
 msgid "Installations"
 msgstr ""
 
+#: public/js/computers.js:45
+msgid "computer"
+msgstr ""
+
+#: public/js/computers.js:45
+msgid "computers"
+msgstr ""
+
+#: public/js/computers.js:67 ajax/computers_export.php:39 src/ComputersCommon.php:286
+msgid "OS version"
+msgstr ""
+
+#: public/js/computers.js:68 ajax/computers_export.php:40
+msgid "KB patches"
+msgstr ""
+
 #: front/dashboard.php:31 front/dashboard.php:35 hook.php:101
 msgid "Period"
 msgstr ""

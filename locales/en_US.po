@@ -96,6 +96,22 @@ msgstr "Latest KB patches and installations"
 msgid "Installations"
 msgstr "Installations"
 
+#: public/js/computers.js:45
+msgid "computer"
+msgstr "computer"
+
+#: public/js/computers.js:45
+msgid "computers"
+msgstr "computers"
+
+#: public/js/computers.js:67 ajax/computers_export.php:39 src/ComputersCommon.php:286
+msgid "OS version"
+msgstr "OS version"
+
+#: public/js/computers.js:68 ajax/computers_export.php:40
+msgid "KB patches"
+msgstr "KB patches"
+
 #: front/dashboard.php:31 front/dashboard.php:35 hook.php:101
 msgid "Period"
 msgstr "Period"
