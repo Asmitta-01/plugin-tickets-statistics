@@ -748,6 +748,8 @@ class AssetStatistics
                         'glpi_softwareversions' => 'softwares_id',
                     ],
                 ],
+            ],
+            'LEFT JOIN' => [
                 'glpi_locations' => [
                     'ON' => [
                         'glpi_locations' => 'id',
