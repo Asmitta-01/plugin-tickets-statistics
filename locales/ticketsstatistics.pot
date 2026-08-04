@@ -68,6 +68,15 @@ msgstr ""
 msgid "Computers on Windows 11 25H2"
 msgstr ""
 
+#: front/computers.php:25
+#, php-format
+msgid "Computers on latest Windows version (%s)"
+msgstr ""
+
+#: front/computers.php:26
+msgid "Computers on latest Windows version"
+msgstr ""
+
 #: front/computers.php:92
 msgid "Computers to update"
 msgstr ""

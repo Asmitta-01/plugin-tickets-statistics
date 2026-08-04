@@ -24,6 +24,10 @@ $versionsBreakdown = AssetStatistics::getWindowsVersionsBreakdown($townId);
 $versionsByTown = AssetStatistics::getWindowsVersionsByTown($townId);
 $latestKb = AssetStatistics::getLatestKbInstallations($townId, 12);
 
+$latestVersionLabel = $counters['latest_version'] !== ''
+    ? sprintf(__('Computers on latest Windows version (%s)', 'ticketsstatistics'), $counters['latest_version'])
+    : __('Computers on latest Windows version', 'ticketsstatistics');
+
 \Html::header(__('Computers Statistics', 'ticketsstatistics'), '', 'assets');
 ?>
 
@@ -79,8 +83,8 @@ $latestKb = AssetStatistics::getLatestKbInstallations($townId, 12);
             <div class="card shadow-sm h-100 text-center" style="border-top:3px solid #22c55e">
                 <div class="card-body py-3">
                     <i class="ti ti-checkup-list fs-1" style="color:#22c55e"></i>
-                    <div class="display-6 fw-bold"><?= (int) $counters['windows_25h2'] ?></div>
-                    <div class="text-muted"><?= __('Computers on Windows 11 25H2', 'ticketsstatistics') ?></div>
+                    <div class="display-6 fw-bold"><?= (int) $counters['latest_version_count'] ?></div>
+                    <div class="text-muted text-truncate" data-bs-toggle="tooltip" data-bs-placement="bottom" title="<?= $latestVersionLabel ?>"><?= $latestVersionLabel ?></div>
                 </div>
             </div>
         </div>

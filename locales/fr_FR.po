@@ -63,6 +63,15 @@ msgstr "Ordinateurs sous Windows 11"
 msgid "Computers on Windows 11 25H2"
 msgstr "Ordinateurs sous Windows 11 25H2"
 
+#: front/computers.php:25
+#, php-format
+msgid "Computers on latest Windows version (%s)"
+msgstr "Ordinateurs sur la derniere version Windows (%s)"
+
+#: front/computers.php:26
+msgid "Computers on latest Windows version"
+msgstr "Ordinateurs sur la derniere version Windows"
+
 #: front/computers.php:92
 msgid "Computers to update"
 msgstr "Ordinateurs à mettre à jour"

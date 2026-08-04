@@ -483,28 +483,66 @@ class AssetStatistics
     /**
      * Compute OS counters for computers using the latest Windows 11 softwareversion per computer.
      *
-     * @return array{windows: int, windows_25h2: int, to_update: int, kb_total: int}
+     * @return array{windows: int, latest_version_count: int, latest_version: string, to_update: int, kb_total: int}
      */
     public static function getWindowsOsCounters(int $townId): array
     {
         $latestWindows = self::getLatestWindowsByComputer($townId);
         $windows = 0;
-        $windows25h2 = 0;
+        $latestVersion = '';
+        $latestVersionCount = 0;
+        $countsByVersion = [];
 
         foreach ($latestWindows as $row) {
             $windows++;
-            $versionOs = (string) ($row['version_os'] ?? '');
-            if (stripos($versionOs, '25H2') !== false) {
-                $windows25h2++;
+            $versionOs = trim((string) ($row['version_os'] ?? ''));
+            if ($versionOs === '') {
+                continue;
+            }
+
+            if (!isset($countsByVersion[$versionOs])) {
+                $countsByVersion[$versionOs] = 0;
+            }
+            $countsByVersion[$versionOs]++;
+        }
+
+        foreach ($countsByVersion as $version => $count) {
+            if ($latestVersion === '' || self::compareWindowsVersions($version, $latestVersion) > 0) {
+                $latestVersion = $version;
+                $latestVersionCount = (int) $count;
             }
         }
 
         return [
             'windows' => $windows,
-            'windows_25h2' => $windows25h2,
-            'to_update' => max(0, $windows - $windows25h2),
+            'latest_version_count' => $latestVersionCount,
+            'latest_version' => $latestVersion,
+            'to_update' => max(0, $windows - $latestVersionCount),
             'kb_total' => self::countDeployedKb($townId),
         ];
+    }
+
+    private static function compareWindowsVersions(string $left, string $right): int
+    {
+        $leftRank = self::extractWindowsVersionRank($left);
+        $rightRank = self::extractWindowsVersionRank($right);
+
+        if ($leftRank !== $rightRank) {
+            return $leftRank <=> $rightRank;
+        }
+
+        return strnatcasecmp($left, $right);
+    }
+
+    private static function extractWindowsVersionRank(string $version): int
+    {
+        if (preg_match('/\b(\d{2})H(\d)\b/i', $version, $matches) === 1) {
+            $year = (int) $matches[1];
+            $half = (int) $matches[2];
+            return ($year * 10) + $half;
+        }
+
+        return -1;
     }
 
     /**
