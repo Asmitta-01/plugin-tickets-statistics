@@ -22,6 +22,7 @@ $scope = (string) ($_GET['scope'] ?? '');
 $counterKey = (string) ($_GET['counter_key'] ?? '');
 $version = trim((string) ($_GET['version'] ?? ''));
 $townId = (int) ($_GET['town_id'] ?? 0);
+$entityId = (int) ($_GET['entity_id'] ?? 0);
 
 $criteria = [];
 $addCriterion = static function (int $field, string $searchtype, string|int $value, string $link = 'AND') use (&$criteria): void {
@@ -37,6 +38,11 @@ $addCriterion = static function (int $field, string $searchtype, string|int $val
     ];
 };
 
+if ($entityId > 0) {
+    // Entity field in Computer search options (tree-compatible search).
+    $addCriterion(80, 'under', $entityId);
+}
+
 if ($townId > 0) {
     // Location field in Computer search options.
     $addCriterion(3, 'equals', $townId);
@@ -47,7 +53,7 @@ if ($scope === 'counter') {
         $addCriterion(45, 'contains', 'Microsoft Windows 11');
     } elseif ($counterKey === 'latest_version' || $counterKey === 'to_update') {
         $latestVersion = ComputersStatistics::getLatestWindowsVersion(
-            ComputersStatistics::getLatestWindowsComputers($townId)
+            ComputersStatistics::getLatestWindowsComputers($townId, $entityId)
         );
         $addCriterion(45, 'contains', 'Microsoft Windows 11');
         if ($latestVersion !== '') {

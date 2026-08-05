@@ -29,6 +29,7 @@ $resolved = ComputersStatistics::resolveComputersScope([
     'kb_code' => $_GET['kb_code'] ?? '',
     'kb_dataset' => $_GET['kb_dataset'] ?? '',
     'town_id' => (int) ($_GET['town_id'] ?? 0),
+    'entity_id' => (int) ($_GET['entity_id'] ?? 0),
 ]);
 
 $allRows = $resolved['rows'];

@@ -19,10 +19,11 @@ if (!\Session::haveRight('dashboard', READ)) {
 }
 
 $townId = (int) ($_GET['town'] ?? 0);
-$counters = AssetStatistics::getWindowsOsCounters($townId);
-$versionsBreakdown = AssetStatistics::getWindowsVersionsBreakdown($townId);
-$versionsByTown = AssetStatistics::getWindowsVersionsByTown($townId);
-$latestKb = AssetStatistics::getLatestKbInstallations($townId, 12);
+$entityId = (int) ($_GET['entity'] ?? \Session::getActiveEntity());
+$counters = AssetStatistics::getWindowsOsCounters($townId, $entityId);
+$versionsBreakdown = AssetStatistics::getWindowsVersionsBreakdown($townId, $entityId);
+$versionsByTown = AssetStatistics::getWindowsVersionsByTown($townId, $entityId);
+$latestKb = AssetStatistics::getLatestKbInstallations($townId, 12, $entityId);
 
 global $CFG_GLPI;
 $computersAjaxUrl = $CFG_GLPI['root_doc'] . '/plugins/ticketsstatistics/ajax/computers.php';
@@ -51,18 +52,34 @@ $latestVersionLabel = $counters['latest_version'] !== ''
 
     <div class="alert alert-secondary mb-3">
         <form class="row g-2 align-items-end" method="get" id="ts-computers-filter-form">
-            <div class="col-md-4">
-                <label for="ts-computers-town" class="form-label mb-1 fw-semibold"><?= __('Town', 'ticketsstatistics') ?></label>
-                <div id="ts-computers-town">
-                    <?php \Location::dropdown([
-                        'name' => 'town',
-                        'display_emptychoice' => true,
-                        'emptylabel' => __('All towns', 'ticketsstatistics'),
-                        'value' => $_GET['town'] ?? 0,
-                        'addicon' => false,
-                        'comments' => false,
-                        'class' => 'form-select form-select-sm',
-                    ]); ?>
+            <div class="col-md-4 d-flex gap-3 flex-wrap">
+                <div>
+                    <label for="ts-computers-entity" class="form-label mb-1 fw-semibold"><?= \Entity::getTypeName(1) ?></label>
+                    <div id="ts-computers-entity">
+                        <?php \Entity::dropdown([
+                            'name' => 'entity',
+                            'value' => $entityId,
+                            'display_emptychoice' => false,
+                            'addicon' => false,
+                            'comments' => false,
+                            'class' => 'form-select form-select-sm',
+                        ]); ?>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="ts-computers-town" class="form-label mb-1 fw-semibold"><?= __('Town', 'ticketsstatistics') ?></label>
+                    <div id="ts-computers-town">
+                        <?php \Location::dropdown([
+                            'name' => 'town',
+                            'display_emptychoice' => true,
+                            'emptylabel' => __('All towns', 'ticketsstatistics'),
+                            'value' => $_GET['town'] ?? 0,
+                            'addicon' => false,
+                            'comments' => false,
+                            'class' => 'form-select form-select-sm',
+                        ]); ?>
+                    </div>
                 </div>
             </div>
 

@@ -37,9 +37,15 @@ document.addEventListener('DOMContentLoaded', function () {
         return input ? (parseInt(input.value || '0', 10) || 0) : 0;
     };
 
+    const getEntityFilterValue = function () {
+        const input = document.querySelector('#ts-computers-entity select');
+        return input ? (parseInt(input.value || '0', 10) || 0) : 0;
+    };
+
     const buildScopeParams = function (extra) {
         const params = Object.assign({}, extra || {});
         params.town_id = String(getTownFilterValue());
+        params.entity_id = String(getEntityFilterValue());
         return params;
     };
 
@@ -236,7 +242,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
         modal.show();
 
-        const query = toQuery({ town_id: String(getTownFilterValue()) });
+        const query = toQuery({
+            town_id: String(getTownFilterValue()),
+            entity_id: String(getEntityFilterValue()),
+        });
         fetch((dataEl.dataset.computersKbSummaryUrl || '') + '?' + query)
             .then(function (response) { return response.json(); })
             .then(function (payload) {

@@ -7,10 +7,10 @@ class ComputersStatistics
     /**
      * @return array<int, int>
      */
-    private static function getEntitiesRestrictCriteria(string $table): array
+    private static function getEntitiesRestrictCriteria(string $table, int $entityId = 0): array
     {
         $dbu = new \DbUtils();
-        $currentEntityId = \Session::getActiveEntity();
+        $currentEntityId = $entityId > 0 ? $entityId : \Session::getActiveEntity();
         $children = $dbu->getSonsOf('glpi_entities', $currentEntityId);
 
         return getEntitiesRestrictCriteria($table, value: $children);
@@ -40,7 +40,7 @@ class ComputersStatistics
     /**
      * @return array<int, array<string, mixed>>
      */
-    public static function getLatestWindowsComputers(int $townId): array
+    public static function getLatestWindowsComputers(int $townId, int $entityId = 0): array
     {
         $DB = \DBConnection::getReadConnection();
         global $CFG_GLPI;
@@ -52,7 +52,7 @@ class ComputersStatistics
             'glpi_items_softwareversions.is_deleted'       => 0,
             'glpi_items_softwareversions.is_deleted_item'  => 0,
             'glpi_softwares.name'                          => ['LIKE', 'Microsoft Windows 11%'],
-        ] + self::getEntitiesRestrictCriteria('glpi_computers');
+        ] + self::getEntitiesRestrictCriteria('glpi_computers', $entityId);
 
         if ($townId > 0) {
             $where['glpi_computers.locations_id'] = $townId;
@@ -188,14 +188,14 @@ class ComputersStatistics
     /**
      * @return array<int, array<int, string>>
      */
-    public static function getKbMapForComputers(int $townId, string $kbCode = '', bool $installed = true): array
+    public static function getKbMapForComputers(int $townId, string $kbCode = '', bool $installed = true, int $entityId = 0): array
     {
         $DB = \DBConnection::getReadConnection();
 
         $baseWhere = [
             'glpi_computers.is_deleted'  => 0,
             'glpi_computers.is_template' => 0,
-        ] + self::getEntitiesRestrictCriteria('glpi_computers');
+        ] + self::getEntitiesRestrictCriteria('glpi_computers', $entityId);
 
         if ($townId > 0) {
             $baseWhere['glpi_computers.locations_id'] = $townId;
@@ -340,7 +340,7 @@ class ComputersStatistics
     /**
      * @return array<int, array{kb_code: string, installations: int}>
      */
-    public static function getKbInstallationsSummary(int $townId): array
+    public static function getKbInstallationsSummary(int $townId, int $entityId = 0): array
     {
         $DB = \DBConnection::getReadConnection();
 
@@ -350,7 +350,7 @@ class ComputersStatistics
             'glpi_items_softwareversions.itemtype'         => 'Computer',
             'glpi_items_softwareversions.is_deleted'       => 0,
             'glpi_items_softwareversions.is_deleted_item'  => 0,
-        ] + self::getEntitiesRestrictCriteria('glpi_computers');
+        ] + self::getEntitiesRestrictCriteria('glpi_computers', $entityId);
 
         if ($townId > 0) {
             $where['glpi_computers.locations_id'] = $townId;
@@ -419,8 +419,9 @@ class ComputersStatistics
         $kbCode = trim((string) ($input['kb_code'] ?? ''));
         $kbDataset = trim((string) ($input['kb_dataset'] ?? 'installed'));
         $townId = (int) ($input['town_id'] ?? 0);
+        $entityId = (int) ($input['entity_id'] ?? 0);
 
-        $latestWindows = self::getLatestWindowsComputers($townId);
+        $latestWindows = self::getLatestWindowsComputers($townId, $entityId);
         $latestVersion = self::getLatestWindowsVersion($latestWindows);
 
         $rows = [];
@@ -447,7 +448,7 @@ class ComputersStatistics
                 }
                 $title .= ' - ' . __('Computers to update', 'ticketsstatistics');
             } elseif ($counterKey === 'kb_total') {
-                $kbMap = self::getKbMapForComputers($townId);
+                $kbMap = self::getKbMapForComputers($townId, '', true, $entityId);
                 foreach ($latestWindows as $row) {
                     $id = (int) ($row['id'] ?? 0);
                     if ($id > 0 && isset($kbMap[$id])) {
@@ -473,7 +474,7 @@ class ComputersStatistics
             $title .= ' - ' . $town . ' - ' . __('OS version', 'ticketsstatistics') . ': ' . $version;
         } elseif ($scope === 'kb') {
             $installed = $kbDataset === 'installed';
-            $kbMap = self::getKbMapForComputers($townId, $kbCode, $installed);
+            $kbMap = self::getKbMapForComputers($townId, $kbCode, $installed, $entityId);
             foreach ($latestWindows as $row) {
                 $id = (int) ($row['id'] ?? 0);
                 if ($id > 0 && isset($kbMap[$id])) {

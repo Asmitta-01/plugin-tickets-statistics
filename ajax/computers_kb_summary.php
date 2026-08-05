@@ -20,7 +20,8 @@ if (!\Session::haveRight('dashboard', READ)) {
 }
 
 $townId = (int) ($_GET['town_id'] ?? 0);
-$rows = ComputersStatistics::getKbInstallationsSummary($townId);
+$entityId = (int) ($_GET['entity_id'] ?? 0);
+$rows = ComputersStatistics::getKbInstallationsSummary($townId, $entityId);
 
 $totalInstallations = 0;
 foreach ($rows as $row) {

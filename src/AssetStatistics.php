@@ -16,11 +16,11 @@ class AssetStatistics
      * Get entity restriction criteria for a given table, optionally using recursive entity restrictions.
      * If is_recursive is true, the criteria will include all entities under the current entity in the hierarchy.
      */
-    private static function getEntitiesRestrictCriteria(string $table, bool $isRecursive = false): array
+    private static function getEntitiesRestrictCriteria(string $table, bool $isRecursive = false, int $entityId = 0): array
     {
         if ($isRecursive) {
             $dbu = new DbUtils();
-            $current_entity_id = \Session::getActiveEntity();
+            $current_entity_id = $entityId > 0 ? $entityId : \Session::getActiveEntity();
             $children = $dbu->getSonsOf('glpi_entities', $current_entity_id);
             return getEntitiesRestrictCriteria($table, value: $children);
         }
@@ -485,9 +485,9 @@ class AssetStatistics
      *
      * @return array{windows: int, latest_version_count: int, latest_version: string, to_update: int, kb_total: int}
      */
-    public static function getWindowsOsCounters(int $townId): array
+    public static function getWindowsOsCounters(int $townId, int $entityId = 0): array
     {
-        $latestWindows = self::getLatestWindowsByComputer($townId);
+        $latestWindows = self::getLatestWindowsByComputer($townId, $entityId);
         $windows = 0;
         $latestVersion = '';
         $latestVersionCount = 0;
@@ -518,7 +518,7 @@ class AssetStatistics
             'latest_version_count' => $latestVersionCount,
             'latest_version' => $latestVersion,
             'to_update' => max(0, $windows - $latestVersionCount),
-            'kb_total' => self::countDeployedKb($townId),
+            'kb_total' => self::countDeployedKb($townId, $entityId),
         ];
     }
 
@@ -548,10 +548,10 @@ class AssetStatistics
     /**
      * @return array{labels: array<int, string>, values: array<int, int>}
      */
-    public static function getWindowsVersionsBreakdown(int $townId): array
+    public static function getWindowsVersionsBreakdown(int $townId, int $entityId = 0): array
     {
         $counts = [];
-        foreach (self::getLatestWindowsByComputer($townId) as $row) {
+        foreach (self::getLatestWindowsByComputer($townId, $entityId) as $row) {
             $version = trim((string) ($row['version_os'] ?? ''));
             if ($version === '') {
                 $version = __('Unknown', 'ticketsstatistics');
@@ -574,12 +574,12 @@ class AssetStatistics
     /**
      * @return array{labels: array<int, string>, versions: array<int, string>, values: array<string, array<int, int>>}
      */
-    public static function getWindowsVersionsByTown(int $townId): array
+    public static function getWindowsVersionsByTown(int $townId, int $entityId = 0): array
     {
         $byTown = [];
         $versionsSet = [];
 
-        foreach (self::getLatestWindowsByComputer($townId) as $row) {
+        foreach (self::getLatestWindowsByComputer($townId, $entityId) as $row) {
             $town = trim((string) ($row['town'] ?? ''));
             if ($town === '') {
                 $town = __('Unknown', 'ticketsstatistics');
@@ -637,7 +637,7 @@ class AssetStatistics
      *
      * @return array{labels: array<int, string>, values: array<int, int>}
      */
-    public static function getLatestKbInstallations(int $townId, int $limit = 10): array
+    public static function getLatestKbInstallations(int $townId, int $limit = 10, int $entityId = 0): array
     {
         global $DB;
 
@@ -647,14 +647,14 @@ class AssetStatistics
             'glpi_items_softwareversions.itemtype'         => 'Computer',
             'glpi_items_softwareversions.is_deleted'       => 0,
             'glpi_items_softwareversions.is_deleted_item'  => 0,
-        ] + self::getEntitiesRestrictCriteria('glpi_computers', true);
+        ] + self::getEntitiesRestrictCriteria('glpi_computers', true, $entityId);
 
         if ($townId > 0) {
             $where['glpi_computers.locations_id'] = $townId;
         }
 
         // Total de machines éligibles (même périmètre, sans jointure KB)
-        $totalMachines = self::countWindowsComputers($townId);
+        $totalMachines = self::countWindowsComputers($townId, $entityId);
 
         $where[] = new \QueryExpression("glpi_softwares.name REGEXP '^KB[0-9]+$'");
 
@@ -711,7 +711,7 @@ class AssetStatistics
     /**
      * Count how many computers have Windows 11 installed, with optional town filter.
      */
-    private static function countWindowsComputers(int $townId): int
+    private static function countWindowsComputers(int $townId, int $entityId = 0): int
     {
         global $DB;
 
@@ -722,7 +722,7 @@ class AssetStatistics
             'glpi_items_softwareversions.is_deleted'       => 0,
             'glpi_items_softwareversions.is_deleted_item'  => 0,
             'glpi_softwares.name'                          => ['LIKE', 'Microsoft Windows 11%'],
-        ] + self::getEntitiesRestrictCriteria('glpi_computers', true);
+        ] + self::getEntitiesRestrictCriteria('glpi_computers', true, $entityId);
 
         if ($townId > 0) {
             $where['glpi_computers.locations_id'] = $townId;
@@ -762,7 +762,7 @@ class AssetStatistics
     /**
      * @return array<int, array{computer_id: int, version_os: string, town: string}>
      */
-    private static function getLatestWindowsByComputer(int $townId): array
+    private static function getLatestWindowsByComputer(int $townId, int $entityId = 0): array
     {
         global $DB;
 
@@ -773,7 +773,7 @@ class AssetStatistics
             'glpi_items_softwareversions.is_deleted'       => 0,
             'glpi_items_softwareversions.is_deleted_item'  => 0,
             'glpi_softwares.name'                          => ['LIKE', 'Microsoft Windows 11%'],
-        ] + self::getEntitiesRestrictCriteria('glpi_computers', true);
+        ] + self::getEntitiesRestrictCriteria('glpi_computers', true, $entityId);
 
         if ($townId > 0) {
             $where['glpi_computers.locations_id'] = $townId;
@@ -842,7 +842,7 @@ class AssetStatistics
         return $result;
     }
 
-    private static function countDeployedKb(int $townId): int
+    private static function countDeployedKb(int $townId, int $entityId = 0): int
     {
         global $DB;
 
@@ -852,7 +852,7 @@ class AssetStatistics
             'glpi_items_softwareversions.itemtype'         => 'Computer',
             'glpi_items_softwareversions.is_deleted'       => 0,
             'glpi_items_softwareversions.is_deleted_item'  => 0,
-        ] + self::getEntitiesRestrictCriteria('glpi_computers', true);
+        ] + self::getEntitiesRestrictCriteria('glpi_computers', true, $entityId);
 
         if ($townId > 0) {
             $where['glpi_computers.locations_id'] = $townId;
