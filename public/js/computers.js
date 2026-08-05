@@ -300,7 +300,15 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         const index = typeof indexFallback === 'number' ? indexFallback : Object.keys(versionColorMap).length;
-        const color = 'hsl(' + ((index * 57) % 360) + ', 68%, 52%)';
+
+        // Première couleur : vert fixe #15c254
+        let color;
+        if (index === 0) {
+            color = '#15c254';
+        } else {
+            color = 'hsl(' + (((index - 1) * 57) % 360) + ', 68%, 52%)';
+        }
+
         versionColorMap[version] = color;
         return color;
     };
@@ -538,7 +546,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         ticks: {
                             precision: 0,
                             callback: function (value) {
-                                return Math.abs(value);
+                                return Math.round(Math.abs(value));
                             },
                         },
                     },
