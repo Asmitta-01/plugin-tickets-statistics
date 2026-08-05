@@ -29,6 +29,7 @@ class ComputerExport implements ExportToCsvInterface
         return [
             __('ID', 'ticketsstatistics'),
             __('Name', 'ticketsstatistics'),
+            __('User', 'ticketsstatistics'),
             __('OS version', 'ticketsstatistics'),
             __('KB patches', 'ticketsstatistics'),
             __('Serial number', 'ticketsstatistics'),
@@ -45,6 +46,7 @@ class ComputerExport implements ExportToCsvInterface
             $rows[] = [
                 (string) ((int) ($row['id'] ?? 0)),
                 (string) ($row['name'] ?? ''),
+                (string) ($row['user_name'] ?? ''),
                 (string) ($row['version_os'] ?? ''),
                 implode(', ', (array) ($row['kb_codes'] ?? [])),
                 (string) ($row['serial'] ?? ''),

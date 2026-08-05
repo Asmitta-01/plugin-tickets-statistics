@@ -62,6 +62,8 @@ class ComputersStatistics
             'SELECT'     => [
                 'glpi_computers.id AS computer_id',
                 'glpi_computers.name AS computer_name',
+                'glpi_users.realname AS owner_realname',
+                'glpi_users.firstname AS owner_firstname',
                 'glpi_computers.serial',
                 'glpi_computers.otherserial',
                 'glpi_computers.date_mod',
@@ -91,6 +93,12 @@ class ComputersStatistics
                 ],
             ],
             'LEFT JOIN'  => [
+                'glpi_users' => [
+                    'ON' => [
+                        'glpi_users'     => 'id',
+                        'glpi_computers' => 'users_id',
+                    ],
+                ],
                 'glpi_locations' => [
                     'ON' => [
                         'glpi_locations' => 'id',
@@ -118,6 +126,7 @@ class ComputersStatistics
             $result[] = [
                 'id' => $computerId,
                 'name' => $computerName !== '' ? $computerName : sprintf(__('Computer #%d', 'ticketsstatistics'), $computerId),
+                'user_name' => (string) ($row['owner_firstname'] ?? '') . ' ' . ($row['owner_realname'] ?? ''),
                 'serial' => (string) ($row['serial'] ?? ''),
                 'inventory_number' => (string) ($row['otherserial'] ?? ''),
                 'version_os' => (string) ($row['version_os'] ?? ''),
