@@ -160,7 +160,7 @@ $latestVersionLabel = $counters['latest_version'] !== ''
                 </div>
                 <div class="card-body d-flex align-items-center justify-content-center">
                     <?php if (!empty($latestKb['labels'])): ?>
-                        <canvas id="ts-computers-kb-chart" style="height:320px; max-height:320px"></canvas>
+                        <canvas id="ts-computers-kb-chart" style="height:520px; max-height:520px"></canvas>
                     <?php else: ?>
                         <div class="text-muted text-center py-5"><?= __('No data available', 'ticketsstatistics') ?></div>
                     <?php endif; ?>

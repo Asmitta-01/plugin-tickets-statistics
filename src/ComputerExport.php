@@ -9,10 +9,10 @@ class ComputerExport implements ExportToCsvInterface
     protected array $computers;
     private string $city;
 
-    public function __construct(array $computers)
+    public function __construct(array $computers, int $townId = 0)
     {
         $this->computers = $computers;
-        if (isset($computers[0]['town'])) {
+        if ($townId > 0 && isset($computers[0]['town'])) {
             $this->city = (string) $computers[0]['town'];
         } else {
             $this->city = '';

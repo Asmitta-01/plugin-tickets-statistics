@@ -653,10 +653,15 @@ class AssetStatistics
             $where['glpi_computers.locations_id'] = $townId;
         }
 
+        // Total de machines éligibles (même périmètre, sans jointure KB)
+        $totalMachines = self::countWindowsComputers($townId);
+
         $where[] = new \QueryExpression("glpi_softwares.name REGEXP '^KB[0-9]+$'");
 
         $labels = [];
-        $values = [];
+        $values  = [];   // installés
+        $missing = [];   // non installés
+
         foreach (
             $DB->request([
                 'SELECT'     => [
@@ -687,18 +692,71 @@ class AssetStatistics
                 ],
                 'WHERE'      => $where,
                 'GROUPBY'    => ['glpi_softwares.name'],
-                'ORDER'      => ['last_rel_id DESC'],
+                'ORDER'      => ['kb_code DESC'],
                 'LIMIT'      => max(1, $limit),
             ]) as $row
         ) {
             $labels[] = (string) ($row['kb_code'] ?? '');
             $values[] = (int) ($row['installs'] ?? 0);
+            $missing[] =  ($row['installs'] ?? 0) - $totalMachines;
         }
 
         return [
             'labels' => $labels,
             'values' => $values,
+            'missing' => $missing,
         ];
+    }
+
+    /**
+     * Count how many computers have Windows 11 installed, with optional town filter.
+     */
+    private static function countWindowsComputers(int $townId): int
+    {
+        global $DB;
+
+        $where = [
+            'glpi_computers.is_deleted'                    => 0,
+            'glpi_computers.is_template'                   => 0,
+            'glpi_items_softwareversions.itemtype'         => 'Computer',
+            'glpi_items_softwareversions.is_deleted'       => 0,
+            'glpi_items_softwareversions.is_deleted_item'  => 0,
+            'glpi_softwares.name'                          => ['LIKE', 'Microsoft Windows 11%'],
+        ] + self::getEntitiesRestrictCriteria('glpi_computers', true);
+
+        if ($townId > 0) {
+            $where['glpi_computers.locations_id'] = $townId;
+        }
+
+        $iter = $DB->request([
+            'SELECT'     => [
+                'COUNT DISTINCT' => 'glpi_computers.id AS cpt',
+            ],
+            'FROM'       => 'glpi_computers',
+            'INNER JOIN' => [
+                'glpi_items_softwareversions' => [
+                    'ON' => [
+                        'glpi_items_softwareversions' => 'items_id',
+                        'glpi_computers'              => 'id',
+                    ],
+                ],
+                'glpi_softwareversions' => [
+                    'ON' => [
+                        'glpi_softwareversions'       => 'id',
+                        'glpi_items_softwareversions' => 'softwareversions_id',
+                    ],
+                ],
+                'glpi_softwares' => [
+                    'ON' => [
+                        'glpi_softwares'        => 'id',
+                        'glpi_softwareversions' => 'softwares_id',
+                    ],
+                ],
+            ],
+            'WHERE'      => $where,
+        ]);
+
+        return (int) ($iter->current()['cpt'] ?? 0);
     }
 
     /**

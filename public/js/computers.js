@@ -431,13 +431,30 @@ document.addEventListener('DOMContentLoaded', function () {
             type: 'bar',
             data: {
                 labels: kbChartData.labels,
-                datasets: [{
-                    label: __('Installations', 'ticketsstatistics'),
-                    data: kbChartData.values,
-                    backgroundColor: '#7c3aed',
-                    borderColor: '#6d28d9',
-                    borderWidth: 1,
-                }],
+                datasets: [
+                    {
+                        label: __('Installations', 'ticketsstatistics'),
+                        data: kbChartData.values,
+                        backgroundColor: '#7c3aed',
+                        borderColor: '#6d28d9',
+                        borderWidth: 1,
+                        datalabels: {
+                            anchor: 'end',
+                            align: 'end', // au-dessus de la barre (barre positive)
+                        },
+                    },
+                    {
+                        label: __('Missing', 'ticketsstatistics'),
+                        data: kbChartData.missing,
+                        backgroundColor: '#ef4444',
+                        borderColor: '#b91c1c',
+                        borderWidth: 1,
+                        datalabels: {
+                            anchor: 'start',
+                            align: 'start', // en dessous de la barre (barre négative)
+                        },
+                    }
+                ],
             },
             options: {
                 onClick: function (_, elements) {
@@ -445,8 +462,10 @@ document.addEventListener('DOMContentLoaded', function () {
                         return;
                     }
                     const index = elements[0].index;
+                    const dataset = elements[0].datasetIndex == 0 ? 'installed' : 'missing';
                     openComputersModal({
                         scope: 'kb',
+                        kb_dataset: dataset,
                         kb_code: kbChartData.labels[index] || '',
                     });
                 },
@@ -470,29 +489,41 @@ document.addEventListener('DOMContentLoaded', function () {
                             mode: 'xy',
                         },
                         limits: {
-                            y: { min: 0, max: 700 },
+                            y: { min: -700, max: 700 },
                         },
                     },
                     datalabels: {
-                        anchor: 'end',
-                        align: 'end',
                         color: '#374151',
                         formatter: function (value) {
-                            return value > 0 ? value : '';
+                            const abs = Math.abs(value);
+                            return abs > 0 ? abs : '';
+                        },
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                const abs = Math.abs(context.parsed.y);
+                                return context.dataset.label + ': ' + abs;
+                            },
                         },
                     },
                 },
                 scales: {
                     x: {
+                        stacked: true,
                         ticks: {
                             maxRotation: 45,
                             minRotation: 25,
                         },
                     },
                     y: {
+                        stacked: true,
                         beginAtZero: true,
                         ticks: {
                             precision: 0,
+                            callback: function (value) {
+                                return Math.abs(value);
+                            },
                         },
                     },
                 },

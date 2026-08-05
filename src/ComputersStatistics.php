@@ -179,21 +179,99 @@ class ComputersStatistics
     /**
      * @return array<int, array<int, string>>
      */
-    public static function getKbMapForComputers(int $townId, string $kbCode = ''): array
+    public static function getKbMapForComputers(int $townId, string $kbCode = '', bool $installed = true): array
     {
         $DB = \DBConnection::getReadConnection();
 
-        $where = [
-            'glpi_computers.is_deleted'                    => 0,
-            'glpi_computers.is_template'                   => 0,
-            'glpi_items_softwareversions.itemtype'         => 'Computer',
-            'glpi_items_softwareversions.is_deleted'       => 0,
-            'glpi_items_softwareversions.is_deleted_item'  => 0,
+        $baseWhere = [
+            'glpi_computers.is_deleted'  => 0,
+            'glpi_computers.is_template' => 0,
         ] + self::getEntitiesRestrictCriteria('glpi_computers');
 
         if ($townId > 0) {
-            $where['glpi_computers.locations_id'] = $townId;
+            $baseWhere['glpi_computers.locations_id'] = $townId;
         }
+
+        if (!$installed) {
+            if ($kbCode === '') {
+                // Un KB précis est nécessaire pour définir "ne l'a pas installé"
+                return [];
+            }
+
+            // 1) Tous les PC éligibles (périmètre de base, sans jointure logiciel)
+            $allComputerIds = [];
+            foreach (
+                $DB->request([
+                    'SELECT' => ['glpi_computers.id AS computer_id'],
+                    'FROM'   => 'glpi_computers',
+                    'WHERE'  => $baseWhere,
+                ]) as $row
+            ) {
+                $id = (int) ($row['computer_id'] ?? 0);
+                if ($id > 0) {
+                    $allComputerIds[$id] = true;
+                }
+            }
+
+            // 2) PC ayant installé ce KB précis
+            $installedWhere = $baseWhere + [
+                'glpi_items_softwareversions.itemtype'        => 'Computer',
+                'glpi_items_softwareversions.is_deleted'      => 0,
+                'glpi_items_softwareversions.is_deleted_item' => 0,
+                'glpi_softwares.name'                         => $kbCode,
+            ];
+
+            $installedComputerIds = [];
+            foreach (
+                $DB->request([
+                    'SELECT'     => ['glpi_computers.id AS computer_id'],
+                    'FROM'       => 'glpi_computers',
+                    'INNER JOIN' => [
+                        'glpi_items_softwareversions' => [
+                            'ON' => [
+                                'glpi_items_softwareversions' => 'items_id',
+                                'glpi_computers'              => 'id',
+                            ],
+                        ],
+                        'glpi_softwareversions' => [
+                            'ON' => [
+                                'glpi_softwareversions'       => 'id',
+                                'glpi_items_softwareversions' => 'softwareversions_id',
+                            ],
+                        ],
+                        'glpi_softwares' => [
+                            'ON' => [
+                                'glpi_softwares'        => 'id',
+                                'glpi_softwareversions' => 'softwares_id',
+                            ],
+                        ],
+                    ],
+                    'WHERE'      => $installedWhere,
+                    'GROUPBY'    => ['glpi_computers.id'],
+                ]) as $row
+            ) {
+                $id = (int) ($row['computer_id'] ?? 0);
+                if ($id > 0) {
+                    $installedComputerIds[$id] = true;
+                }
+            }
+
+            // 3) Différence : éligibles mais pas dans "installés"
+            $map = [];
+            foreach (array_keys($allComputerIds) as $computerId) {
+                if (!isset($installedComputerIds[$computerId])) {
+                    $map[$computerId] = [$kbCode];
+                }
+            }
+
+            return $map;
+        }
+
+        $where = $baseWhere + [
+            'glpi_items_softwareversions.itemtype'        => 'Computer',
+            'glpi_items_softwareversions.is_deleted'      => 0,
+            'glpi_items_softwareversions.is_deleted_item' => 0,
+        ];
 
         if ($kbCode !== '') {
             $where['glpi_softwares.name'] = $kbCode;
@@ -237,11 +315,10 @@ class ComputersStatistics
             ]) as $row
         ) {
             $computerId = (int) ($row['computer_id'] ?? 0);
-            $currentKb = (string) ($row['kb_code'] ?? '');
+            $currentKb  = (string) ($row['kb_code'] ?? '');
             if ($computerId <= 0 || $currentKb === '') {
                 continue;
             }
-
             if (!isset($map[$computerId])) {
                 $map[$computerId] = [];
             }
@@ -331,6 +408,7 @@ class ComputersStatistics
         $version = trim((string) ($input['version'] ?? ''));
         $town = trim((string) ($input['town'] ?? ''));
         $kbCode = trim((string) ($input['kb_code'] ?? ''));
+        $kbDataset = trim((string) ($input['kb_dataset'] ?? 'installed'));
         $townId = (int) ($input['town_id'] ?? 0);
 
         $latestWindows = self::getLatestWindowsComputers($townId);
@@ -385,7 +463,8 @@ class ComputersStatistics
             }
             $title .= ' - ' . $town . ' - ' . __('OS version', 'ticketsstatistics') . ': ' . $version;
         } elseif ($scope === 'kb') {
-            $kbMap = self::getKbMapForComputers($townId, $kbCode);
+            $installed = $kbDataset === 'installed';
+            $kbMap = self::getKbMapForComputers($townId, $kbCode, $installed);
             foreach ($latestWindows as $row) {
                 $id = (int) ($row['id'] ?? 0);
                 if ($id > 0 && isset($kbMap[$id])) {
