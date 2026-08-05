@@ -4,32 +4,65 @@
 ![PHP](https://img.shields.io/badge/PHP-8.3%20%7C%208.4%20%7C%208.5-777bb4)
 ![GLPI](https://img.shields.io/badge/GLPI-10.0.16%20to%2011.0.6-0ea5e9)
 
-TicketsStatistics adds a dedicated reporting dashboard to GLPI for helpdesk ticket activity.
+TicketsStatistics adds a dedicated reporting dashboard to GLPI for helpdesk ticket activity, plus town-based ticket, asset, and computer/patch analytics.
 
-Current release: 0.6.0
+**Current release:** 0.6.1
 
-The plugin provides:
+## Table of contents
 
-- ticket counters by status
-- charts by priority and category
-- town-based ticket analytics
-- ticket creation trends per day
-- dedicated technicians statistics page with assignment and performance metrics
-- period filters including custom date ranges
+- [Features](#features)
+- [Data displayed](#data-displayed-what-each-value-means)
+- [Compatibility](#compatibility)
+- [Usage](#usage)
+- [Translations](#translations)
+- [Contributing](#contributing)
+
+## Features
+
+### Tickets dashboard
+
+- Ticket counters by status
+- Charts by priority and category
+- Town-based ticket analytics
+- Ticket creation trends per day
+- Period filters, including custom date ranges
 - PDF export of the dashboard
-- dedicated assets statistics page with filters by town (location) and manufacturer
-- assets overview cards (total, computers, network devices, monitors)
-- stacked assets charts by town and by manufacturer (context-aware with selected filters)
-- software analytics on computers: top installed softwares and coverage (with/without selected software)
-- **stats widget embedded in the GLPI central dashboard** (Tab 0): ticket status doughnut, top requesters bar chart, tickets by town bar chart, and assets by type doughnut — all filterable by period
-- **resolved period view**: a toggle switch on the counters row (available on the main dashboard, the ticket list, and the central widget) that switches the big-number cards from the default creation-date view to a solved-date view showing tickets resolved/closed in the period, tickets opened in the period, and the average TTR for tickets resolved in that period
-- **open statuses global mode**: New / Assigned / Pending cards can be computed globally (outside period) while other cards remain period-based; behavior is consistent in cards, modal lists and full-list opening
-- **computers statistics page** with town filter:
-  - cards: Windows 11 computers, latest Windows version (auto-detected), computers to update, total KB patches deployed
-  - charts: Windows by OS version, Windows by site and OS version (stacked), latest KB patches and installations
-  - interactions: click on cards/charts opens detail modals, with CSV export and GLPI full-list opening when applicable
-- **GLPI-native full-list integration**: full list now opens `computer.php` with GLPI `criteria[...]` URL parameters so GLPI search engine handles filtering directly
-- **refactoring**: shared computers helpers moved from procedural ajax helper to class-based service in `src/ComputersStatistics.php`
+
+### Resolved period view
+
+A toggle switch on the counters row (main dashboard, ticket list, and central widget) that switches the big-number cards from the default creation-date view to a solved-date view: tickets resolved/closed in the period, tickets opened in the period, and the average TTR for tickets resolved in that period.
+
+### Open statuses global mode
+
+New / Assigned / Pending cards can be computed globally (outside the period filter) while other cards remain period-based. Behavior stays consistent across cards, modal lists, and the full-list opening.
+
+### Technicians
+
+Dedicated technicians statistics page with assignment and performance metrics.
+
+### Assets
+
+- Dedicated assets statistics page, filterable by town (location) and manufacturer
+- Overview cards: total assets, computers, network devices, monitors
+- Stacked charts by town and by manufacturer, context-aware with selected filters
+- Software analytics on computers: top installed software and coverage (with/without a selected software)
+
+### Computers & patch statistics
+
+Dedicated page, filterable by town:
+
+- Cards: Windows 11 computers, latest Windows version (auto-detected), computers to update, total KB patches deployed
+- Charts: Windows by OS version, Windows by site and OS version (stacked), latest KB patches and installations
+- Interactions: clicking cards/charts opens detail modals, with CSV export and GLPI full-list opening where applicable
+
+### Central dashboard widget
+
+Stats widget embedded in the GLPI central dashboard (Tab 0): ticket status doughnut, top requesters bar chart, tickets by town bar chart, and assets by type doughnut — all filterable by period.
+
+### GLPI integration
+
+- Full list opens `computer.php` with GLPI `criteria[...]` URL parameters, so the native GLPI search engine handles filtering directly
+- Shared computers helpers live in a class-based service, `src/ComputersStatistics.php`
 
 ## Data displayed (what each value means)
 
@@ -41,46 +74,49 @@ This section explains the meaning of the values shown in the dashboard.
 
 ### Counters (default view)
 
-- New, Assigned, Pending, Resolved/Closed: number of tickets currently in those statuses within the selected scope.
-- Total tickets: sum of status counters in the selected scope.
-- MISSC (when `cfaomobility` is active): number of tickets with a non-empty MISSC number.
-- Global open statuses switch (enabled by default): New, Assigned, and Pending counters are computed globally (without period filtering), while still respecting entity/category restrictions.
+| Value | Meaning |
+| --- | --- |
+| New, Assigned, Pending, Resolved/Closed | Number of tickets currently in that status within the selected scope |
+| Total tickets | Sum of the status counters in the selected scope |
+| MISSC (when `cfaomobility` is active) | Number of tickets with a non-empty MISSC number |
+
+- **Global open statuses switch** (enabled by default): New, Assigned, and Pending counters are computed globally (without period filtering), while still respecting entity/category restrictions.
 - When this switch is disabled, New, Assigned, and Pending counters use the selected period like the other counters.
-- Cards click behavior is consistent with the switch: modal results and "Open full list" use the same global-vs-period logic (including GLPI 10 ticket-list widget).
+- Card click behavior stays consistent with the switch: modal results and "Open full list" use the same global-vs-period logic (including the GLPI 10 ticket-list widget).
 
 ### Opened vs Closed per day
 
-- Opened per day: count of tickets by creation day (`DATE(tickets.date)`).
-- Closed per day: count of tickets by resolution/closure day (`DATE(COALESCE(solvedate, closedate))`).
-- Days shown are the union of both day sets. A day can have opened = 0 and closed > 0 (or the reverse).
+- **Opened per day**: count of tickets by creation day (`DATE(tickets.date)`).
+- **Closed per day**: count of tickets by resolution/closure day (`DATE(COALESCE(solvedate, closedate))`).
+- Days shown are the union of both day sets — a day can have opened = 0 and closed > 0 (or the reverse).
 - In custom period mode, closed-per-day values are also bounded by the selected custom range on resolved/closed date.
 
 ### TTR (Time To Resolution)
 
-- Ticket duration source: `solve_delay_stat`, or `close_delay_stat` when solve delay is missing/zero.
-- Unit displayed: hours.
-- Daily TTR value: average of all valid ticket durations for that resolved/closed day.
-- Global average: average of all valid ticket durations in the selected scope, repeated as a baseline across all days.
-- In custom period mode, TTR values are bounded by the selected custom range on resolved/closed date.
+- **Duration source**: `solve_delay_stat`, or `close_delay_stat` when the solve delay is missing/zero.
+- **Unit displayed**: hours.
+- **Daily TTR value**: average of all valid ticket durations for that resolved/closed day.
+- **Global average**: average of all valid ticket durations in the selected scope, repeated as a baseline across all days.
+- In custom period mode, TTR values are also bounded by the selected custom range on resolved/closed date.
 
 ### Resolved period view counters
 
-- Resolved / Closed in period: tickets in status Resolved or Closed whose resolved/closed date is in the selected period.
-- Opened in period: tickets whose creation date is in the selected period.
-- Avg TTR: average resolution time (hours) for tickets resolved/closed in the selected period.
+| Value | Meaning |
+| --- | --- |
+| Resolved / Closed in period | Tickets in status Resolved or Closed whose resolved/closed date falls in the selected period |
+| Opened in period | Tickets whose creation date falls in the selected period |
+| Avg TTR | Average resolution time (hours) for tickets resolved/closed in the selected period |
 
 ## Compatibility
 
-This plugin targets:
-
 - GLPI 10.0.16 and newer in the 10.x series
 - GLPI 11.0.6 or older in the 11.x series
-- PHP 8.3, 8.4 and 8.5
+- PHP 8.3, 8.4, and 8.5
 
-### Notes & versions specificities
+### Notes & version specificities
 
-- The plugin use `\Glpi\DBAL\QueryExpression` for building database queries if available (GLPI 11.0.0+), otherwise it falls back to `\QueryExpression`.
-- The plugin assets(javascript) are loaded with the `public/` prefix for GLPI 10.x and without it for GLPI 11.x.
+- The plugin uses `\Glpi\DBAL\QueryExpression` for building database queries when available (GLPI 11.0.0+), and falls back to `\QueryExpression` otherwise.
+- Plugin JavaScript assets are loaded with the `public/` prefix on GLPI 10.x, and without it on GLPI 11.x.
 
 ## Usage
 
@@ -88,13 +124,15 @@ After installation and activation, users with access to the helpdesk dashboard c
 
 ## Translations
 
-Run this command to generate the translation files:
+Generate the PHP translation strings:
 
 ```bash
 find . -type f \( -name '*.php' \) > files-php.list
 xgettext --language=PHP --keyword=__ --from-code=UTF-8 --output=locales/ticketsstatistics.pot --join --add-comments --files-from=files-php.list
 rm files-php.list
 ```
+
+Generate the JavaScript translation strings:
 
 ```bash
 find . -type f \( -name '*.js' \) > files-js.list
@@ -107,7 +145,7 @@ Then open the generated `locales/ticketsstatistics.pot` file with a translation 
 ## Contributing
 
 - Open a ticket for each bug/feature so it can be discussed
-- Follow [development guidelines](http://glpi-developer-documentation.readthedocs.io/en/latest/plugins/index.html)
-- Refer to [GitFlow](http://git-flow.readthedocs.io/) process for branching
+- Follow the [development guidelines](http://glpi-developer-documentation.readthedocs.io/en/latest/plugins/index.html)
+- Refer to the [GitFlow](http://git-flow.readthedocs.io/) process for branching
 - Work on a new branch on your own fork
 - Open a PR that will be reviewed by a developer
