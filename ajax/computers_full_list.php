@@ -21,7 +21,6 @@ global $CFG_GLPI;
 $scope = (string) ($_GET['scope'] ?? '');
 $counterKey = (string) ($_GET['counter_key'] ?? '');
 $version = trim((string) ($_GET['version'] ?? ''));
-$kbCode = trim((string) ($_GET['kb_code'] ?? ''));
 $townId = (int) ($_GET['town_id'] ?? 0);
 
 $criteria = [];
@@ -38,7 +37,7 @@ $addCriterion = static function (int $field, string $searchtype, string|int $val
     ];
 };
 
-if ($townId > 0 && $scope !== 'kb') {
+if ($townId > 0) {
     // Location field in Computer search options.
     $addCriterion(3, 'equals', $townId);
 }
@@ -72,27 +71,7 @@ if ($scope === 'counter') {
         }
     }
 } elseif ($scope === 'kb') {
-    // KB is tracked via installed software; Computer search options do not expose a direct KB field.
-    // Use an ID criteria fallback for this scope.
-    $resolved = ComputersStatistics::resolveComputersScope([
-        'scope' => $scope,
-        'counter_key' => $counterKey,
-        'version' => $version,
-        'town' => $_GET['town'] ?? '',
-        'kb_code' => $kbCode,
-        'town_id' => $townId,
-    ]);
-
-    $first = true;
-    foreach ($resolved['rows'] as $row) {
-        $id = (int) ($row['id'] ?? 0);
-        if ($id <= 0) {
-            continue;
-        }
-
-        $addCriterion(2, 'equals', $id, $first ? 'AND' : 'OR');
-        $first = false;
-    }
+    // Non pris en compte par GLPI 
 }
 
 if ($criteria === []) {

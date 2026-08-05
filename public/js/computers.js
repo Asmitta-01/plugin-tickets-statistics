@@ -145,11 +145,16 @@ document.addEventListener('DOMContentLoaded', function () {
             };
         }
         if (fullBtn) {
-            fullBtn.disabled = false;
-            fullBtn.onclick = function () {
-                const q = toQuery(lastFilters || {});
-                window.open((dataEl.dataset.computersFullListUrl || '') + '?' + q, '_blank');
-            };
+            if (scopeFilters.scope === 'kb') {
+                fullBtn.disabled = true;
+                fullBtn.onclick = null;
+            } else {
+                fullBtn.disabled = false;
+                fullBtn.onclick = function () {
+                    const q = toQuery(lastFilters || {});
+                    window.open((dataEl.dataset.computersFullListUrl || '') + '?' + q, '_blank');
+                };
+            }
         }
 
         modal.show();
