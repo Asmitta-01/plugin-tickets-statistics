@@ -134,7 +134,7 @@ $latestVersionLabel = $counters['latest_version'] !== ''
     </div>
 
     <div class="row g-3 mb-3">
-        <div class="col-lg-5">
+        <div class="col-lg-4">
             <div class="card shadow-sm h-100">
                 <div class="card-header"><?= __('Windows machines by OS version', 'ticketsstatistics') ?></div>
                 <div class="card-body d-flex align-items-center justify-content-center">
@@ -147,7 +147,7 @@ $latestVersionLabel = $counters['latest_version'] !== ''
             </div>
         </div>
 
-        <div class="col-lg-7">
+        <div class="col-lg-8">
             <div class="card shadow-sm h-100">
                 <div class="card-header d-flex align-items-center justify-content-between">
                     <span><?= __('Windows machines by site and OS version', 'ticketsstatistics') ?></span>

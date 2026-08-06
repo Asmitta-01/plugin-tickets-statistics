@@ -616,6 +616,10 @@ class AssetStatistics
         $versions = array_keys($versionsSet);
         natcasesort($versions);
         $versions = array_values($versions);
+        // Sort versions in descending order, latest version first
+        usort($versions, static function (string $left, string $right): int {
+            return self::compareWindowsVersions($right, $left);
+        });
 
         $values = [];
         foreach ($versions as $version) {

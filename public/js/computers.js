@@ -293,27 +293,25 @@ document.addEventListener('DOMContentLoaded', function () {
         return String(value == null ? '' : value);
     };
 
-    const versionColorMap = {};  
-    const colorForVersion = function (version, indexFallback) {  
-        if (versionColorMap[version]) {  
-            return versionColorMap[version];  
-        }  
-    
-        const index = typeof indexFallback === 'number' ? indexFallback : Object.keys(versionColorMap).length;  
-    
-        let color;  
-        if (index === 0) {  
-            color = '#15c254'; 
-        } else if (index === 1) {  
+    const versionColorMap = {};
+    const colorForVersion = function (version, indexFallback) {
+        if (versionColorMap[version]) {
+            return versionColorMap[version];
+        }
+
+        const index = typeof indexFallback === 'number' ? indexFallback : Object.keys(versionColorMap).length;
+
+        let color;
+        if (index === 0) {
+            color = '#15c254';
+        } else if (index === 1) {
             color = '#f59e0b';
-        } else if (index === 2) {  
-            color = '#ff0000'; 
-        } else {  
-            color = 'hsl(' + (((index - 3) * 57) % 360) + ', 68%, 52%)';  
-        }  
-    
-        versionColorMap[version] = color;  
-        return color;  
+        } else {
+            color = 'hsl(' + (((index - 2) * 57) % 360) + ', 68%, 52%)';
+        }
+
+        versionColorMap[version] = color;
+        return color;
     };
 
     if (window.ChartDataLabels) {
@@ -333,7 +331,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 datasets: [{
                     data: versionChartData.values,
                     backgroundColor: colors,
-                    hoverOffset: 10,
+                    hoverOffset: 16,
                 }],
             },
             options: {
@@ -351,137 +349,118 @@ document.addEventListener('DOMContentLoaded', function () {
                 plugins: {
                     legend: {
                         position: 'bottom',
-                        align: 'center',
                     },
-                    datalabels: {  
-                        color: '#fff',  
-                        formatter: function (value, context) {  
-                            const total = context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);  
-                            return value > 0 ? Math.round((value / total) * 100) + '%' : '';  
-                        },  
+                    datalabels: {
+                        color: '#fff',
+                        font: {
+                            weight: 'bold',
+                            size: 13,
+                        },
+                        formatter: function (value, context) {
+                            const total = context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                            const percent = total > 0 ? Math.round((value / total) * 100) : 0;
+                            return percent > 0 ? percent + '%' : '';
+                        },
                     },
                 },
             },
         });
     }
 
-const townCanvas = document.getElementById('ts-computers-town-version-chart');
-if (townCanvas
-    && Array.isArray(townVersionChartData.labels)
-    && townVersionChartData.labels.length > 0
-    && Array.isArray(townVersionChartData.versions)
-    && townVersionChartData.versions.length > 0
-) {
-    // townVersionChartData.versions est déjà trié de la plus récente à la plus ancienne
-    const datasets = townVersionChartData.versions.map(function (version, index) {
-        const color = colorForVersion(version, index);
-        const values = townVersionChartData.values && townVersionChartData.values[version]
-            ? townVersionChartData.values[version]
-            : [];
+    const townCanvas = document.getElementById('ts-computers-town-version-chart');
+    if (townCanvas
+        && Array.isArray(townVersionChartData.labels)
+        && townVersionChartData.labels.length > 0
+        && Array.isArray(townVersionChartData.versions)
+        && townVersionChartData.versions.length > 0
+    ) {
+        const datasets = townVersionChartData.versions.map(function (version, index) {
+            const color = colorForVersion(version, index);
+            const values = townVersionChartData.values && townVersionChartData.values[version]
+                ? townVersionChartData.values[version]
+                : [];
 
-        return {
-            label: version,
-            data: values,
-            backgroundColor: color,
-            borderColor: color,
-            borderWidth: 1,
-        };
-    });
-
-    // Total par site + tri décroissant + top 8
-    const siteTotals = townVersionChartData.labels.map(function (label, idx) {
-        const total = datasets.reduce(function (sum, ds) {
-            return sum + (ds.data[idx] || 0);
-        }, 0);
-        return { label: label, index: idx, total: total };
-    });
-
-    siteTotals.sort(function (a, b) { return b.total - a.total; });
-    const topSites = siteTotals.slice(0, 8);
-
-    const sortedLabels = topSites.map(function (s) { return s.label; });
-    const sortedIndexes = topSites.map(function (s) { return s.index; });
-    const totals = topSites.map(function (s) { return s.total; });
-
-    // On ne garde que le top 8 dans chaque dataset, dans l'ordre trié
-    const topDatasets = datasets.map(function (ds) {
-        return Object.assign({}, ds, {
-            data: sortedIndexes.map(function (i) { return ds.data[i] || 0; }),
+            return {
+                label: version,
+                data: values,
+                backgroundColor: color,
+                borderColor: color,
+                borderWidth: 1,
+            };
         });
-    });
 
-    // Valeurs de la dernière version (dataset 0) = "à jour"
-    const latestValues = topDatasets[0] ? topDatasets[0].data : [];
-
-    new Chart(townCanvas, {
-        type: 'bar',
-        data: {
-            labels: sortedLabels,
-            datasets: topDatasets,
-        },
-        options: {
-            indexAxis: 'y',
-            onClick: function (_, elements) {
-                if (!elements || !elements.length) {
-                    return;
-                }
-                const point = elements[0];
-                const townLabel = sortedLabels[point.index] || '';
-                const versionLabel = topDatasets[point.datasetIndex].label || '';
-                openComputersModal({
-                    scope: 'town_version',
-                    town: townLabel,
-                    version: versionLabel,
-                });
+        new Chart(townCanvas, {
+            type: 'bar',
+            data: {
+                labels: townVersionChartData.labels,
+                datasets: datasets,
             },
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'bottom',
-                    align: 'center',
+            options: {
+                indexAxis: 'y',
+                onClick: function (_, elements) {
+                    if (!elements || !elements.length) {
+                        return;
+                    }
+                    const point = elements[0];
+                    const townLabel = townVersionChartData.labels[point.index] || '';
+                    const versionLabel = townVersionChartData.versions[point.datasetIndex] || '';
+                    openComputersModal({
+                        scope: 'town_version',
+                        town: townLabel,
+                        version: versionLabel,
+                    });
                 },
-                zoom: {
-                    pan: { enabled: true, mode: 'xy' },
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                    },
                     zoom: {
-                        wheel: { enabled: true },
-                        pinch: { enabled: true },
-                        mode: 'xy',
+                        pan: { enabled: true, mode: 'xy' },
+                        zoom: {
+                            wheel: { enabled: true },
+                            pinch: { enabled: true },
+                            mode: 'xy',
+                        },
+                        limits: {
+                            x: { min: 0, max: 700 },
+                        },
                     },
-                    limits: {
-                        x: { min: 0, max: 700 },
+                    datalabels: {
+                        color: '#374151',
+                        anchor: 'end',
+                        align: 'end',
+                        formatter: function (value, context) {
+                            // Don't show label if not last dataset, hide label for stacked bar chart to avoid clutter
+                            if (context.datasetIndex !== context.chart.data.datasets.length - 1) {
+                                return '';
+                            }
+
+                            // Get the total value for this bar (sum of all datasets for this index)
+                            const total = context.chart.data.datasets.reduce((sum, dataset) => sum + (dataset.data[context.dataIndex] || 0), 0);
+
+                            // Get the percentage of the first dataset value relative to the total
+                            const firstDatasetValue = context.chart.data.datasets[0].data[context.dataIndex] || 0;
+                            const percent = total > 0 ? Math.round((firstDatasetValue / total) * 100) : 0;
+                            return percent + '% à jour';
+                        },
                     },
                 },
-                datalabels: {
-                    color: '#374151',
-                    anchor: 'end',
-                    align: 'end',
-                    formatter: function (value, context) {
-                        if (context.datasetIndex !== topDatasets.length - 1) {
-                            return '';
-                        }
-                        const i = context.dataIndex;
-                        const total = totals[i];
-                        const pct = total > 0
-                            ? Math.round((latestValues[i] / total) * 100)
-                            : 0;
-                        return total + ' \u00b7 ' + pct + '% ' + __('à jour', 'ticketsstatistics');
+                scales: {
+                    x: {
+                        stacked: true,
+                        beginAtZero: true,
+                        ticks: { precision: 0 },
+                    },
+                    y: {
+                        stacked: true,
                     },
                 },
             },
-            scales: {
-                x: {
-                    stacked: true,
-                    beginAtZero: true,
-                    ticks: { precision: 0 },
-                },
-                y: {
-                    stacked: true,
-                },
-            },
-        },
-    });
-}
-const kbCanvas = document.getElementById('ts-computers-kb-chart');
+        });
+    }
+
+    const kbCanvas = document.getElementById('ts-computers-kb-chart');
     if (kbCanvas && Array.isArray(kbChartData.labels) && kbChartData.labels.length > 0) {
         new Chart(kbCanvas, {
             type: 'bar',
@@ -491,8 +470,8 @@ const kbCanvas = document.getElementById('ts-computers-kb-chart');
                     {
                         label: __('Installations', 'ticketsstatistics'),
                         data: kbChartData.values,
-                        backgroundColor: '#7c3aed',
-                        borderColor: '#6d28d9',
+                        backgroundColor: '#15c254',
+                        borderColor: '#1db153',
                         borderWidth: 1,
                         datalabels: {
                             anchor: 'end',
