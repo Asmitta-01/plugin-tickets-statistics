@@ -293,24 +293,27 @@ document.addEventListener('DOMContentLoaded', function () {
         return String(value == null ? '' : value);
     };
 
-    const versionColorMap = {};
-    const colorForVersion = function (version, indexFallback) {
-        if (versionColorMap[version]) {
-            return versionColorMap[version];
-        }
-
-        const index = typeof indexFallback === 'number' ? indexFallback : Object.keys(versionColorMap).length;
-
-        // Première couleur : vert fixe #15c254
-        let color;
-        if (index === 0) {
-            color = '#15c254';
-        } else {
-            color = 'hsl(' + (((index - 1) * 57) % 360) + ', 68%, 52%)';
-        }
-
-        versionColorMap[version] = color;
-        return color;
+    const versionColorMap = {};  
+    const colorForVersion = function (version, indexFallback) {  
+        if (versionColorMap[version]) {  
+            return versionColorMap[version];  
+        }  
+    
+        const index = typeof indexFallback === 'number' ? indexFallback : Object.keys(versionColorMap).length;  
+    
+        let color;  
+        if (index === 0) {  
+            color = '#15c254'; 
+        } else if (index === 1) {  
+            color = '#f59e0b';
+        } else if (index === 2) {  
+            color = '#ff0000'; 
+        } else {  
+            color = 'hsl(' + (((index - 3) * 57) % 360) + ', 68%, 52%)';  
+        }  
+    
+        versionColorMap[version] = color;  
+        return color;  
     };
 
     if (window.ChartDataLabels) {
@@ -348,108 +351,137 @@ document.addEventListener('DOMContentLoaded', function () {
                 plugins: {
                     legend: {
                         position: 'bottom',
+                        align: 'center',
                     },
-                    datalabels: {
-                        color: '#fff',
-                        formatter: function (value) {
-                            return value > 0 ? value : '';
-                        },
+                    datalabels: {  
+                        color: '#fff',  
+                        formatter: function (value, context) {  
+                            const total = context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);  
+                            return value > 0 ? Math.round((value / total) * 100) + '%' : '';  
+                        },  
                     },
                 },
             },
         });
     }
 
-    const townCanvas = document.getElementById('ts-computers-town-version-chart');
-    if (townCanvas
-        && Array.isArray(townVersionChartData.labels)
-        && townVersionChartData.labels.length > 0
-        && Array.isArray(townVersionChartData.versions)
-        && townVersionChartData.versions.length > 0
-    ) {
-        const datasets = townVersionChartData.versions.map(function (version, index) {
-            const color = colorForVersion(version, index);
-            const values = townVersionChartData.values && townVersionChartData.values[version]
-                ? townVersionChartData.values[version]
-                : [];
+const townCanvas = document.getElementById('ts-computers-town-version-chart');
+if (townCanvas
+    && Array.isArray(townVersionChartData.labels)
+    && townVersionChartData.labels.length > 0
+    && Array.isArray(townVersionChartData.versions)
+    && townVersionChartData.versions.length > 0
+) {
+    // townVersionChartData.versions est déjà trié de la plus récente à la plus ancienne
+    const datasets = townVersionChartData.versions.map(function (version, index) {
+        const color = colorForVersion(version, index);
+        const values = townVersionChartData.values && townVersionChartData.values[version]
+            ? townVersionChartData.values[version]
+            : [];
 
-            return {
-                label: version,
-                data: values,
-                backgroundColor: color,
-                borderColor: color,
-                borderWidth: 1,
-            };
+        return {
+            label: version,
+            data: values,
+            backgroundColor: color,
+            borderColor: color,
+            borderWidth: 1,
+        };
+    });
+
+    // Total par site + tri décroissant + top 8
+    const siteTotals = townVersionChartData.labels.map(function (label, idx) {
+        const total = datasets.reduce(function (sum, ds) {
+            return sum + (ds.data[idx] || 0);
+        }, 0);
+        return { label: label, index: idx, total: total };
+    });
+
+    siteTotals.sort(function (a, b) { return b.total - a.total; });
+    const topSites = siteTotals.slice(0, 8);
+
+    const sortedLabels = topSites.map(function (s) { return s.label; });
+    const sortedIndexes = topSites.map(function (s) { return s.index; });
+    const totals = topSites.map(function (s) { return s.total; });
+
+    // On ne garde que le top 8 dans chaque dataset, dans l'ordre trié
+    const topDatasets = datasets.map(function (ds) {
+        return Object.assign({}, ds, {
+            data: sortedIndexes.map(function (i) { return ds.data[i] || 0; }),
         });
+    });
 
-        new Chart(townCanvas, {
-            type: 'bar',
-            data: {
-                labels: townVersionChartData.labels,
-                datasets: datasets,
+    // Valeurs de la dernière version (dataset 0) = "à jour"
+    const latestValues = topDatasets[0] ? topDatasets[0].data : [];
+
+    new Chart(townCanvas, {
+        type: 'bar',
+        data: {
+            labels: sortedLabels,
+            datasets: topDatasets,
+        },
+        options: {
+            indexAxis: 'y',
+            onClick: function (_, elements) {
+                if (!elements || !elements.length) {
+                    return;
+                }
+                const point = elements[0];
+                const townLabel = sortedLabels[point.index] || '';
+                const versionLabel = topDatasets[point.datasetIndex].label || '';
+                openComputersModal({
+                    scope: 'town_version',
+                    town: townLabel,
+                    version: versionLabel,
+                });
             },
-            options: {
-                onClick: function (_, elements) {
-                    if (!elements || !elements.length) {
-                        return;
-                    }
-                    const point = elements[0];
-                    const townLabel = townVersionChartData.labels[point.index] || '';
-                    const versionLabel = townVersionChartData.versions[point.datasetIndex] || '';
-                    openComputersModal({
-                        scope: 'town_version',
-                        town: townLabel,
-                        version: versionLabel,
-                    });
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    align: 'center',
                 },
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                    },
+                zoom: {
+                    pan: { enabled: true, mode: 'xy' },
                     zoom: {
-                        pan: {
-                            enabled: true,
-                            mode: 'xy',
-                        },
-                        zoom: {
-                            wheel: {
-                                enabled: true,
-                            },
-                            pinch: {
-                                enabled: true
-                            },
-                            mode: 'xy',
-                        },
-                        limits: {
-                            y: { min: 0, max: 700 },
-                        },
+                        wheel: { enabled: true },
+                        pinch: { enabled: true },
+                        mode: 'xy',
                     },
-                    datalabels: {
-                        color: '#fff',
-                        formatter: function (value) {
-                            return value > 0 ? value : '';
-                        },
+                    limits: {
+                        x: { min: 0, max: 700 },
                     },
                 },
-                scales: {
-                    x: {
-                        stacked: true,
-                    },
-                    y: {
-                        stacked: true,
-                        beginAtZero: true,
-                        min: 0,
-                        ticks: {
-                            precision: 0,
-                        },
+                datalabels: {
+                    color: '#374151',
+                    anchor: 'end',
+                    align: 'end',
+                    formatter: function (value, context) {
+                        if (context.datasetIndex !== topDatasets.length - 1) {
+                            return '';
+                        }
+                        const i = context.dataIndex;
+                        const total = totals[i];
+                        const pct = total > 0
+                            ? Math.round((latestValues[i] / total) * 100)
+                            : 0;
+                        return total + ' \u00b7 ' + pct + '% ' + __('à jour', 'ticketsstatistics');
                     },
                 },
             },
-        });
-    }
-
-    const kbCanvas = document.getElementById('ts-computers-kb-chart');
+            scales: {
+                x: {
+                    stacked: true,
+                    beginAtZero: true,
+                    ticks: { precision: 0 },
+                },
+                y: {
+                    stacked: true,
+                },
+            },
+        },
+    });
+}
+const kbCanvas = document.getElementById('ts-computers-kb-chart');
     if (kbCanvas && Array.isArray(kbChartData.labels) && kbChartData.labels.length > 0) {
         new Chart(kbCanvas, {
             type: 'bar',
