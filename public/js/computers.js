@@ -31,6 +31,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const versionChartData = parseJson(dataEl.dataset.versionChart) || { labels: [], values: [] };
     const townVersionChartData = parseJson(dataEl.dataset.townVersionChart) || { labels: [], versions: [], values: {} };
+    const townTypeChartData = parseJson(dataEl.dataset.townTypeChart) || { labels: [], type_keys: [], type_labels: {}, values: {} };
+    const entityVersionChartData = parseJson(dataEl.dataset.entityVersionChart) || { labels: [], versions: [], values: {} };
     const kbChartData = parseJson(dataEl.dataset.kbChart) || { labels: [], values: [] };
     const getTownFilterValue = function () {
         const input = document.querySelector('#ts-computers-town select');
@@ -454,6 +456,171 @@ document.addEventListener('DOMContentLoaded', function () {
                     },
                     y: {
                         stacked: true,
+                    },
+                },
+            },
+        });
+    }
+
+    const townTypeCanvas = document.getElementById('ts-computers-town-type-chart');
+    if (townTypeCanvas
+        && Array.isArray(townTypeChartData.labels)
+        && townTypeChartData.labels.length > 0
+        && Array.isArray(townTypeChartData.type_keys)
+        && townTypeChartData.type_keys.length > 0
+    ) {
+        const typeColors = {
+            laptop: '#0ea5e9',
+            desktop: '#22c55e',
+            server: '#ef4444',
+            vmware: '#8b5cf6',
+            other: '#f59e0b',
+        };
+
+        const datasets = townTypeChartData.type_keys.map(function (typeKey) {
+            return {
+                label: (townTypeChartData.type_labels && townTypeChartData.type_labels[typeKey]) ? townTypeChartData.type_labels[typeKey] : typeKey,
+                data: (townTypeChartData.values && townTypeChartData.values[typeKey]) ? townTypeChartData.values[typeKey] : [],
+                backgroundColor: typeColors[typeKey] || '#94a3b8',
+                borderColor: typeColors[typeKey] || '#94a3b8',
+                borderWidth: 1,
+            };
+        });
+
+        new Chart(townTypeCanvas, {
+            type: 'bar',
+            data: {
+                labels: townTypeChartData.labels,
+                datasets: datasets,
+            },
+            options: {
+                indexAxis: 'y',
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                    },
+                    zoom: {
+                        pan: { enabled: true, mode: 'xy' },
+                        zoom: {
+                            wheel: { enabled: true },
+                            pinch: { enabled: true },
+                            mode: 'xy',
+                        },
+                        limits: {
+                            x: { min: 0, max: 500 },
+                        },
+                    },
+                    datalabels: {
+                        color: '#374151',
+                        align: 'end',
+                        formatter: function (value, context) {
+                            // Display label only for the last dataset to avoid clutter
+                            if (context.datasetIndex !== context.chart.data.datasets.length - 1) {
+                                return '';
+                            }
+
+                            // Calculate the total value for this bar (sum of all datasets for this index)
+                            const total = context.chart.data.datasets.reduce((sum, dataset) => sum + (dataset.data[context.dataIndex] || 0), 0);
+                            return total > 0 ? total + ' ' + __('Computers') : '';
+                        },
+                    },
+                },
+                scales: {
+                    x: {
+                        stacked: true,
+                        beginAtZero: true,
+                        ticks: { precision: 0 },
+                    },
+                    y: {
+                        stacked: true,
+                        ticks: {
+                            callback: function (val) {
+                                return this.getLabelForValue(val).split(' '); // découpe en plusieurs lignes  
+                            }
+                        }
+                    },
+                },
+            },
+        });
+    }
+
+    const entityVersionCanvas = document.getElementById('ts-computers-entity-version-chart');
+    if (entityVersionCanvas
+        && Array.isArray(entityVersionChartData.labels)
+        && entityVersionChartData.labels.length > 0
+        && Array.isArray(entityVersionChartData.versions)
+        && entityVersionChartData.versions.length > 0
+    ) {
+        const datasets = entityVersionChartData.versions.map(function (version, index) {
+            const color = colorForVersion(version, index);
+            const values = entityVersionChartData.values && entityVersionChartData.values[version]
+                ? entityVersionChartData.values[version]
+                : [];
+
+            return {
+                label: version,
+                data: values,
+                backgroundColor: color,
+                borderColor: color,
+                borderWidth: 1,
+            };
+        });
+
+        new Chart(entityVersionCanvas, {
+            type: 'bar',
+            data: {
+                labels: entityVersionChartData.labels,
+                datasets: datasets,
+            },
+            options: {
+                indexAxis: 'y',
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                    },
+                    zoom: {
+                        pan: { enabled: true, mode: 'xy' },
+                        zoom: {
+                            wheel: { enabled: true },
+                            pinch: { enabled: true },
+                            mode: 'xy',
+                        },
+                        limits: {
+                            x: { min: 0, max: 700 },
+                        },
+                    },
+                    datalabels: {
+                        color: '#374151',
+                        anchor: 'end',
+                        align: 'end',
+                        formatter: function (value, context) {
+                            if (context.datasetIndex !== context.chart.data.datasets.length - 1) {
+                                return '';
+                            }
+
+                            const total = context.chart.data.datasets.reduce((sum, dataset) => sum + (dataset.data[context.dataIndex] || 0), 0);
+
+                            const firstDatasetValue = context.chart.data.datasets[0].data[context.dataIndex] || 0;
+                            const percent = total > 0 ? Math.round((firstDatasetValue / total) * 100) : 0;
+                            return percent + '%\nà jour';
+                        },
+                    },
+                },
+                scales: {
+                    x: {
+                        stacked: true,
+                        beginAtZero: true,
+                        ticks: { precision: 0 },
+                    },
+                    y: {
+                        stacked: true,
+                        ticks: {
+                            callback: function (val) {
+                                return this.getLabelForValue(val).split(' '); // découpe en plusieurs lignes  
+                            }
+                        }
                     },
                 },
             },

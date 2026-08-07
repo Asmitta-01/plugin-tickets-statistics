@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: TicketsStatistics\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-04-10 11:11+0100\n"
-"PO-Revision-Date: 2026-08-07 08:25+0100\n"
+"PO-Revision-Date: 2026-08-07 10:44+0100\n"
 "Last-Translator: Codex\n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -117,6 +117,14 @@ msgid ""
 msgstr ""
 "Un ordinateur est considéré comme obsolète lorsque sa génération de CPU est "
 "inférieure à 8"
+
+#: front/computers.php:189
+msgid "Computers by town and type"
+msgstr "Ordinateurs par ville et type"
+
+#: front/computers.php:207
+msgid "Windows compliance by entity and OS version"
+msgstr "Conformité Windows par entité"
 
 #: public/js/computers.js:107
 msgid "Installations"

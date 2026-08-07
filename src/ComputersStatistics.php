@@ -614,13 +614,13 @@ class ComputersStatistics
         echo '<div class="btn-group btn-group-sm" role="group" aria-label="" id="' . $id . '">';
         if ($successLabel != '') {
             echo '<div class="btn">' . __('Status', 'ticketsstatistics') . '</div>';
-            echo '<div class="btn"' . ($successTooltip ? ' data-bs-toggle="tooltip" title="' . $successTooltip . '"' : '') . '>';
+            echo '<div class="btn"' . ($successTooltip ? ' data-bs-toggle="tooltip" title="' . $successTooltip . '"' : '') . ' data-bs-placement="bottom">';
             echo '<span class="badge me-1" style="background-color: #22c55e;"></span>';
             echo $successLabel;
             echo '</div>';
         }
         if ($dangerLabel != '') {
-            echo '<div class="btn"' . ($dangerTooltip ? ' data-bs-toggle="tooltip" title="' . $dangerTooltip . '"' : '') . '>';
+            echo '<div class="btn"' . ($dangerTooltip ? ' data-bs-toggle="tooltip" title="' . $dangerTooltip . '"' : '') . ' data-bs-placement="bottom">';
             echo '<span class="badge me-1" style="background-color: #ef4444;"></span>';
             echo $dangerLabel;
             echo '</div>';

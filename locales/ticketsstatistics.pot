@@ -117,6 +117,14 @@ msgstr ""
 msgid "A computer is considered obsolete when its CPU generation is lower than 8"
 msgstr ""
 
+#: front/computers.php:189
+msgid "Computers by town and type"
+msgstr ""
+
+#: front/computers.php:207
+msgid "Windows compliance by entity and OS version"
+msgstr ""
+
 #: public/js/computers.js:107
 msgid "Installations"
 msgstr ""

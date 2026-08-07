@@ -547,6 +547,184 @@ class AssetStatistics
         return -1;
     }
 
+    private static function classifyComputerType(string $typeName): string
+    {
+        $name = mb_strtolower(trim($typeName));
+        if ($name === '') {
+            return 'other';
+        }
+
+        if (str_contains($name, 'vmware') || str_contains($name, 'virtual') || preg_match('/\bvm\b/', $name) === 1) {
+            return 'vmware';
+        }
+
+        if (str_contains($name, 'server') || str_contains($name, 'serveur')) {
+            return 'server';
+        }
+
+        if (str_contains($name, 'laptop') || str_contains($name, 'portable') || str_contains($name, 'notebook')) {
+            return 'laptop';
+        }
+
+        if (str_contains($name, 'desktop') || str_contains($name, 'bureau')) {
+            return 'desktop';
+        }
+
+        return 'other';
+    }
+
+    /**
+     * @return array{labels: array<int, string>, type_keys: array<int, string>, type_labels: array<string, string>, values: array<string, array<int, int>>}
+     */
+    public static function getComputersByTownAndType(int $townId, int $entityId = 0): array
+    {
+        global $DB;
+
+        $where = [
+            'glpi_computers.is_deleted'  => 0,
+            'glpi_computers.is_template' => 0,
+        ] + self::getEntitiesRestrictCriteria('glpi_computers', true, $entityId);
+
+        if ($townId > 0) {
+            $where['glpi_computers.locations_id'] = $townId;
+        }
+
+        $byTown = [];
+        foreach (
+            $DB->request([
+                'SELECT'     => [
+                    'glpi_locations.town',
+                    'glpi_computertypes.name AS computer_type_name',
+                    'COUNT DISTINCT' => 'glpi_computers.id AS cpt',
+                ],
+                'FROM'       => 'glpi_computers',
+                'LEFT JOIN'  => [
+                    'glpi_locations' => [
+                        'ON' => [
+                            'glpi_locations' => 'id',
+                            'glpi_computers' => 'locations_id',
+                        ],
+                    ],
+                    'glpi_computertypes' => [
+                        'ON' => [
+                            'glpi_computertypes' => 'id',
+                            'glpi_computers'     => 'computertypes_id',
+                        ],
+                    ],
+                ],
+                'WHERE'      => $where,
+                'GROUPBY'    => ['glpi_locations.town', 'glpi_computertypes.name'],
+            ]) as $row
+        ) {
+            $town = trim((string) ($row['town'] ?? ''));
+            if ($town === '') {
+                $town = __('Unknown', 'ticketsstatistics');
+            }
+
+            $typeKey = self::classifyComputerType((string) ($row['computer_type_name'] ?? ''));
+            if (!isset($byTown[$town])) {
+                $byTown[$town] = [
+                    'laptop' => 0,
+                    'desktop' => 0,
+                    'server' => 0,
+                    'vmware' => 0,
+                    'other' => 0,
+                ];
+            }
+
+            $byTown[$town][$typeKey] += (int) ($row['cpt'] ?? 0);
+        }
+
+        uasort($byTown, static function (array $left, array $right): int {
+            return array_sum($right) <=> array_sum($left);
+        });
+
+        $labels = array_keys($byTown);
+        $typeKeys = ['laptop', 'desktop', 'server', 'vmware', 'other'];
+        $values = [];
+        foreach ($typeKeys as $typeKey) {
+            $values[$typeKey] = [];
+            foreach ($labels as $town) {
+                $values[$typeKey][] = (int) ($byTown[$town][$typeKey] ?? 0);
+            }
+        }
+
+        return [
+            'labels' => $labels,
+            'type_keys' => $typeKeys,
+            'type_labels' => [
+                'laptop' => __('Laptop', 'ticketsstatistics'),
+                'desktop' => __('Desktop', 'ticketsstatistics'),
+                'server' => __('Server', 'ticketsstatistics'),
+                'vmware' => __('VMware', 'ticketsstatistics'),
+                'other' => __('Other', 'ticketsstatistics'),
+            ],
+            'values' => $values,
+        ];
+    }
+
+    /**
+     * @return array{labels: array<int, string>, versions: array<int, string>, values: array<string, array<int, int>>}
+     */
+    public static function getWindowsVersionsByEntity(int $townId, int $entityId = 0): array
+    {
+        $byEntity = [];
+        $versionsSet = [];
+
+        foreach (self::getLatestWindowsByComputer($townId, $entityId) as $row) {
+            $entity = trim((string) ($row['entity'] ?? ''));
+            if ($entity === '') {
+                $entity = __('Unknown', 'ticketsstatistics');
+            }
+
+            $version = trim((string) ($row['version_os'] ?? ''));
+            if ($version === '') {
+                $version = __('Unknown', 'ticketsstatistics');
+            }
+
+            if (!isset($byEntity[$entity])) {
+                $byEntity[$entity] = [];
+            }
+            if (!isset($byEntity[$entity][$version])) {
+                $byEntity[$entity][$version] = 0;
+            }
+
+            $byEntity[$entity][$version]++;
+            $versionsSet[$version] = true;
+        }
+
+        uasort($byEntity, static function (array $left, array $right): int {
+            $leftTotal = array_sum($left);
+            $rightTotal = array_sum($right);
+            $byTotal = $rightTotal <=> $leftTotal;
+            if ($byTotal !== 0) {
+                return $byTotal;
+            }
+
+            return 0;
+        });
+
+        $labels = array_keys($byEntity);
+        $versions = array_values(array_keys($versionsSet));
+        usort($versions, static function (string $left, string $right): int {
+            return self::compareWindowsVersions($right, $left);
+        });
+
+        $values = [];
+        foreach ($versions as $version) {
+            $values[$version] = [];
+            foreach ($labels as $entity) {
+                $values[$version][] = (int) ($byEntity[$entity][$version] ?? 0);
+            }
+        }
+
+        return [
+            'labels' => $labels,
+            'versions' => $versions,
+            'values' => $values,
+        ];
+    }
+
     /**
      * @return array{labels: array<int, string>, values: array<int, int>}
      */
@@ -766,7 +944,7 @@ class AssetStatistics
     }
 
     /**
-     * @return array<int, array{computer_id: int, version_os: string, town: string}>
+     * @return array<int, array{computer_id: int, version_os: string, town: string, entity: string}>
      */
     private static function getLatestWindowsByComputer(int $townId, int $entityId = 0): array
     {
@@ -790,6 +968,7 @@ class AssetStatistics
                 'glpi_computers.id AS computer_id',
                 'glpi_softwareversions.name AS version_os',
                 'glpi_locations.town',
+                'glpi_entities.completename AS entity_name',
                 'glpi_items_softwareversions.id AS rel_id',
             ],
             'FROM'       => 'glpi_computers',
@@ -820,6 +999,12 @@ class AssetStatistics
                         'glpi_computers' => 'locations_id',
                     ],
                 ],
+                'glpi_entities' => [
+                    'ON' => [
+                        'glpi_entities'  => 'id',
+                        'glpi_computers' => 'entities_id',
+                    ],
+                ],
             ],
             'WHERE'      => $where,
             'ORDER'      => [
@@ -842,6 +1027,7 @@ class AssetStatistics
                 'computer_id' => $computerId,
                 'version_os'  => (string) ($row['version_os'] ?? ''),
                 'town'        => (string) ($row['town'] ?? ''),
+                'entity'      => (string) ($row['entity_name'] ?? ''),
             ];
         }
 

@@ -23,6 +23,8 @@ $entityId = (int) ($_GET['entity'] ?? \Session::getActiveEntity());
 $counters = AssetStatistics::getWindowsOsCounters($townId, $entityId);
 $versionsBreakdown = AssetStatistics::getWindowsVersionsBreakdown($townId, $entityId);
 $versionsByTown = AssetStatistics::getWindowsVersionsByTown($townId, $entityId);
+$computersByTownType = AssetStatistics::getComputersByTownAndType($townId, $entityId);
+$windowsByEntityVersion = AssetStatistics::getWindowsVersionsByEntity($townId, $entityId);
 $latestKb = AssetStatistics::getLatestKbInstallations($townId, 12, $entityId);
 
 global $CFG_GLPI;
@@ -181,6 +183,44 @@ $latestVersionLabel = $counters['latest_version'] !== ''
     </div>
 
     <div class="row g-3 mb-3">
+        <div class="col-lg-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header d-flex align-items-center justify-content-between">
+                    <span><?= __('Computers by town and type', 'ticketsstatistics') ?></span>
+                    <button data-bs-toggle="tooltip" title="<?= __('Reset the zoom', 'ticketsstatistics') ?>" class="btn btn-sm btn-outline-secondary ms-2 ts-reset-chart" data-canvas="ts-computers-town-type-chart">
+                        <?= __('Reset', 'ticketsstatistics') ?>
+                    </button>
+                </div>
+                <div class="card-body d-flex align-items-center justify-content-center">
+                    <?php if (!empty($computersByTownType['labels']) && !empty($computersByTownType['type_keys'])): ?>
+                        <canvas id="ts-computers-town-type-chart" style="height:360px; max-height:360px"></canvas>
+                    <?php else: ?>
+                        <div class="text-muted text-center py-5"><?= __('No data available', 'ticketsstatistics') ?></div>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header d-flex align-items-center justify-content-between">
+                    <span><?= __('Windows compliance by entity and OS version', 'ticketsstatistics') ?></span>
+                    <button data-bs-toggle="tooltip" title="<?= __('Reset the zoom', 'ticketsstatistics') ?>" class="btn btn-sm btn-outline-secondary ms-2 ts-reset-chart" data-canvas="ts-computers-entity-version-chart">
+                        <?= __('Reset', 'ticketsstatistics') ?>
+                    </button>
+                </div>
+                <div class="card-body d-flex align-items-center justify-content-center">
+                    <?php if (!empty($windowsByEntityVersion['labels']) && !empty($windowsByEntityVersion['versions'])): ?>
+                        <canvas id="ts-computers-entity-version-chart" style="height:360px; max-height:360px"></canvas>
+                    <?php else: ?>
+                        <div class="text-muted text-center py-5"><?= __('No data available', 'ticketsstatistics') ?></div>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-3">
         <div class="col-12">
             <div class="card shadow-sm h-100">
                 <div class="card-header d-flex align-items-center justify-content-between">
@@ -236,6 +276,8 @@ $latestVersionLabel = $counters['latest_version'] !== ''
     id="ts-computers-chart-data"
     data-version-chart="<?= htmlspecialchars(json_encode($versionsBreakdown, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT), ENT_QUOTES, 'UTF-8') ?>"
     data-town-version-chart="<?= htmlspecialchars(json_encode($versionsByTown, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT), ENT_QUOTES, 'UTF-8') ?>"
+    data-town-type-chart="<?= htmlspecialchars(json_encode($computersByTownType, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT), ENT_QUOTES, 'UTF-8') ?>"
+    data-entity-version-chart="<?= htmlspecialchars(json_encode($windowsByEntityVersion, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT), ENT_QUOTES, 'UTF-8') ?>"
     data-kb-chart="<?= htmlspecialchars(json_encode($latestKb, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT), ENT_QUOTES, 'UTF-8') ?>"
     data-computers-ajax-url="<?= htmlspecialchars($computersAjaxUrl, ENT_QUOTES, 'UTF-8') ?>"
     data-computers-export-url="<?= htmlspecialchars($computersExportUrl, ENT_QUOTES, 'UTF-8') ?>"

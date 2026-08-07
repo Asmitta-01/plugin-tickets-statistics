@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: TicketsStatistics\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-04-10 11:11+0100\n"
-"PO-Revision-Date: 2026-08-07 08:26+0100\n"
+"PO-Revision-Date: 2026-08-07 10:45+0100\n"
 "Last-Translator: Codex\n"
 "Language-Team: English\n"
 "Language: en_US\n"
@@ -98,17 +98,14 @@ msgid "Missing"
 msgstr "Missing"
 
 #: front/computers.php:189
-#| msgid "KB patches"
 msgid "Installed KB patches"
 msgstr "Installed KB patches"
 
 #: front/computers.php:189
-#| msgid "KB patches"
 msgid "Missing KB patches"
 msgstr "Missing KB patches"
 
 #: front/computers.php:134
-#| msgid "computers"
 msgid "Obsolete computers"
 msgstr "Obsolete computers"
 
@@ -117,6 +114,15 @@ msgid ""
 "A computer is considered obsolete when its CPU generation is lower than 8"
 msgstr ""
 "A computer is considered obsolete when its CPU generation is lower than 8"
+
+#: front/computers.php:189
+msgid "Computers by town and type"
+msgstr "Computers by town and type"
+
+#: front/computers.php:207
+#| msgid "Windows machines by site and OS version"
+msgid "Windows compliance by entity and OS version"
+msgstr "Windows compliance by entity"
 
 #: public/js/computers.js:107
 msgid "Installations"
