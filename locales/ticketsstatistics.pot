@@ -97,6 +97,26 @@ msgstr ""
 msgid "Latest KB patches and installations"
 msgstr ""
 
+#: front/computers.php
+msgid "Missing"
+msgstr ""
+
+#: front/computers.php:189
+msgid "Installed KB patches"
+msgstr ""
+
+#: front/computers.php:189
+msgid "Missing KB patches"
+msgstr ""
+
+#: front/computers.php:134
+msgid "Obsolete computers"
+msgstr ""
+
+#: front/computers.php:134
+msgid "A computer is considered obsolete when its CPU generation is lower than 8"
+msgstr ""
+
 #: public/js/computers.js:107
 msgid "Installations"
 msgstr ""

@@ -131,7 +131,7 @@ $latestVersionLabel = $counters['latest_version'] !== ''
                         class="text-muted"
                         data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
-                        title="<?= __('A computer is considered obsolete when its CPU generation is lower than 8.', 'ticketsstatistics') ?>"><?= __('Obsolete computers', 'ticketsstatistics') ?></div>
+                        title="<?= __('A computer is considered obsolete when its CPU generation is lower than 8', 'ticketsstatistics') ?>"><?= __('Obsolete computers', 'ticketsstatistics') ?></div>
                 </div>
             </div>
         </div>
@@ -185,9 +185,12 @@ $latestVersionLabel = $counters['latest_version'] !== ''
             <div class="card shadow-sm h-100">
                 <div class="card-header d-flex align-items-center justify-content-between">
                     <span><?= __('Latest KB patches and installations', 'ticketsstatistics') ?></span>
-                    <button data-bs-toggle="tooltip" title="<?= __('Reset the zoom', 'ticketsstatistics') ?>" class="btn btn-sm btn-outline-secondary ms-2 ts-reset-chart" data-canvas="ts-computers-kb-chart">
-                        <?= __('Reset', 'ticketsstatistics') ?>
-                    </button>
+                    <div>
+                        <?php \GlpiPlugin\Ticketsstatistics\ComputersStatistics::showGroupButtons('ts-computers-kb-group', __('Installations', 'ticketsstatistics'), __('Missing', 'ticketsstatistics'), __('Installed KB patches', 'ticketsstatistics'), __('Missing KB patches', 'ticketsstatistics')); ?>
+                        <button data-bs-toggle="tooltip" title="<?= __('Reset the zoom', 'ticketsstatistics') ?>" class="btn btn-sm btn-outline-secondary ms-2 ts-reset-chart" data-canvas="ts-computers-kb-chart">
+                            <?= __('Reset', 'ticketsstatistics') ?>
+                        </button>
+                    </div>
                 </div>
                 <div class="card-body d-flex align-items-center justify-content-center">
                     <?php if (!empty($latestKb['labels'])): ?>

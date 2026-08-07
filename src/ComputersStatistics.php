@@ -609,4 +609,22 @@ class ComputersStatistics
             'rows' => $rows,
         ];
     }
+    public static function showGroupButtons(string $id, string $successLabel = '', string $dangerLabel = '', ?string $successTooltip = null, ?string $dangerTooltip = null): void
+    {
+        echo '<div class="btn-group btn-group-sm" role="group" aria-label="" id="' . $id . '">';
+        if ($successLabel != '') {
+            echo '<div class="btn">' . __('Status', 'ticketsstatistics') . '</div>';
+            echo '<div class="btn"' . ($successTooltip ? ' data-bs-toggle="tooltip" title="' . $successTooltip . '"' : '') . '>';
+            echo '<span class="badge me-1" style="background-color: #22c55e;"></span>';
+            echo $successLabel;
+            echo '</div>';
+        }
+        if ($dangerLabel != '') {
+            echo '<div class="btn"' . ($dangerTooltip ? ' data-bs-toggle="tooltip" title="' . $dangerTooltip . '"' : '') . '>';
+            echo '<span class="badge me-1" style="background-color: #ef4444;"></span>';
+            echo $dangerLabel;
+            echo '</div>';
+        }
+        echo '</div>';
+    }
 }

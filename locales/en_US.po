@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: TicketsStatistics\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-04-10 11:11+0100\n"
-"PO-Revision-Date: 2026-08-04 09:19+0100\n"
+"PO-Revision-Date: 2026-08-07 08:26+0100\n"
 "Last-Translator: Codex\n"
 "Language-Team: English\n"
 "Language: en_US\n"
@@ -15,7 +15,8 @@ msgstr ""
 
 #: front/dashboard.php:12 front/dashboard.php:20 src/TicketsStatistics.php:14
 #: src/TicketsStatistics.php:24 public/js/period.js:28 front/dashboard.php:15
-#: front/dashboard.php:23 src/TicketsStatistics.php:18 src/TicketsStatistics.php:27
+#: front/dashboard.php:23 src/TicketsStatistics.php:18
+#: src/TicketsStatistics.php:27
 msgid "Tickets Statistics"
 msgstr "Tickets Statistics"
 
@@ -92,6 +93,31 @@ msgstr "Windows machines by site and OS version"
 msgid "Latest KB patches and installations"
 msgstr "Latest KB patches and installations"
 
+#: front/computers.php
+msgid "Missing"
+msgstr "Missing"
+
+#: front/computers.php:189
+#| msgid "KB patches"
+msgid "Installed KB patches"
+msgstr "Installed KB patches"
+
+#: front/computers.php:189
+#| msgid "KB patches"
+msgid "Missing KB patches"
+msgstr "Missing KB patches"
+
+#: front/computers.php:134
+#| msgid "computers"
+msgid "Obsolete computers"
+msgstr "Obsolete computers"
+
+#: front/computers.php:134
+msgid ""
+"A computer is considered obsolete when its CPU generation is lower than 8"
+msgstr ""
+"A computer is considered obsolete when its CPU generation is lower than 8"
+
 #: public/js/computers.js:107
 msgid "Installations"
 msgstr "Installations"
@@ -104,7 +130,8 @@ msgstr "computer"
 msgid "computers"
 msgstr "computers"
 
-#: public/js/computers.js:67 ajax/computers_export.php:39 src/ComputersCommon.php:286
+#: public/js/computers.js:67 ajax/computers_export.php:39
+#: src/ComputersCommon.php:286
 msgid "OS version"
 msgstr "OS version"
 
@@ -140,7 +167,8 @@ msgstr "Download PDF in low quality"
 #: ajax/tickets.php:111 public/js/period.js:257 public/js/period.js:335
 #: front/dashboard.php:64 front/dashboard.php:122 front/dashboard.php:190
 #: src/TicketCityExport.php:45 ajax/tickets.php:69 public/js/period.js:267
-#: public/js/period.js:350 src/TicketsStatistics.php:58 front/dashboard.php:85 hook.php:87
+#: public/js/period.js:350 src/TicketsStatistics.php:58 front/dashboard.php:85
+#: hook.php:87
 msgid "New"
 msgstr "New"
 
@@ -167,22 +195,18 @@ msgid "Tickets still in New status"
 msgstr "Tickets still in New status"
 
 #: front/dashboard.php:103
-#| msgid "Assigned to"
 msgid "Assigned tickets"
 msgstr "Assigned tickets"
 
 #: front/dashboard.php:104
-#| msgid "Loading tickets..."
 msgid "Pending tickets"
 msgstr "Pending tickets"
 
 #: front/dashboard.php:105
-#| msgid "Resolved/Closed tickers"
 msgid "Resolved or closed tickets"
 msgstr "Resolved or closed tickets"
 
 #: front/dashboard.php:106
-#| msgid "Total tickets per town"
 msgid "Total tickets received in the period"
 msgstr "Total tickets received in the period"
 
@@ -228,7 +252,8 @@ msgstr "Reset"
 msgid "Tickets opened per day"
 msgstr "Tickets opened per day"
 
-#: src/TicketsStatistics.php:31 src/TicketsStatistics.php:38 src/PeriodFilter.php:11
+#: src/TicketsStatistics.php:31 src/TicketsStatistics.php:38
+#: src/PeriodFilter.php:11
 msgid "Last 7 days"
 msgstr "Last 7 days"
 
@@ -236,7 +261,8 @@ msgstr "Last 7 days"
 msgid "This month"
 msgstr "This month"
 
-#: src/TicketsStatistics.php:32 src/TicketsStatistics.php:39 src/PeriodFilter.php:13
+#: src/TicketsStatistics.php:32 src/TicketsStatistics.php:39
+#: src/PeriodFilter.php:13
 msgid "Last 30 days"
 msgstr "Last 30 days"
 
@@ -244,19 +270,23 @@ msgstr "Last 30 days"
 msgid "Last month"
 msgstr "Mois dernier"
 
-#: src/TicketsStatistics.php:33 src/TicketsStatistics.php:40 src/PeriodFilter.php:13
+#: src/TicketsStatistics.php:33 src/TicketsStatistics.php:40
+#: src/PeriodFilter.php:15
 msgid "Last 90 days"
 msgstr "Last 90 days"
 
-#: src/TicketsStatistics.php:34 src/TicketsStatistics.php:41 src/PeriodFilter.php:14
+#: src/TicketsStatistics.php:34 src/TicketsStatistics.php:41
+#: src/PeriodFilter.php:14
 msgid "This year"
 msgstr "This year"
 
-#: src/TicketsStatistics.php:35 src/TicketsStatistics.php:42 src/PeriodFilter.php:15
+#: src/TicketsStatistics.php:35 src/TicketsStatistics.php:42
+#: src/PeriodFilter.php:15
 msgid "Last year"
 msgstr "Last year"
 
-#: src/TicketsStatistics.php:36 src/TicketsStatistics.php:43 src/PeriodFilter.php:16
+#: src/TicketsStatistics.php:36 src/TicketsStatistics.php:43
+#: src/PeriodFilter.php:16
 msgid "Custom period"
 msgstr "Custom period"
 
@@ -306,13 +336,15 @@ msgstr "Generating..."
 
 #: public/js/period.js:226 public/js/period.js:331 public/js/period.js:251
 #: public/js/period.js:378 public/js/period.js:261 public/js/period.js:384
-#: front/dashboard.php:67 ajax/central_data.php:42 front/dashboard.php:88 hook.php:90
+#: front/dashboard.php:67 ajax/central_data.php:42 front/dashboard.php:88
+#: hook.php:90
 msgid "Resolved / Closed"
 msgstr "Resolved/Closed"
 
-#: ajax/tickets.php:88 ajax/tickets.php:184 public/js/period.js:617 front/dashboard.php:250
-#: ajax/tickets.php:46 ajax/tickets.php:148 ajax/tickets.php:154 public/js/period.js:679
-#: front/dashboard.php:260 front/dashboard.php:292
+#: ajax/tickets.php:88 ajax/tickets.php:184 public/js/period.js:617
+#: front/dashboard.php:250 ajax/tickets.php:46 ajax/tickets.php:148
+#: ajax/tickets.php:154 public/js/period.js:679 front/dashboard.php:260
+#: front/dashboard.php:292
 msgid "Tickets"
 msgstr "Tickets"
 
@@ -336,13 +368,13 @@ msgstr "Town"
 msgid "Date"
 msgstr "Date"
 
-#: ajax/tickets.php:112 front/dashboard.php:126 front/dashboard.php:194 ajax/tickets.php:70
-#: src/TicketsStatistics.php:62
+#: ajax/tickets.php:112 front/dashboard.php:126 front/dashboard.php:194
+#: ajax/tickets.php:70 src/TicketsStatistics.php:62
 msgid "Resolved"
 msgstr "Resolved"
 
-#: ajax/tickets.php:164 ajax/tickets.php:232 ajax/tickets.php:128 ajax/tickets.php:196
-#: ajax/tickets.php:204
+#: ajax/tickets.php:164 ajax/tickets.php:232 ajax/tickets.php:128
+#: ajax/tickets.php:196 ajax/tickets.php:204
 msgid "Unknown"
 msgstr "Unknown"
 
@@ -447,8 +479,12 @@ msgid "Close"
 msgstr "Close"
 
 #: front/dashboard.php:309
-msgid "Time to resolve tickets created in the selected period, grouped by resolution date"
-msgstr "Time to resolve tickets created in the selected period, grouped by resolution date"
+msgid ""
+"Time to resolve tickets created in the selected period, grouped by "
+"resolution date"
+msgstr ""
+"Time to resolve tickets created in the selected period, grouped by "
+"resolution date"
 
 #: src/TicketCityExport.php:34
 msgid "Assigned to"
@@ -487,8 +523,9 @@ msgid "Very high"
 msgstr "Very high"
 
 #: src/TicketsStatisticsQuickActions.php:15 front/quickactions.php:237
-#: front/quickactions.php:242 front/quickactions.php:137 front/quickactions.php:142
-#: src/TicketsStatisticsQuickActions.php:17 front/quickactions.php:147
+#: front/quickactions.php:242 front/quickactions.php:137
+#: front/quickactions.php:142 src/TicketsStatisticsQuickActions.php:17
+#: front/quickactions.php:147
 msgid "Tickets Statistics Quick Actions"
 msgstr "Tickets Statistics Quick Actions"
 
@@ -499,12 +536,14 @@ msgid "%s must be valid JSON."
 msgstr "%s must be valid JSON."
 
 #: front/quickactions.php:61 front/quickactions.php:287
-#: src/TicketsStatisticsQuickActions.php:85 src/TicketsStatisticsQuickActions.php:126
+#: src/TicketsStatisticsQuickActions.php:85
+#: src/TicketsStatisticsQuickActions.php:126
 msgid "Table is required."
 msgstr "Table is required."
 
 #: front/quickactions.php:64 front/quickactions.php:315
-#: src/TicketsStatisticsQuickActions.php:88 src/TicketsStatisticsQuickActions.php:129
+#: src/TicketsStatisticsQuickActions.php:88
+#: src/TicketsStatisticsQuickActions.php:129
 msgid "Where clause"
 msgstr "Where clause"
 
@@ -519,7 +558,8 @@ msgid "At least one SELECT field is required."
 msgstr "At least one SELECT field is required."
 
 #: front/quickactions.php:107 front/quickactions.php:309
-#: src/TicketsStatisticsQuickActions.php:140 src/TicketsStatisticsQuickActions.php:181
+#: src/TicketsStatisticsQuickActions.php:140
+#: src/TicketsStatisticsQuickActions.php:181
 msgid "Update values"
 msgstr "Update values"
 
@@ -543,73 +583,88 @@ msgstr "UPDATE does not support LEFT JOIN in this tool."
 msgid "GROUP BY and ORDER are only available for SELECT."
 msgstr "GROUP BY and ORDER are only available for SELECT."
 
-#: front/quickactions.php:148 front/quickactions.php:30 front/quickactions.php:35
+#: front/quickactions.php:148 front/quickactions.php:30
+#: front/quickactions.php:35
 msgid "No result returned."
 msgstr "No result returned."
 
-#: front/quickactions.php:191 front/quickactions.php:78 front/quickactions.php:83
+#: front/quickactions.php:191 front/quickactions.php:78
+#: front/quickactions.php:83
 msgid "all"
 msgstr "all"
 
-#: front/quickactions.php:194 front/quickactions.php:80 front/quickactions.php:85
+#: front/quickactions.php:194 front/quickactions.php:80
+#: front/quickactions.php:85
 #, javascript-format, php-format
 msgid "This command will run a SELECT on %s and fetch up to %s row(s)."
 msgstr "This command will run a SELECT on %s and fetch up to %s row(s)."
 
-#: front/quickactions.php:201 front/quickactions.php:223 front/quickactions.php:87
-#: front/quickactions.php:120 front/quickactions.php:92 front/quickactions.php:125
+#: front/quickactions.php:201 front/quickactions.php:223
+#: front/quickactions.php:87 front/quickactions.php:120
+#: front/quickactions.php:92 front/quickactions.php:125
 msgid "Please preview the request before executing it."
 msgstr "Please preview the request before executing it."
 
-#: front/quickactions.php:207 front/quickactions.php:93 front/quickactions.php:98
+#: front/quickactions.php:207 front/quickactions.php:93
+#: front/quickactions.php:98
 #, javascript-format, php-format
 msgid "SELECT completed with %d row(s)."
 msgstr "SELECT completed with %d row(s)."
 
-#: front/quickactions.php:219 front/quickactions.php:110 front/quickactions.php:115
+#: front/quickactions.php:219 front/quickactions.php:110
+#: front/quickactions.php:115
 #, javascript-format, php-format
 msgid "This command will update %d row(s) in %s."
 msgstr "This command will update %d row(s) in %s."
 
-#: front/quickactions.php:227 front/quickactions.php:128 front/quickactions.php:133
+#: front/quickactions.php:227 front/quickactions.php:128
+#: front/quickactions.php:133
 #, javascript-format, php-format
 msgid "UPDATE completed. %d row(s) affected."
 msgstr "UPDATE completed. %d row(s) affected."
 
-#: front/quickactions.php:246 front/quickactions.php:146 front/quickactions.php:151
+#: front/quickactions.php:246 front/quickactions.php:146
+#: front/quickactions.php:151
 msgid ""
-"This tool only supports SELECT and UPDATE requests built from form inputs. Raw PHP, "
-"DELETE, INSERT, and other SQL statements are not allowed."
+"This tool only supports SELECT and UPDATE requests built from form inputs. "
+"Raw PHP, DELETE, INSERT, and other SQL statements are not allowed."
 msgstr ""
-"This tool only supports SELECT and UPDATE requests built from form inputs. Raw PHP, "
-"DELETE, INSERT, and other SQL statements are not allowed."
+"This tool only supports SELECT and UPDATE requests built from form inputs. "
+"Raw PHP, DELETE, INSERT, and other SQL statements are not allowed."
 
-#: front/quickactions.php:281 front/quickactions.php:176 front/quickactions.php:181
+#: front/quickactions.php:281 front/quickactions.php:176
+#: front/quickactions.php:181
 msgid "Request type"
 msgstr "Request type"
 
-#: front/quickactions.php:300 front/quickactions.php:189 front/quickactions.php:194
+#: front/quickactions.php:300 front/quickactions.php:189
+#: front/quickactions.php:194
 msgid "SELECT fields"
 msgstr "SELECT fields"
 
-#: front/quickactions.php:302 front/quickactions.php:321 front/quickactions.php:327
-#: front/quickactions.php:191 front/quickactions.php:196
+#: front/quickactions.php:302 front/quickactions.php:321
+#: front/quickactions.php:327 front/quickactions.php:191
+#: front/quickactions.php:196
 msgid "One field per line."
 msgstr "One field per line."
 
-#: front/quickactions.php:311 front/quickactions.php:197 front/quickactions.php:202
+#: front/quickactions.php:311 front/quickactions.php:197
+#: front/quickactions.php:202
 msgid "JSON object used only for UPDATE requests."
 msgstr "JSON object used only for UPDATE requests."
 
-#: front/quickactions.php:317 front/quickactions.php:203 front/quickactions.php:208
+#: front/quickactions.php:317 front/quickactions.php:203
+#: front/quickactions.php:208
 msgid "Use JSON matching the GLPI DB abstraction array format."
 msgstr "Use JSON matching the GLPI DB abstraction array format."
 
-#: front/quickactions.php:321 front/quickactions.php:207 front/quickactions.php:212
+#: front/quickactions.php:321 front/quickactions.php:207
+#: front/quickactions.php:212
 msgid "LEFT JOIN"
 msgstr "LEFT JOIN"
 
-#: front/quickactions.php:323 front/quickactions.php:209 front/quickactions.php:214
+#: front/quickactions.php:323 front/quickactions.php:209
+#: front/quickactions.php:214
 msgid "Optional JSON join definition. SELECT only."
 msgstr "Optional JSON join definition. SELECT only."
 
@@ -669,41 +724,49 @@ msgstr "Network Equipment"
 msgid "Racks"
 msgstr "Racks"
 
-#: front/quickactions.php:326 front/quickactions.php:213 front/quickactions.php:218
+#: front/quickactions.php:326 front/quickactions.php:213
+#: front/quickactions.php:218
 msgid "GROUP BY"
 msgstr "GROUP BY"
 
-#: front/quickactions.php:333 front/quickactions.php:219 front/quickactions.php:224
+#: front/quickactions.php:333 front/quickactions.php:219
+#: front/quickactions.php:224
 msgid "ORDER"
 msgstr "ORDER"
 
-#: front/quickactions.php:335 front/quickactions.php:215 front/quickactions.php:221
-#: front/quickactions.php:220 front/quickactions.php:226
+#: front/quickactions.php:335 front/quickactions.php:215
+#: front/quickactions.php:221 front/quickactions.php:220
+#: front/quickactions.php:226
 msgid "One field per line. SELECT only."
 msgstr "One field per line. SELECT only."
 
-#: front/quickactions.php:339 front/quickactions.php:225 front/quickactions.php:230
+#: front/quickactions.php:339 front/quickactions.php:225
+#: front/quickactions.php:230
 msgid "Limit"
 msgstr "Limit"
 
-#: front/quickactions.php:344 front/quickactions.php:230 front/quickactions.php:235
+#: front/quickactions.php:344 front/quickactions.php:230
+#: front/quickactions.php:235
 msgid "Preview command"
 msgstr "Preview command"
 
-#: front/quickactions.php:346 front/quickactions.php:232 front/quickactions.php:237
+#: front/quickactions.php:346 front/quickactions.php:232
+#: front/quickactions.php:237
 msgid "Confirm and execute"
 msgstr "Confirm and execute"
 
-#: front/quickactions.php:352 front/quickactions.php:241 front/quickactions.php:246
+#: front/quickactions.php:352 front/quickactions.php:241
+#: front/quickactions.php:246
 msgid "Built request"
 msgstr "Built request"
 
-#: front/quickactions.php:358 front/quickactions.php:251 front/quickactions.php:256
+#: front/quickactions.php:358 front/quickactions.php:251
+#: front/quickactions.php:256
 msgid "Result"
 msgstr "Result"
 
-#: front/quickactions.php:115 front/quickactions.php:125 front/quickactions.php:120
-#: front/quickactions.php:130
+#: front/quickactions.php:115 front/quickactions.php:125
+#: front/quickactions.php:120 front/quickactions.php:130
 msgid "An error occurred while executing the UPDATE request: "
 msgstr "An error occurred while executing the UPDATE request: "
 
@@ -905,8 +968,12 @@ msgid "Match all selected software"
 msgstr "Match all selected software"
 
 #: front/assets.php
-msgid "If unchecked, the search matches computers having at least one selected software."
-msgstr "If unchecked, the search matches computers having at least one selected software."
+msgid ""
+"If unchecked, the search matches computers having at least one selected "
+"software."
+msgstr ""
+"If unchecked, the search matches computers having at least one selected "
+"software."
 
 #: front/assets.php
 msgid "No software selected"
