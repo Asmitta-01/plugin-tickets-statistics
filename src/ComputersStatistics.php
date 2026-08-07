@@ -37,6 +37,116 @@ class ComputersStatistics
         return -1;
     }
 
+    private static function isProcessorGenerationLowerThan8(string $processor): bool
+    {
+        if (preg_match('/\\b(11th|12th|13th)\\b/i', $processor) || stripos($processor, 'Ultra') !== false) {
+            return false;
+        }
+
+        if (preg_match('/\\b(Core\\s+m3-8100Y|N200)\\b/i', $processor)) {
+            return true;
+        }
+
+        if (preg_match('/i[3579]-([0-9]{4,5})/i', $processor, $matches)) {
+            $model = $matches[1];
+            $generation = strlen($model) === 4
+                ? (int) $model[0]
+                : (int) substr($model, 0, 2);
+
+            return $generation < 8;
+        }
+
+        if (preg_match('/Xeon\\s+\\w+\\s+([0-9]{4})/i', $processor, $matches)) {
+            $generation = (int) $matches[1][0];
+            return $generation < 8;
+        }
+
+        return false;
+    }
+
+    /**
+     * @return array<int, bool>
+     */
+    private static function getObsoleteWindowsComputerIds(int $townId, int $entityId = 0): array
+    {
+        $DB = \DBConnection::getReadConnection();
+
+        $where = [
+            'glpi_computers.is_deleted'                    => 0,
+            'glpi_computers.is_template'                   => 0,
+            'glpi_items_softwareversions.itemtype'         => 'Computer',
+            'glpi_items_softwareversions.is_deleted'       => 0,
+            'glpi_items_softwareversions.is_deleted_item'  => 0,
+            'glpi_softwares.name'                          => ['LIKE', 'Microsoft Windows 11%'],
+            'glpi_items_deviceprocessors.itemtype'         => 'Computer',
+        ] + self::getEntitiesRestrictCriteria('glpi_computers', $entityId);
+
+        if ($townId > 0) {
+            $where['glpi_computers.locations_id'] = $townId;
+        }
+
+        $obsoleteIds = [];
+        foreach (
+            $DB->request([
+                'SELECT'     => [
+                    'glpi_computers.id AS computer_id',
+                    'glpi_deviceprocessors.designation AS processor_name',
+                ],
+                'FROM'       => 'glpi_computers',
+                'INNER JOIN' => [
+                    'glpi_items_softwareversions' => [
+                        'ON' => [
+                            'glpi_items_softwareversions' => 'items_id',
+                            'glpi_computers'              => 'id',
+                        ],
+                    ],
+                    'glpi_softwareversions' => [
+                        'ON' => [
+                            'glpi_softwareversions'       => 'id',
+                            'glpi_items_softwareversions' => 'softwareversions_id',
+                        ],
+                    ],
+                    'glpi_softwares' => [
+                        'ON' => [
+                            'glpi_softwares'        => 'id',
+                            'glpi_softwareversions' => 'softwares_id',
+                        ],
+                    ],
+                    'glpi_items_deviceprocessors' => [
+                        'ON' => [
+                            'glpi_items_deviceprocessors' => 'items_id',
+                            'glpi_computers'              => 'id',
+                        ],
+                    ],
+                    'glpi_deviceprocessors' => [
+                        'ON' => [
+                            'glpi_deviceprocessors'       => 'id',
+                            'glpi_items_deviceprocessors' => 'deviceprocessors_id',
+                        ],
+                    ],
+                ],
+                'WHERE'      => $where,
+            ]) as $row
+        ) {
+            $computerId = (int) ($row['computer_id'] ?? 0);
+            $processorName = (string) ($row['processor_name'] ?? '');
+            if ($computerId <= 0 || $processorName === '') {
+                continue;
+            }
+
+            if (self::isProcessorGenerationLowerThan8($processorName)) {
+                $obsoleteIds[$computerId] = true;
+            }
+        }
+
+        return $obsoleteIds;
+    }
+
+    public static function countObsoleteWindowsComputers(int $townId, int $entityId = 0): int
+    {
+        return count(self::getObsoleteWindowsComputerIds($townId, $entityId));
+    }
+
     /**
      * @return array<int, array<string, mixed>>
      */
@@ -447,6 +557,15 @@ class ComputersStatistics
                     }
                 }
                 $title .= ' - ' . __('Computers to update', 'ticketsstatistics');
+            } elseif ($counterKey === 'obsolete') {
+                $obsoleteIds = self::getObsoleteWindowsComputerIds($townId, $entityId);
+                foreach ($latestWindows as $row) {
+                    $id = (int) ($row['id'] ?? 0);
+                    if ($id > 0 && isset($obsoleteIds[$id])) {
+                        $rows[] = $row;
+                    }
+                }
+                $title .= ' - ' . __('Obsolete computers', 'ticketsstatistics');
             } elseif ($counterKey === 'kb_total') {
                 $kbMap = self::getKbMapForComputers($townId, '', true, $entityId);
                 foreach ($latestWindows as $row) {

@@ -53,8 +53,10 @@ Dedicated technicians statistics page with assignment and performance metrics.
 Dedicated page, filterable by town:
 
 - Cards: Windows 11 computers, latest Windows version (auto-detected), computers to update, total KB patches deployed
+- Cards: Windows 11 computers, latest Windows version (auto-detected), computers to update, obsolete computers (CPU generation < 8), total KB patches deployed
 - Charts: Windows by OS version, Windows by site and OS version (stacked), latest KB patches and installations
 - Interactions: clicking cards/charts opens detail modals, with CSV export and GLPI full-list opening where applicable
+- Obsolete computers rule: a computer is considered obsolete when the detected CPU generation is lower than 8.
 
 ### Central dashboard widget
 

@@ -92,7 +92,7 @@ $latestVersionLabel = $counters['latest_version'] !== ''
     </div>
 
     <div class="row g-3 mb-3">
-        <div class="col-md-3">
+        <div class="col-lg col-md-6">
             <div class="card shadow-sm h-100 text-center ts-computers-card" data-counter-key="windows" style="border-top:3px solid #0ea5e9; cursor: pointer;">
                 <div class="card-body py-3">
                     <i class="ti ti-brand-windows fs-1" style="color:#0ea5e9"></i>
@@ -102,27 +102,41 @@ $latestVersionLabel = $counters['latest_version'] !== ''
             </div>
         </div>
 
-        <div class="col-md-3">
+        <div class="col-lg col-md-6">
             <div class="card shadow-sm h-100 text-center ts-computers-card" data-counter-key="latest_version" style="border-top:3px solid #22c55e; cursor: pointer;">
                 <div class="card-body py-3">
                     <i class="ti ti-checkup-list fs-1" style="color:#22c55e"></i>
                     <div class="display-6 fw-bold"><?= (int) $counters['latest_version_count'] ?></div>
-                    <div class="text-muted text-truncate" data-bs-toggle="tooltip" data-bs-placement="bottom" title="<?= $latestVersionLabel ?>"><?= $latestVersionLabel ?></div>
+                    <div class="text-muted" data-bs-toggle="tooltip" data-bs-placement="bottom" title="<?= $latestVersionLabel ?>"><?= $latestVersionLabel ?></div>
                 </div>
             </div>
         </div>
 
-        <div class="col-md-3">
-            <div class="card shadow-sm h-100 text-center ts-computers-card" data-counter-key="to_update" style="border-top:3px solid #ef4444; cursor: pointer;">
+        <div class="col-lg col-md-6">
+            <div class="card shadow-sm h-100 text-center ts-computers-card" data-counter-key="to_update" style="border-top:3px solid #f59e0b; cursor: pointer;">
                 <div class="card-body py-3">
-                    <i class="ti ti-alert-triangle fs-1" style="color:#ef4444"></i>
+                    <i class="ti ti-alert-triangle fs-1" style="color:#f59e0b"></i>
                     <div class="display-6 fw-bold"><?= (int) $counters['to_update'] ?></div>
                     <div class="text-muted"><?= __('Computers to update', 'ticketsstatistics') ?></div>
                 </div>
             </div>
         </div>
 
-        <div class="col-md-3">
+        <div class="col-lg col-md-6">
+            <div class="card shadow-sm h-100 text-center ts-computers-card" data-counter-key="obsolete" style="border-top:3px solid #ef4444; cursor: pointer;">
+                <div class="card-body py-3">
+                    <i class="ti ti-cpu fs-1" style="color:#ef4444"></i>
+                    <div class="display-6 fw-bold"><?= (int) ($counters['obsolete'] ?? 0) ?></div>
+                    <div
+                        class="text-muted"
+                        data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        title="<?= __('A computer is considered obsolete when its CPU generation is lower than 8.', 'ticketsstatistics') ?>"><?= __('Obsolete computers', 'ticketsstatistics') ?></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg col-md-6">
             <div class="card shadow-sm h-100 text-center ts-computers-card" data-counter-key="kb_total" style="border-top:3px solid #7c3aed; cursor: pointer;">
                 <div class="card-body py-3">
                     <i class="ti ti-shield-check fs-1" style="color:#7c3aed"></i>

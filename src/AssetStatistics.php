@@ -3,6 +3,7 @@
 namespace GlpiPlugin\Ticketsstatistics;
 
 use DbUtils;
+use GlpiPlugin\Ticketsstatistics\ComputersStatistics;
 
 class AssetStatistics
 {
@@ -483,7 +484,7 @@ class AssetStatistics
     /**
      * Compute OS counters for computers using the latest Windows 11 softwareversion per computer.
      *
-     * @return array{windows: int, latest_version_count: int, latest_version: string, to_update: int, kb_total: int}
+     * @return array{windows: int, latest_version_count: int, latest_version: string, to_update: int, obsolete: int, kb_total: int}
      */
     public static function getWindowsOsCounters(int $townId, int $entityId = 0): array
     {
@@ -518,6 +519,7 @@ class AssetStatistics
             'latest_version_count' => $latestVersionCount,
             'latest_version' => $latestVersion,
             'to_update' => max(0, $windows - $latestVersionCount),
+            'obsolete' => ComputersStatistics::countObsoleteWindowsComputers($townId, $entityId),
             'kb_total' => self::countDeployedKb($townId, $entityId),
         ];
     }

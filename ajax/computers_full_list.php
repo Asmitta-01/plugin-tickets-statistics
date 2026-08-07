@@ -38,12 +38,12 @@ $addCriterion = static function (int $field, string $searchtype, string|int $val
     ];
 };
 
-if ($entityId > 0) {
+if ($entityId > 0 && !($scope === 'counter' && $counterKey === 'obsolete')) {
     // Entity field in Computer search options (tree-compatible search).
     $addCriterion(80, 'under', $entityId);
 }
 
-if ($townId > 0) {
+if ($townId > 0 && !($scope === 'counter' && $counterKey === 'obsolete')) {
     // Location field in Computer search options.
     $addCriterion(3, 'equals', $townId);
 }
@@ -60,6 +60,28 @@ if ($scope === 'counter') {
             // Get OperatingSystemVersion ID for the latest version to filter by.
             $osVersionId = ComputersStatistics::getOperatingSystemIDByName($latestVersion);
             $addCriterion(46, $counterKey === 'to_update' ? 'notequals' : 'equals', $osVersionId);
+        }
+    } elseif ($counterKey === 'obsolete') {
+        $resolved = ComputersStatistics::resolveComputersScope([
+            'scope' => $scope,
+            'counter_key' => $counterKey,
+            'version' => $version,
+            'town' => $_GET['town'] ?? '',
+            'kb_code' => $_GET['kb_code'] ?? '',
+            'kb_dataset' => $_GET['kb_dataset'] ?? '',
+            'town_id' => $townId,
+            'entity_id' => $entityId,
+        ]);
+
+        $first = true;
+        foreach ($resolved['rows'] as $row) {
+            $id = (int) ($row['id'] ?? 0);
+            if ($id <= 0) {
+                continue;
+            }
+
+            $addCriterion(2, 'equals', $id, $first ? 'AND' : 'OR');
+            $first = false;
         }
     } elseif ($counterKey === 'kb_total') {
         // This counter opens a KB summary modal; full list does not apply directly.
