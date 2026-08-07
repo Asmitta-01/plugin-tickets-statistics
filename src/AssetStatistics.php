@@ -547,32 +547,6 @@ class AssetStatistics
         return -1;
     }
 
-    private static function classifyComputerType(string $typeName): string
-    {
-        $name = mb_strtolower(trim($typeName));
-        if ($name === '') {
-            return 'other';
-        }
-
-        if (str_contains($name, 'vmware') || str_contains($name, 'virtual') || preg_match('/\bvm\b/', $name) === 1) {
-            return 'vmware';
-        }
-
-        if (str_contains($name, 'server') || str_contains($name, 'serveur')) {
-            return 'server';
-        }
-
-        if (str_contains($name, 'laptop') || str_contains($name, 'portable') || str_contains($name, 'notebook')) {
-            return 'laptop';
-        }
-
-        if (str_contains($name, 'desktop') || str_contains($name, 'bureau')) {
-            return 'desktop';
-        }
-
-        return 'other';
-    }
-
     /**
      * @return array{labels: array<int, string>, type_keys: array<int, string>, type_labels: array<string, string>, values: array<string, array<int, int>>}
      */
@@ -621,7 +595,7 @@ class AssetStatistics
                 $town = __('Unknown', 'ticketsstatistics');
             }
 
-            $typeKey = self::classifyComputerType((string) ($row['computer_type_name'] ?? ''));
+            $typeKey = ComputersStatistics::classifyComputerType((string) ($row['computer_type_name'] ?? ''));
             if (!isset($byTown[$town])) {
                 $byTown[$town] = [
                     'laptop' => 0,
@@ -664,14 +638,16 @@ class AssetStatistics
     }
 
     /**
-     * @return array{labels: array<int, string>, versions: array<int, string>, values: array<string, array<int, int>>}
+     * @return array{labels: array<int, string>, entity_ids: array<int, int>, versions: array<int, string>, values: array<string, array<int, int>>}
      */
     public static function getWindowsVersionsByEntity(int $townId, int $entityId = 0): array
     {
         $byEntity = [];
+        $entityLabels = [];
         $versionsSet = [];
 
         foreach (self::getLatestWindowsByComputer($townId, $entityId) as $row) {
+            $entityRowId = (int) ($row['entity_id'] ?? 0);
             $entity = trim((string) ($row['entity'] ?? ''));
             if ($entity === '') {
                 $entity = __('Unknown', 'ticketsstatistics');
@@ -682,14 +658,15 @@ class AssetStatistics
                 $version = __('Unknown', 'ticketsstatistics');
             }
 
-            if (!isset($byEntity[$entity])) {
-                $byEntity[$entity] = [];
+            if (!isset($byEntity[$entityRowId])) {
+                $byEntity[$entityRowId] = [];
+                $entityLabels[$entityRowId] = $entity;
             }
-            if (!isset($byEntity[$entity][$version])) {
-                $byEntity[$entity][$version] = 0;
+            if (!isset($byEntity[$entityRowId][$version])) {
+                $byEntity[$entityRowId][$version] = 0;
             }
 
-            $byEntity[$entity][$version]++;
+            $byEntity[$entityRowId][$version]++;
             $versionsSet[$version] = true;
         }
 
@@ -704,7 +681,10 @@ class AssetStatistics
             return 0;
         });
 
-        $labels = array_keys($byEntity);
+        $entityIds = array_values(array_keys($byEntity));
+        $labels = array_map(static function (int $currentEntityId) use ($entityLabels): string {
+            return (string) ($entityLabels[$currentEntityId] ?? __('Unknown', 'ticketsstatistics'));
+        }, $entityIds);
         $versions = array_values(array_keys($versionsSet));
         usort($versions, static function (string $left, string $right): int {
             return self::compareWindowsVersions($right, $left);
@@ -713,13 +693,14 @@ class AssetStatistics
         $values = [];
         foreach ($versions as $version) {
             $values[$version] = [];
-            foreach ($labels as $entity) {
-                $values[$version][] = (int) ($byEntity[$entity][$version] ?? 0);
+            foreach ($entityIds as $currentEntityId) {
+                $values[$version][] = (int) ($byEntity[$currentEntityId][$version] ?? 0);
             }
         }
 
         return [
             'labels' => $labels,
+            'entity_ids' => $entityIds,
             'versions' => $versions,
             'values' => $values,
         ];
@@ -944,7 +925,7 @@ class AssetStatistics
     }
 
     /**
-     * @return array<int, array{computer_id: int, version_os: string, town: string, entity: string}>
+     * @return array<int, array{computer_id: int, version_os: string, town: string, entity: string, entity_id: int}>
      */
     private static function getLatestWindowsByComputer(int $townId, int $entityId = 0): array
     {
@@ -966,6 +947,7 @@ class AssetStatistics
         $rows = $DB->request([
             'SELECT'     => [
                 'glpi_computers.id AS computer_id',
+                'glpi_computers.entities_id AS entity_id',
                 'glpi_softwareversions.name AS version_os',
                 'glpi_locations.town',
                 'glpi_entities.completename AS entity_name',
@@ -1028,6 +1010,7 @@ class AssetStatistics
                 'version_os'  => (string) ($row['version_os'] ?? ''),
                 'town'        => (string) ($row['town'] ?? ''),
                 'entity'      => (string) ($row['entity_name'] ?? ''),
+                'entity_id'   => (int) ($row['entity_id'] ?? 0),
             ];
         }
 

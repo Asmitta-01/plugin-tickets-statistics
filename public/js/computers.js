@@ -495,6 +495,20 @@ document.addEventListener('DOMContentLoaded', function () {
             },
             options: {
                 indexAxis: 'y',
+                onClick: function (_, elements) {
+                    if (!elements || !elements.length) {
+                        return;
+                    }
+
+                    const point = elements[0];
+                    const townLabel = townTypeChartData.labels[point.index] || '';
+                    const typeKey = townTypeChartData.type_keys[point.datasetIndex] || '';
+                    openComputersModal({
+                        scope: 'town_type',
+                        town: townLabel,
+                        type_key: typeKey,
+                    });
+                },
                 maintainAspectRatio: false,
                 plugins: {
                     legend: {
@@ -575,6 +589,25 @@ document.addEventListener('DOMContentLoaded', function () {
             },
             options: {
                 indexAxis: 'y',
+                onClick: function (_, elements) {
+                    if (!elements || !elements.length) {
+                        return;
+                    }
+
+                    const point = elements[0];
+                    const entityLabel = entityVersionChartData.labels[point.index] || '';
+                    const entityScopeId = Array.isArray(entityVersionChartData.entity_ids)
+                        ? (parseInt(entityVersionChartData.entity_ids[point.index] || '0', 10) || 0)
+                        : 0;
+                    const versionLabel = entityVersionChartData.versions[point.datasetIndex] || '';
+
+                    openComputersModal({
+                        scope: 'entity_version',
+                        entity: entityLabel,
+                        entity_scope_id: entityScopeId,
+                        version: versionLabel,
+                    });
+                },
                 maintainAspectRatio: false,
                 plugins: {
                     legend: {

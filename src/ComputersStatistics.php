@@ -177,7 +177,9 @@ class ComputersStatistics
                 'glpi_computers.serial',
                 'glpi_computers.otherserial',
                 'glpi_computers.date_mod',
+                'glpi_computers.entities_id AS entity_id',
                 'glpi_locations.town',
+                'glpi_entities.completename AS entity_name',
                 'glpi_softwareversions.name AS version_os',
                 'glpi_items_softwareversions.id AS rel_id',
             ],
@@ -215,6 +217,12 @@ class ComputersStatistics
                         'glpi_computers' => 'locations_id',
                     ],
                 ],
+                'glpi_entities' => [
+                    'ON' => [
+                        'glpi_entities'  => 'id',
+                        'glpi_computers' => 'entities_id',
+                    ],
+                ],
             ],
             'WHERE'      => $where,
             'ORDER'      => [
@@ -241,6 +249,8 @@ class ComputersStatistics
                 'inventory_number' => (string) ($row['otherserial'] ?? ''),
                 'version_os' => (string) ($row['version_os'] ?? ''),
                 'town' => (string) (($row['town'] ?? '') ?: __('Unknown', 'ticketsstatistics')),
+                'entity' => (string) (($row['entity_name'] ?? '') ?: __('Unknown', 'ticketsstatistics')),
+                'entity_id' => (int) ($row['entity_id'] ?? 0),
                 'last_update' => \Html::convDateTime((string) ($row['date_mod'] ?? '')),
                 'kb_codes' => [],
                 'url' => $CFG_GLPI['root_doc'] . '/front/computer.form.php?id=' . $computerId,
@@ -293,6 +303,177 @@ class ComputersStatistics
         ]);
         $id = count($iterator) ? $iterator->current()['id'] : -1;
         return $id;
+    }
+
+    public static function getEntityIdByCompleteName(string $name): int
+    {
+        global $DB;
+        $iterator = $DB->request([
+            'SELECT' => ['id'],
+            'FROM'   => 'glpi_entities',
+            'WHERE'  => [
+                'completename' => $name,
+            ],
+        ]);
+        $id = count($iterator) ? $iterator->current()['id'] : -1;
+        return $id;
+    }
+
+    /**
+     * Classifies a computer type name into a category key.
+     *
+     * @param string $typeName The name of the computer type.
+     * @return string The category key ('laptop', 'desktop', 'server', 'vmware', 'other').
+     */
+    public static function classifyComputerType(string $typeName): string
+    {
+        $name = mb_strtolower(trim($typeName));
+        if ($name === '') {
+            return 'other';
+        }
+
+        if (str_contains($name, 'vmware') || str_contains($name, 'virtual') || preg_match('/\bvm\b/', $name) === 1) {
+            return 'vmware';
+        }
+
+        if (str_contains($name, 'server') || str_contains($name, 'serveur')) {
+            return 'server';
+        }
+
+        if (str_contains($name, 'laptop') || str_contains($name, 'portable') || str_contains($name, 'notebook')) {
+            return 'laptop';
+        }
+
+        if (str_contains($name, 'desktop') || str_contains($name, 'bureau')) {
+            return 'desktop';
+        }
+
+        return 'other';
+    }
+
+    /**
+     * Returns the IDs of computer types based on its classification key.
+     * 
+     * @param string $typeKey The classification key ('laptop', 'desktop', 'server', 'vmware', 'other').
+     * @return int[] The IDs of the computer types, or [] if not found.
+     */
+    public static function getComputerTypeIdsByKey(string $typeKey): array
+    {
+        global $DB;
+
+        $ids = [];
+        foreach (
+            $DB->request([
+                'SELECT' => ['id', 'name'],
+                'FROM'   => 'glpi_computertypes',
+            ]) as $row
+        ) {
+            $currentId = (int) ($row['id'] ?? 0);
+            if ($currentId <= 0) {
+                continue;
+            }
+
+            if (self::classifyComputerType((string) ($row['name'] ?? '')) === $typeKey) {
+                $ids[] = $currentId;
+            }
+        }
+
+        return $ids;
+    }
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    public static function getComputersByTownAndType(string $town, string $typeKey, int $townId, int $entityId = 0): array
+    {
+        $DB = \DBConnection::getReadConnection();
+        global $CFG_GLPI;
+
+        $where = [
+            'glpi_computers.is_deleted'  => 0,
+            'glpi_computers.is_template' => 0,
+        ] + self::getEntitiesRestrictCriteria('glpi_computers', $entityId);
+
+        if ($townId > 0) {
+            $where['glpi_computers.locations_id'] = $townId;
+        }
+
+        $rows = [];
+        foreach (
+            $DB->request([
+                'SELECT'    => [
+                    'glpi_computers.id AS computer_id',
+                    'glpi_computers.name AS computer_name',
+                    'glpi_computers.serial',
+                    'glpi_computers.otherserial',
+                    'glpi_computers.date_mod',
+                    'glpi_computers.entities_id AS entity_id',
+                    'glpi_users.realname AS owner_realname',
+                    'glpi_users.firstname AS owner_firstname',
+                    'glpi_locations.town',
+                    'glpi_computertypes.name AS computer_type_name',
+                ],
+                'FROM'      => 'glpi_computers',
+                'LEFT JOIN' => [
+                    'glpi_users' => [
+                        'ON' => [
+                            'glpi_users'     => 'id',
+                            'glpi_computers' => 'users_id',
+                        ],
+                    ],
+                    'glpi_locations' => [
+                        'ON' => [
+                            'glpi_locations' => 'id',
+                            'glpi_computers' => 'locations_id',
+                        ],
+                    ],
+                    'glpi_computertypes' => [
+                        'ON' => [
+                            'glpi_computertypes' => 'id',
+                            'glpi_computers'     => 'computertypes_id',
+                        ],
+                    ],
+                ],
+                'WHERE'     => $where,
+                'ORDER'     => ['glpi_computers.id ASC'],
+            ]) as $row
+        ) {
+            $currentTown = trim((string) ($row['town'] ?? ''));
+            if ($currentTown === '') {
+                $currentTown = __('Unknown', 'ticketsstatistics');
+            }
+
+            if ($townId <= 0 && $town !== '' && $town !== $currentTown) {
+                continue;
+            }
+
+            $currentTypeKey = self::classifyComputerType((string) ($row['computer_type_name'] ?? ''));
+            if ($typeKey !== '' && $currentTypeKey !== $typeKey) {
+                continue;
+            }
+
+            $computerId = (int) ($row['computer_id'] ?? 0);
+            if ($computerId <= 0) {
+                continue;
+            }
+
+            $computerName = (string) ($row['computer_name'] ?? '');
+            $rows[] = [
+                'id' => $computerId,
+                'name' => $computerName !== '' ? $computerName : sprintf(__('Computer #%d', 'ticketsstatistics'), $computerId),
+                'user_name' => trim((string) (($row['owner_firstname'] ?? '') . ' ' . ($row['owner_realname'] ?? ''))),
+                'serial' => (string) ($row['serial'] ?? ''),
+                'inventory_number' => (string) ($row['otherserial'] ?? ''),
+                'version_os' => '',
+                'town' => $currentTown,
+                'entity_id' => (int) ($row['entity_id'] ?? 0),
+                'last_update' => \Html::convDateTime((string) ($row['date_mod'] ?? '')),
+                'kb_codes' => [],
+                'url' => $CFG_GLPI['root_doc'] . '/front/computer.form.php?id=' . $computerId,
+            ];
+        }
+
+        return $rows;
     }
 
     /**
@@ -530,6 +711,9 @@ class ComputersStatistics
         $kbDataset = trim((string) ($input['kb_dataset'] ?? 'installed'));
         $townId = (int) ($input['town_id'] ?? 0);
         $entityId = (int) ($input['entity_id'] ?? 0);
+        $typeKey = trim((string) ($input['type_key'] ?? ''));
+        $entityScopeId = (int) ($input['entity_scope_id'] ?? 0);
+        $entityScopeName = trim((string) ($input['entity'] ?? ''));
 
         $latestWindows = self::getLatestWindowsComputers($townId, $entityId);
         $latestVersion = self::getLatestWindowsVersion($latestWindows);
@@ -591,6 +775,28 @@ class ComputersStatistics
                 }
             }
             $title .= ' - ' . $town . ' - ' . __('OS version', 'ticketsstatistics') . ': ' . $version;
+        } elseif ($scope === 'town_type') {
+            $rows = self::getComputersByTownAndType($town, $typeKey, $townId, $entityId);
+            $title .= ' - ' . $town . ' - ' . __('Type', 'ticketsstatistics') . ': ' . $typeKey;
+        } elseif ($scope === 'entity_version') {
+            foreach ($latestWindows as $row) {
+                if ((string) ($row['version_os'] ?? '') !== $version) {
+                    continue;
+                }
+
+                if ($entityScopeId > 0) {
+                    if ((int) ($row['entity_id'] ?? 0) !== $entityScopeId) {
+                        continue;
+                    }
+                } elseif ($entityScopeName !== '' && (string) ($row['entity'] ?? '') !== $entityScopeName) {
+                    continue;
+                }
+
+                $rows[] = $row;
+            }
+
+            $entityLabel = $entityScopeName !== '' ? $entityScopeName : __('Unknown', 'ticketsstatistics');
+            $title .= ' - ' . $entityLabel . ' - ' . __('OS version', 'ticketsstatistics') . ': ' . $version;
         } elseif ($scope === 'kb') {
             $installed = $kbDataset === 'installed';
             $kbMap = self::getKbMapForComputers($townId, $kbCode, $installed, $entityId);

@@ -21,11 +21,20 @@ global $CFG_GLPI;
 $scope = (string) ($_GET['scope'] ?? '');
 $counterKey = (string) ($_GET['counter_key'] ?? '');
 $version = trim((string) ($_GET['version'] ?? ''));
+$town = trim((string) ($_GET['town'] ?? ''));
+$typeKey = trim((string) ($_GET['type_key'] ?? ''));
+$entityScopeId = (int) ($_GET['entity_scope_id'] ?? 0);
+$entityScopeName = trim((string) ($_GET['entity'] ?? ''));
 $townId = (int) ($_GET['town_id'] ?? 0);
 $entityId = (int) ($_GET['entity_id'] ?? 0);
 
 $criteria = [];
-$addCriterion = static function (int $field, string $searchtype, string|int $value, string $link = 'AND') use (&$criteria): void {
+$addCriterion = static function (int|array $field, string $searchtype = '', string|int $value = 0, string $link = 'AND') use (&$criteria): void {
+    if (is_array($field)) {
+        $criteria[] = $field;
+        return;
+    }
+
     if ((string) $value === '') {
         return;
     }
@@ -38,12 +47,12 @@ $addCriterion = static function (int $field, string $searchtype, string|int $val
     ];
 };
 
-if ($entityId > 0 && !($scope === 'counter' && $counterKey === 'obsolete')) {
+if ($entityId > 0 && !($scope === 'counter' && $counterKey === 'obsolete') && $scope !== 'town_type') {
     // Entity field in Computer search options (tree-compatible search).
     $addCriterion(80, 'under', $entityId);
 }
 
-if ($townId > 0 && !($scope === 'counter' && $counterKey === 'obsolete')) {
+if ($townId > 0 && !($scope === 'counter' && $counterKey === 'obsolete') && $scope !== 'town_type') {
     // Location field in Computer search options.
     $addCriterion(3, 'equals', $townId);
 }
@@ -66,7 +75,10 @@ if ($scope === 'counter') {
             'scope' => $scope,
             'counter_key' => $counterKey,
             'version' => $version,
-            'town' => $_GET['town'] ?? '',
+            'town' => $town,
+            'entity' => $entityScopeName,
+            'type_key' => $typeKey,
+            'entity_scope_id' => $entityScopeId,
             'kb_code' => $_GET['kb_code'] ?? '',
             'kb_dataset' => $_GET['kb_dataset'] ?? '',
             'town_id' => $townId,
@@ -98,6 +110,37 @@ if ($scope === 'counter') {
             $addCriterion(3, 'equals', $townId);
         }
     }
+} elseif ($scope === 'town_type') {
+    $townId = ComputersStatistics::getTownIdByName($town);
+    $addCriterion(3, 'equals', $townId);
+
+    $computerTypeIds = ComputersStatistics::getComputerTypeIdsByKey($typeKey);
+    if (count($computerTypeIds) === 1) {
+        $addCriterion(4, 'equals', $computerTypeIds[0]);
+    } else {
+        $groupCriteria = ['link' => 'AND', 'criteria' => []];
+        foreach ($computerTypeIds as $i => $computerTypeId) {
+            $groupCriteria['criteria'][] = [
+                'field' => 4,
+                'searchtype' => 'equals',
+                'value' => $computerTypeId,
+                'link' => $i === 0 ? 'AND' : 'OR',
+            ];
+        }
+        $addCriterion($groupCriteria);
+    }
+} elseif ($scope === 'entity_version') {
+    $addCriterion(45, 'contains', 'Microsoft Windows 11');
+    $osVersionId = ComputersStatistics::getOperatingSystemIDByName($version);
+    $addCriterion(46, 'equals', $osVersionId);
+
+    if ($entityScopeId <= 0 && $entityScopeName !== '') {
+        $entityScopeId = ComputersStatistics::getEntityIdByCompleteName($entityScopeName);
+    }
+
+    if ($entityScopeId > 0) {
+        $addCriterion(80, 'equals', $entityScopeId);
+    }
 } elseif ($scope === 'kb') {
     // Non pris en compte par GLPI 
 }
@@ -113,6 +156,15 @@ foreach ($criteria as $i => $criterion) {
     $params[sprintf('criteria[%d][searchtype]', (int) $i)] = (string) $criterion['searchtype'];
     $params[sprintf('criteria[%d][value]', (int) $i)] = (string) $criterion['value'];
     $params[sprintf('criteria[%d][link]', (int) $i)] = (string) $criterion['link'];
+
+    if (isset($criterion['criteria']) && is_array($criterion['criteria'])) {
+        foreach ($criterion['criteria'] as $j => $subCriterion) {
+            $params[sprintf('criteria[%d][criteria][%d][field]', (int) $i, (int) $j)] = (string) $subCriterion['field'];
+            $params[sprintf('criteria[%d][criteria][%d][searchtype]', (int) $i, (int) $j)] = (string) $subCriterion['searchtype'];
+            $params[sprintf('criteria[%d][criteria][%d][value]', (int) $i, (int) $j)] = (string) $subCriterion['value'];
+            $params[sprintf('criteria[%d][criteria][%d][link]', (int) $i, (int) $j)] = (string) $subCriterion['link'];
+        }
+    }
 }
 
 $target = $CFG_GLPI['root_doc'] . '/front/computer.php?' . http_build_query($params);
