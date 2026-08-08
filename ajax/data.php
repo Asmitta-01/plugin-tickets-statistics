@@ -282,6 +282,31 @@ foreach (
 uasort($cityStats, fn($a, $b) => array_sum($b) - array_sum($a));
 $cityStats = array_slice($cityStats, 0, 10, true);
 
+$moisFr = [  
+    '01' => 'janvier', '02' => 'février', '03' => 'mars', '04' => 'avril',  
+    '05' => 'mai', '06' => 'juin', '07' => 'juillet', '08' => 'août',  
+    '09' => 'septembre', '10' => 'octobre', '11' => 'novembre', '12' => 'décembre',  
+];  
+  
+$monthlyVolume = ['labels' => [], 'values' => []];  
+foreach (  
+    $DB->request([  
+        'SELECT'  => [  
+            'COUNT DISTINCT' => "$table.id AS cpt",  
+            new \QueryExpression("DATE_FORMAT($table.`date`, '%Y-%m') AS `month`"),  
+        ],  
+        'FROM'    => $table,  
+        'WHERE'   => $where,  
+        'GROUPBY' => new \QueryExpression('`month`'),  
+        'ORDER'   => new \QueryExpression('`month` ASC'),  
+    ]) as $row  
+) {  
+    [$year, $monthNum] = explode('-', $row['month']);  
+    $label = $moisFr[$monthNum] . '_' . $year; // ex: "janvier_2025"  
+    $monthlyVolume['labels'][] = $label;  
+    $monthlyVolume['values'][] = (int) $row['cpt'];  
+}
+
 // Format for Chart.js polar area
 // One dataset per status group, value = total tickets for that city+group
 $cityData['labels']          = array_keys($cityStats);
@@ -473,4 +498,60 @@ $solvedView = [
     'avg_ttr'            => $solvedAvgTtr,
 ];
 
-echo json_encode(compact('counters', 'priority', 'misscs', 'category', 'cityData', 'perday', 'resolution', 'solvedView'));
+// --- Incident tickets by resolution time bucket ---  
+$incidentResolution = ['labels' => [], 'values' => [], 'colors' => []];  
+$bucketDefs = [  
+    ['label' => 't <= 2H',        'min' => 0,     'max' => 2 * 3600,  'color' => '#33ff00'],  
+    ['label' => '2H < t <= 4H',   'min' => 2*3600,'max' => 4 * 3600,  'color' => '#0d6efd'],  
+    ['label' => '4H < t <= 16H',  'min' => 4*3600,'max' => 16 * 3600, 'color' => '#ff7b00'],  
+    ['label' => 't > 16H',        'min' => 16*3600,'max' => PHP_INT_MAX, 'color' => '#c40505'],  
+];  
+$bucketCounts = array_fill_keys(array_column($bucketDefs, 'label'), 0);  
+  
+$incidentWhere = array_merge($where, [  
+    "$table.type" => \Ticket::INCIDENT_TYPE,  
+    new \QueryExpression("($table.`solve_delay_stat` != 0 OR $table.`close_delay_stat` != 0)"),  
+]);  
+  
+foreach (  
+    $DB->request([  
+        'SELECT' => ["$table.solve_delay_stat", "$table.close_delay_stat"],  
+        'FROM'   => $table,  
+        'WHERE'  => $incidentWhere,  
+    ]) as $row  
+) {  
+    $seconds = (int) $row['solve_delay_stat'] ?: (int) $row['close_delay_stat'];  
+    if ($seconds <= 0) continue;  
+  
+    foreach ($bucketDefs as $bucket) {  
+        if ($seconds > $bucket['min'] && $seconds <= $bucket['max']) {  
+            $bucketCounts[$bucket['label']]++;  
+            break;  
+        }  
+    }  
+}  
+  
+foreach ($bucketDefs as $bucket) {  
+    $incidentResolution['labels'][] = $bucket['label'];  
+    $incidentResolution['values'][] = $bucketCounts[$bucket['label']];  
+    $incidentResolution['colors'][] = $bucket['color'];  
+}  
+  
+// Comparaison au mois précédent (variation %)  
+$prevMonthWhere = array_merge(  
+    ["$table.is_deleted" => 0, "$table.type" => \Ticket::INCIDENT_TYPE] + getEntitiesRestrictCriteria($table),  
+    [new \QueryExpression("$table.`date` >= '" . (new \DateTime('first day of last month'))->format('Y-m-d') . " 00:00:00'")],  
+    [new \QueryExpression("$table.`date` < '" . (new \DateTime('first day of this month'))->format('Y-m-d') . " 00:00:00'")]  
+);  
+$prevMonthCountIter = $DB->request([  
+    'COUNT' => 'cpt',  
+    'FROM'  => $table,  
+    'WHERE' => $prevMonthWhere,  
+]);  
+$prevMonthCount = (int) $prevMonthCountIter->current()['cpt'];  
+$currentTotal = array_sum($incidentResolution['values']);  
+$incidentResolution['variation'] = $prevMonthCount > 0  
+    ? round((($currentTotal - $prevMonthCount) / $prevMonthCount) * 100, 1)  
+    : 0;
+
+echo json_encode(compact('counters', 'priority', 'misscs', 'category', 'cityData', 'perday', 'resolution', 'solvedView', 'monthlyVolume', 'incidentResolution'));

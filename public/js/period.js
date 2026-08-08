@@ -297,6 +297,53 @@ function loadCharts() {
                 });
             }
 
+            if (document.getElementById('chart-incident-resolution') !== null && data.incidentResolution) {  
+            const ir = data.incidentResolution;  
+            const total = ir.values.reduce((a, b) => a + b, 0);  
+        
+            document.getElementById('chart-incident-resolution-total').textContent = total;  
+            const variationEl = document.getElementById('chart-incident-resolution-variation');  
+            const isPositive = ir.variation >= 0;  
+            variationEl.innerHTML = `<span style="color:${isPositive ? '#2ecc71' : '#e74c3c'}">  
+                ${isPositive ? '▲' : '▼'} ${Math.abs(ir.variation)}%  
+            </span>`;  
+        
+            const legendEl = document.getElementById('chart-incident-resolution-legend');  
+            legendEl.innerHTML = ir.labels.map((label, i) => `  
+                <li><span style="display:inline-block;width:10px;height:10px;border-radius:50%;  
+                    background:${ir.colors[i]};margin-right:6px;"></span>${label}</li>  
+            `).join('');  
+        
+            new Chart(document.getElementById('chart-incident-resolution'), {  
+                type: 'doughnut',  
+                data: {  
+                    labels: ir.labels,  
+                    datasets: [{  
+                        data: ir.values,  
+                        backgroundColor: ir.colors,  
+                    }]  
+                },  
+                options: {  
+                    plugins: {  
+                        legend: { display: false },  
+                        datalabels: {  
+                            color: '#333',  
+                            formatter: (value) => {  
+                                const pct = total > 0 ? Math.round((value / total) * 100) : 0;  
+                                return value + ' (' + pct + '%)';  
+                            },  
+                            anchor: 'end',  
+                            align: 'end',  
+                            offset: 8,  
+                            // labels reliés par une ligne : nécessite chartjs-plugin-datalabels  
+                            // avec 'align: "end", anchor: "end"' et l'option de connecteur  
+                        },  
+                    },  
+                    maintainAspectRatio: false,  
+                },  
+            });  
+        }
+
             // Priority donut
             if (document.getElementById('chart-priority') !== null) {
                 new Chart(document.getElementById('chart-priority'), {
@@ -504,6 +551,30 @@ function loadCharts() {
                     },
                 }
             });
+
+            if (document.getElementById('chart-monthly-volume') !== null) {  
+                new Chart(document.getElementById('chart-monthly-volume'), {  
+                    type: 'bar',  
+                    data: {  
+                        labels: data.monthlyVolume.labels,  
+                        datasets: [{  
+                            label: __('Tickets', 'ticketsstatistics'),  
+                            data: data.monthlyVolume.values,  
+                            backgroundColor: '#0d6efd',  
+                        }],  
+                    },  
+                    options: {  
+                        plugins: {  
+                            datalabels: { anchor: 'end', align: 'end' },  
+                        },  
+                        scales: {  
+                            x: { ticks: { maxRotation: 45, minRotation: 45 } },  
+                            y: { beginAtZero: true },  
+                        },  
+                    },  
+                });  
+            }
+
             const citiesDataLabels = {
                 anchor: 'end',
                 align: 'end',
