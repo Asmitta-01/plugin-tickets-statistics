@@ -321,13 +321,20 @@ function loadCharts() {
 
             const ttrIntervalsData = data.ttrDistribution;
             const total = ttrIntervalsData.values.reduce((a, b) => a + b, 0);
+            const previousTotal = ttrIntervalsData.previousTotal || 0;
+            let variation = 0;
+            if (previousTotal > 0) {
+                variation = ((total / previousTotal) - 1) * 100;
+            } else if (total > 0) {
+                variation = 100;
+            }
+
             const centerIntervalsVariationPlugin = {
                 id: 'chart-ttr-intervals-variation',
                 afterDraw(chart) {
                     const { ctx, chartArea: { left, top, right, bottom } } = chart;
                     const centerX = (left + right) / 2;
                     const centerY = (top + bottom) / 2;
-                    const variation = 0;
                     const isPositive = variation >= 0;
 
                     ctx.save();

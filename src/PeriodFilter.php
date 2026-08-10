@@ -241,4 +241,139 @@ class PeriodFilter
     {
         return \DateTime::createFromFormat('Y-m-d', $date) !== false;
     }
+
+    /**
+     * Resolves the [from, to] DateTime boundaries (inclusive) for a given period.
+     * Centralizes the date logic so both apply() and the "previous period"
+     * calculation stay in sync.
+     *
+     * @return array{0: \DateTime, 1: \DateTime}
+     */
+    private static function resolveBounds(string $period, ?string $dateFrom = null, ?string $dateTo = null): array
+    {
+        $now = new \DateTime();
+
+        switch ($period) {
+            case 'last7':
+                $to   = (clone $now)->setTime(23, 59, 59);
+                $from = (clone $to)->modify('-6 days')->setTime(0, 0, 0);
+                break;
+            case 'thismonth':
+                $from = (clone $now)->modify('first day of this month')->setTime(0, 0, 0);
+                $to   = (clone $now)->setTime(23, 59, 59);
+                break;
+            case 'last30':
+                $to   = (clone $now)->setTime(23, 59, 59);
+                $from = (clone $to)->modify('-29 days')->setTime(0, 0, 0);
+                break;
+            case 'lastmonth':
+                $from = (clone $now)->modify('first day of last month')->setTime(0, 0, 0);
+                $to   = (clone $now)->modify('last day of last month')->setTime(23, 59, 59);
+                break;
+            case 'last90':
+                $to   = (clone $now)->setTime(23, 59, 59);
+                $from = (clone $to)->modify('-89 days')->setTime(0, 0, 0);
+                break;
+            case 'thisyear':
+                $from = (clone $now)->modify('first day of january this year')->setTime(0, 0, 0);
+                $to   = (clone $now)->setTime(23, 59, 59);
+                break;
+            case 'lastyear':
+                $from = (clone $now)->modify('first day of january last year')->setTime(0, 0, 0);
+                $to   = (clone $now)->modify('last day of december last year')->setTime(23, 59, 59);
+                break;
+            case 'custom':
+                $from = ($dateFrom && \DateTime::createFromFormat('Y-m-d', $dateFrom) !== false)
+                    ? \DateTime::createFromFormat('Y-m-d', $dateFrom)->setTime(0, 0, 0)
+                    : (clone $now)->modify('-29 days')->setTime(0, 0, 0);
+                $to = ($dateTo && \DateTime::createFromFormat('Y-m-d', $dateTo) !== false)
+                    ? \DateTime::createFromFormat('Y-m-d', $dateTo)->setTime(23, 59, 59)
+                    : (clone $now)->setTime(23, 59, 59);
+                break;
+            default:
+                $to   = (clone $now)->setTime(23, 59, 59);
+                $from = (clone $to)->modify('-29 days')->setTime(0, 0, 0);
+                break;
+        }
+
+        return [$from, $to];
+    }
+
+    /**
+     * Computes the [from, to] boundaries of the period immediately preceding
+     * the given one, of equal length (for day-based periods) or the matching
+     * calendar unit (for month/year-based periods).
+     *
+     * Examples:
+     * - 'last7'  -> the 7 days right before the current "last 7 days"
+     * - 'thismonth' -> the previous calendar month
+     * - 'custom' with a 10-day range -> the 10 days right before that range
+     *
+     * @return array{0: \DateTime, 1: \DateTime}
+     */
+    private static function resolvePreviousBounds(string $period, ?string $dateFrom = null, ?string $dateTo = null): array
+    {
+        [$from, $to] = self::resolveBounds($period, $dateFrom, $dateTo);
+
+        switch ($period) {
+            case 'thismonth':
+            case 'lastmonth':
+                $prevTo   = (clone $from)->modify('-1 second');
+                $prevFrom = (clone $prevTo)->modify('first day of this month')->setTime(0, 0, 0);
+                break;
+            case 'thisyear':
+            case 'lastyear':
+                $prevTo   = (clone $from)->modify('-1 second');
+                $prevFrom = (clone $prevTo)->modify('first day of january this year')->setTime(0, 0, 0);
+                break;
+            default:
+                // Périodes basées sur un nombre de jours (last7, last30, last90, custom, ...):
+                // même durée, immédiatement avant la période courante.
+                $lengthInSeconds = $to->getTimestamp() - $from->getTimestamp();
+                $prevTo   = (clone $from)->modify('-1 second');
+                $prevFrom = (clone $prevTo)->modify('-' . $lengthInSeconds . ' seconds');
+                break;
+        }
+
+        return [$prevFrom, $prevTo];
+    }
+
+    /**
+     * Same as apply(), but filters on the period immediately preceding
+     * the given one (same length, or matching calendar unit for
+     * month/year-based periods). Useful for period-over-period comparisons.
+     */
+    public static function applyPrevious(array &$where, string $table, string $period, ?string $dateFrom = null, ?string $dateTo = null): void
+    {
+        [$prevFrom, $prevTo] = self::resolvePreviousBounds($period, $dateFrom, $dateTo);
+
+        $expressionClass = class_exists('\Glpi\DBAL\QueryExpression')
+            ? '\Glpi\DBAL\QueryExpression'
+            : '\QueryExpression';
+
+        $fromStr = $prevFrom->format('Y-m-d H:i:s');
+        $toStr   = $prevTo->format('Y-m-d H:i:s');
+
+        $where[] = new $expressionClass("$table.`date` >= '$fromStr' AND $table.`date` <= '$toStr'");
+    }
+
+    /**
+     * Same as applySolvedDate(), but filters on the period immediately preceding
+     * the given one.
+     */
+    public static function applyPreviousSolvedDate(array &$where, string $table, string $period, ?string $dateFrom = null, ?string $dateTo = null): void
+    {
+        [$prevFrom, $prevTo] = self::resolvePreviousBounds($period, $dateFrom, $dateTo);
+
+        $expressionClass = class_exists('\Glpi\DBAL\QueryExpression')
+            ? '\Glpi\DBAL\QueryExpression'
+            : '\QueryExpression';
+
+        $fromStr = $prevFrom->format('Y-m-d H:i:s');
+        $toStr   = $prevTo->format('Y-m-d H:i:s');
+
+        $col = "COALESCE(NULLIF($table.`solvedate`, '0000-00-00 00:00:00'), $table.`closedate`)";
+
+        $where[] = new $expressionClass("$col >= '$fromStr' AND $col <= '$toStr'");
+    }
 }

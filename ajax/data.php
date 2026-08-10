@@ -519,10 +519,27 @@ foreach (
     }
 }
 
+// Calculate total for previous period for comparison
+$previousWhere = ["$table.is_deleted" => 0] + getEntitiesRestrictCriteria($table);
+\GlpiPlugin\Ticketsstatistics\CategoryFilter::apply($previousWhere, $table, $categoryId);
+\GlpiPlugin\Ticketsstatistics\PeriodFilter::applyPreviousSolvedDate($previousWhere, $table, $period, $dateFrom, $dateTo);
+
+$previousTtrWhere = $previousWhere + [
+    new \QueryExpression("COALESCE(NULLIF($table.`solve_delay_stat`, 0), $table.`close_delay_stat`) IS NOT NULL"),
+];
+
+$previousTotalIter = $DB->request([
+    'COUNT' => 'cpt',
+    'FROM'  => $table,
+    'WHERE' => $previousTtrWhere,
+]);
+$previousTotal = (int) ($previousTotalIter->current()['cpt'] ?? 0);
+
 $ttrDistribution = [
-    'labels' => array_keys($ttrBuckets),
-    'values' => array_values($ttrBuckets),
-    'colors' => \GlpiPlugin\Ticketsstatistics\TicketsStatistics::getTTRColors()
+    'labels'        => array_keys($ttrBuckets),
+    'values'        => array_values($ttrBuckets),
+    'colors'        => \GlpiPlugin\Ticketsstatistics\TicketsStatistics::getTTRColors(),
+    'previousTotal' => $previousTotal,
 ];
 
 // --- Open tickets age distribution (all open statuses combined) ---
