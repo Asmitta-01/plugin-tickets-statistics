@@ -415,7 +415,29 @@ function loadCharts() {
                 const openAge = data.openAgeDistribution;
                 const totalOpen = openAge.values.reduce((a, b) => a + b, 0);
 
-                new Chart(document.getElementById('chart-open-age'), {
+                const centerOpenAgeTotalPlugin = {
+                    id: 'chart-open-age-total',
+                    afterDraw(chart) {
+                        const { ctx, chartArea: { left, top, right, bottom } } = chart;
+                        const centerX = (left + right) / 2;
+                        const centerY = (top + bottom) / 2;
+
+                        ctx.save();
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+
+                        ctx.font = 'bold 2rem sans-serif';
+                        ctx.fillStyle = '#374151';
+                        ctx.fillText(totalOpen, centerX, centerY);
+
+                        ctx.restore();
+
+                        const textMetrics = ctx.measureText(totalOpen);
+                        chart.$centerTextBox = { x: centerX - textMetrics.width / 2, y: centerY - 16, width: textMetrics.width, height: 32 };
+                    }
+                };
+
+                const openAgeChart = new Chart(document.getElementById('chart-open-age'), {
                     type: 'doughnut',
                     data: {
                         labels: openAge.labels,
@@ -467,7 +489,9 @@ function loadCharts() {
                             },
                         },
                     },
+                    plugins: [centerOpenAgeTotalPlugin]
                 });
+                attachCenterTooltip(openAgeChart, __('Total open tickets', 'ticketsstatistics'));
             }
 
             // Priority donut

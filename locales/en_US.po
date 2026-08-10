@@ -1058,3 +1058,7 @@ msgstr "Resolved tickets by TTR intervals"
 #: public/js/period.js:470
 msgid "Variation of tickets between the selected period and the previous one"
 msgstr "Variation of tickets between the selected period and the previous one"
+
+#: public/js/period.js:560
+msgid "Total open tickets"
+msgstr "Total open tickets"
