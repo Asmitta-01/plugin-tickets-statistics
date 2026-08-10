@@ -1,5 +1,7 @@
 <?php
 
+use GlpiPlugin\Ticketsstatistics\TicketsStatistics;
+
 /**
  * -------------------------------------------------------------------------
  * TicketsStatistics plugin for GLPI
@@ -318,7 +320,7 @@ foreach ($openedByDay as $day => $count) {
     $openedByMonth[$month] = ($openedByMonth[$month] ?? 0) + $count;
 }
 $perMonth['keys']   = array_keys($openedByMonth);
-$perMonth['labels'] = array_map(fn($month) => date('F Y', strtotime($month)), $perMonth['keys']);
+$perMonth['labels'] = array_map(fn($month) => mb_ucfirst(TicketsStatistics::formatMonthLocalized($month)), $perMonth['keys']);
 $perMonth['values'] = array_values($openedByMonth);
 
 

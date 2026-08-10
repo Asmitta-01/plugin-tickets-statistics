@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: TicketsStatistics\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-04-10 11:11+0100\n"
-"PO-Revision-Date: 2026-08-10 13:16+0100\n"
+"PO-Revision-Date: 2026-08-10 13:51+0100\n"
 "Last-Translator: Codex\n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -1049,7 +1049,7 @@ msgstr "Volume mensuel des tickets"
 
 #: front/dashboard.php:332
 msgid "Open tickets by age"
-msgstr "Tickets ouverts par durée"
+msgstr "Ancienneté des tickets ouverts"
 
 #: ajax/tickets.php:104 public/js/period.js:500
 msgid "Opened duration"

@@ -470,7 +470,7 @@ function loadCharts() {
                         },
                         maintainAspectRatio: false,
                         layout: {
-                            padding: { bottom: 20 }
+                            padding: { top: 20, bottom: 20 }
                         },
                         plugins: {
                             legend: {
@@ -481,7 +481,7 @@ function loadCharts() {
                                 },
                                 title: {
                                     display: true,
-                                    text: __('Opened duration', 'ticketsstatistics'),
+                                    text: __('Opened duration', 'ticketsstatistics').replace("&#39;", '’'),
                                     font: { weight: 'bold' },
                                 }
                             },
@@ -971,6 +971,9 @@ function loadCharts() {
                             type: 'per_month',
                             label: data.perMonth.keys[elements[0].index]
                         });
+                    },
+                    layout: {
+                        padding: { top: 20 }
                     },
                     plugins: {
                         legend: { display: false },

@@ -87,4 +87,27 @@ class TicketsStatistics
         }
         return $categories;
     }
+
+    /**
+     * Formats a month string into a localized format based on the user's language preference.
+     * `date('F Y', strtotime($month))` is replaced with `IntlDateFormatter` to provide proper localization.
+     */
+    public static function formatMonthLocalized(string $month): string
+    {
+        // $month attendu au format 'YYYY-MM' ou tout ce que strtotime() comprend
+        $timestamp = strtotime($month);
+
+        $locale = $_SESSION['glpilanguage'] ?? 'en_GB'; // langue GLPI de l'utilisateur courant
+
+        $formatter = new \IntlDateFormatter(
+            $locale,
+            \IntlDateFormatter::LONG,
+            \IntlDateFormatter::NONE,
+            null,
+            null,
+            'MMMM yyyy' // motif ICU : mois en toutes lettres + année
+        );
+
+        return $formatter->format($timestamp);
+    }
 }
