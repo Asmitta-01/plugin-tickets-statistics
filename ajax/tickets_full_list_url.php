@@ -112,26 +112,6 @@ $isOpenStatusCounter = in_array($group, ['new', 'incoming', 'assigned', 'waiting
 
 $criteria = [];
 
-if ($type !== 'open_age' && !$isMissc && count($statuses) === 1) {
-    $criteria[] = [
-        'field'      => 12, // Status
-        'searchtype' => 'equals',
-        'value'      => $statuses[0],
-        'link'       => 'AND',
-    ];
-} elseif ($type !== 'open_age' && !$isMissc && count($statuses) > 1) {
-    $first = true;
-    foreach ($statuses as $status) {
-        $criteria[] = [
-            'field'      => 12, // Status
-            'searchtype' => 'equals',
-            'value'      => $status,
-            'link'       => $first ? 'AND' : 'OR',
-        ];
-        $first = false;
-    }
-}
-
 if ($isMissc) {
     $criteria[] = [
         'field'      => 5200, // MISSC Number
@@ -139,9 +119,7 @@ if ($isMissc) {
         'value'      => '^$',
         'link'       => 'AND',
     ];
-}
-
-if ($type === 'open_age') {
+} elseif ($type === 'open_age') {
     if ($group === '') {
         $statuses = [\Ticket::INCOMING, \Ticket::ASSIGNED, \Ticket::WAITING];
     }
@@ -209,7 +187,35 @@ if ($type === 'open_age') {
             'link'       => 'AND',
         ];
     }
+} elseif ($type == 'per_month') {
+    $month = $label; // Expected format: 'YYYY-MM'
+    // Get the first day of the month
+    $from = (new \DateTimeImmutable($month . '-01'))->format('Y-m-d H:i:s');
+    // Get the first day of the next month
+    $toExclusive = (new \DateTimeImmutable($month . '-01'))->modify('+1 month')->format('Y-m-d H:i:s');
+} else {
+    if (count($statuses) === 1) {
+        $criteria[] = [
+            'field'      => 12, // Status
+            'searchtype' => 'equals',
+            'value'      => $statuses[0],
+            'link'       => 'AND',
+        ];
+    } elseif (count($statuses) > 1) {
+        $first = true;
+        foreach ($statuses as $status) {
+            $criteria[] = [
+                'field'      => 12, // Status
+                'searchtype' => 'equals',
+                'value'      => $status,
+                'link'       => $first ? 'AND' : 'OR',
+            ];
+            $first = false;
+        }
+    }
 }
+
+
 
 if ($type !== 'open_age' && (!$openStatusesGlobal || !$isOpenStatusCounter)) {
     if ($from !== null) {

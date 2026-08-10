@@ -367,8 +367,18 @@ function loadCharts() {
                     }]
                 },
                 options: {
+                    onClick: function (_, elements) {
+                        if (!elements.length) {
+                            return;
+                        }
+
+                        openTicketsModal({
+                            type: 'ttr_bucket',
+                            label: ttrIntervalsData.labels[elements[0].index]
+                        });
+                    },
                     layout: {
-                        padding: { bottom: 20 }
+                        padding: { top: 20, bottom: 20 }
                     },
                     plugins: {
                         legend: {
@@ -387,7 +397,7 @@ function loadCharts() {
                             color: '#333',
                             formatter: (value) => {
                                 const pct = total > 0 ? Math.round((value / total) * 100) : 0;
-                                return value + ' (' + pct + '%)';
+                                return value > 0 ? value + ' (' + pct + '%)' : '';
                             },
                             clamp: true,
                             anchor: 'end',
@@ -921,6 +931,16 @@ function loadCharts() {
                     }],
                 },
                 options: {
+                    onClick: function (_, elements) {
+                        if (!elements.length) {
+                            return;
+                        }
+
+                        openTicketsModal({
+                            type: 'per_month',
+                            label: data.perMonth.keys[elements[0].index]
+                        });
+                    },
                     plugins: {
                         legend: { display: false },
                         datalabels: { anchor: 'end', align: 'end' },
@@ -1026,7 +1046,7 @@ function openTicketsModal(filters, openFullListPage = false) {
     fetch(root + '/plugins/ticketsstatistics/ajax/tickets.php?' + params.toString())
         .then(response => response.json())
         .then(payload => {
-            title.textContent = payload.title;
+            title.innerHTML = payload.title;
             count.textContent = formatTicketsCount(payload.count);
 
             if (payload.truncated) {

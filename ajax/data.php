@@ -311,13 +311,14 @@ foreach (
 }
 
 // Agrégation par mois (Volume mensuel: tickets ouverts par mois)
-$perMonth = ['labels' => [], 'values' => []];
+$perMonth = ['labels' => [], 'values' => [], 'keys' => []];
 $openedByMonth = [];
 foreach ($openedByDay as $day => $count) {
     $month = substr($day, 0, 7); // 'YYYY-MM-DD' -> 'YYYY-MM'
     $openedByMonth[$month] = ($openedByMonth[$month] ?? 0) + $count;
 }
-$perMonth['labels'] = array_map(fn($month) => date('F Y', strtotime($month)), array_keys($openedByMonth));
+$perMonth['keys']   = array_keys($openedByMonth);
+$perMonth['labels'] = array_map(fn($month) => date('F Y', strtotime($month)), $perMonth['keys']);
 $perMonth['values'] = array_values($openedByMonth);
 
 

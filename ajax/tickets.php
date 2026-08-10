@@ -66,6 +66,15 @@ function ticketsstatistics_build_title(string $type, string $label, string $stat
         case 'open_age':
             $parts[] = __('Open duration', 'ticketsstatistics');
             break;
+        case 'per_month':
+            $parts[] = __('Month', 'ticketsstatistics');
+            if (preg_match('/^\d{4}-\d{2}$/', $label)) {
+                $label = date('F Y', strtotime($label));
+            }
+            break;
+        case 'ttr_bucket':
+            $parts[] = __('Resolution Time', 'ticketsstatistics');
+            break;
     }
 
     if ($label !== '') {
@@ -98,7 +107,7 @@ $cat_table = 'glpi_itilcategories';
 $loc_table = 'glpi_locations';
 $type = (string) ($_GET['type'] ?? '');
 $rawLabel = (string) ($_GET['label'] ?? '');
-$label = $type === 'category' ? $rawLabel : trim($rawLabel);
+$label = $type === 'category' ? $rawLabel : trim(html_entity_decode($rawLabel));
 $clickedCategoryId = isset($_GET['category_id']) ? (int) $_GET['category_id'] : null;
 $status_group = (string) ($_GET['status_group'] ?? '');
 $openStatusesGlobal = !isset($_GET['open_statuses_global']) || (int) $_GET['open_statuses_global'] === 1;
@@ -181,6 +190,32 @@ switch ($type) {
         $where[] = ["$table.status" => [\Ticket::SOLVED, \Ticket::CLOSED]];
         if (\DateTime::createFromFormat('Y-m-d', $label) !== false) {
             $where[] = new \QueryExpression("DATE($table.`closedate`) = " . $DB->quoteValue($label));
+        }
+        break;
+
+    case 'per_month':
+        if (preg_match('/^\d{4}-\d{2}$/', $label)) {
+            $where[] = new \QueryExpression("DATE_FORMAT($table.`date`, '%Y-%m') = " . $DB->quoteValue($label));
+        }
+        break;
+
+    case 'ttr_bucket':
+        $delay_expr = "COALESCE(NULLIF($table.`solve_delay_stat`, 0), $table.`close_delay_stat`)";
+        $where[] = new \QueryExpression("$delay_expr IS NOT NULL");
+
+        switch ($label) {
+            case 't < 2h':
+                $where[] = new \QueryExpression("$delay_expr < 7200");
+                break;
+            case '2h <= t < 4h':
+                $where[] = new \QueryExpression("$delay_expr >= 7200 AND $delay_expr < 14400");
+                break;
+            case '4h <= t < 16h':
+                $where[] = new \QueryExpression("$delay_expr >= 14400 AND $delay_expr < 57600");
+                break;
+            default: // 't >= 16h'
+                $where[] = new \QueryExpression("$delay_expr >= 57600");
+                break;
         }
         break;
 
