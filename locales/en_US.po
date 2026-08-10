@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: TicketsStatistics\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-04-10 11:11+0100\n"
-"PO-Revision-Date: 2026-08-10 12:04+0100\n"
+"PO-Revision-Date: 2026-08-10 13:16+0100\n"
 "Last-Translator: Codex\n"
 "Language-Team: English\n"
 "Language: en_US\n"
@@ -1062,3 +1062,19 @@ msgstr "Variation of tickets between the selected period and the previous one"
 #: public/js/period.js:560
 msgid "Total open tickets"
 msgstr "Total open tickets"
+
+#: src/PeriodFilter.php:25
+msgid "Less than 24 hours"
+msgstr "Less than 24 hours"
+
+#: src/PeriodFilter.php:26
+msgid "1 to 3 days"
+msgstr "1 to 3 days"
+
+#: src/PeriodFilter.php:27
+msgid "3 to 7 days"
+msgstr "3 to 7 days"
+
+#: src/PeriodFilter.php:28
+msgid "More than 7 days"
+msgstr "More than 7 days"

@@ -1053,3 +1053,19 @@ msgstr ""
 #: public/js/period.js:560
 msgid "Total open tickets"
 msgstr ""
+
+#: src/PeriodFilter.php:25
+msgid "Less than 24 hours"
+msgstr ""
+
+#: src/PeriodFilter.php:26
+msgid "1 to 3 days"
+msgstr ""
+
+#: src/PeriodFilter.php:27
+msgid "3 to 7 days"
+msgstr ""
+
+#: src/PeriodFilter.php:28
+msgid "More than 7 days"
+msgstr ""

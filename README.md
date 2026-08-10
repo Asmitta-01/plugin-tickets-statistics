@@ -1,13 +1,13 @@
 # TicketsStatistics GLPI plugin
 
-![Version](https://img.shields.io/badge/Version-0.7.0-2563eb)
+![Version](https://img.shields.io/badge/Version-0.8.0-2563eb)
 ![PHP](https://img.shields.io/badge/PHP-%3E%3D8.3-777bb4)
 ![GLPI](https://img.shields.io/badge/GLPI-10.0.16%20to%2011.0.6-0ea5e9)
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Asmitta-01/plugin-tickets-statistics)
 
 TicketsStatistics adds a dedicated reporting dashboard to GLPI for helpdesk ticket activity, plus town-based ticket, asset, and computer/patch analytics.
 
-**Current release:** 0.7.0
+**Current release:** 0.8.0
 
 ## Table of contents
 
@@ -23,7 +23,7 @@ TicketsStatistics adds a dedicated reporting dashboard to GLPI for helpdesk tick
 ### Tickets dashboard
 
 - Ticket counters by status
-- Charts by priority and category
+- Charts by priority, category, TTR intervals, open ticket age, and monthly volume
 - Town-based ticket analytics
 - Ticket creation trends per day
 - Period filters, including custom date ranges
@@ -111,6 +111,22 @@ This section explains the meaning of the values shown in the dashboard.
 | Resolved / Closed in period | Tickets in status Resolved or Closed whose resolved/closed date falls in the selected period |
 | Opened in period | Tickets whose creation date falls in the selected period |
 | Avg TTR | Average resolution time (hours) for tickets resolved/closed in the selected period |
+
+### Resolved tickets by TTR intervals
+
+- **Source**: Tickets with a resolution time (`solve_delay_stat` or `close_delay_stat`) within the selected period.
+- **Buckets**: Tickets are grouped into predefined time intervals: `< 2h`, `2h-4h`, `4h-16h`, and `>= 16h`.
+- **Center value**: The total number of resolved tickets in the period, and the percentage variation compared to the previous period.
+
+### Open tickets by age
+
+- **Source**: All tickets in an open status (`New`, `Assigned`, `Pending`). This chart is not affected by the period filter.
+- **Buckets**: Tickets are grouped by their age (time since creation): `< 24h`, `1-3 days`, `3-7 days`, and `> 7 days`.
+- **Center value**: The total number of open tickets.
+
+### Monthly Volume of Tickets
+
+- **Source**: Tickets opened during the selected period, grouped by month.
 
 ## Compatibility
 
