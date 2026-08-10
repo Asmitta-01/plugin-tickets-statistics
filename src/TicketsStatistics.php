@@ -45,6 +45,16 @@ class TicketsStatistics
         ];
     }
 
+    public static function getTTRColors(): array
+    {
+        return [
+            '#49bf4d',
+            '#0241ec',
+            '#ff8000',
+            '#C00000',
+        ];
+    }
+
     public static function getStatusColor(string $status): string
     {
         return self::getStatusColors()[$status] ?? '#000000';

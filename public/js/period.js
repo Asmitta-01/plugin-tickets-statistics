@@ -210,6 +210,28 @@ function submitFilterForm() {
         if (filterForm) filterForm.submit();
     }
 }
+function ensureHoverTooltip() {
+    let el = document.getElementById('chart-hover-tooltip');
+    if (!el) {
+        el = document.createElement('div');
+        el.id = 'chart-hover-tooltip';
+        el.style.cssText = `
+            position: fixed;
+            display: none;
+            pointer-events: none;
+            background: rgba(17, 24, 39, 0.92);
+            color: #fff;
+            font-size: 12px;
+            font-family: sans-serif;
+            padding: 6px 10px;
+            border-radius: 6px;
+            z-index: 9999;
+            white-space: nowrap;
+        `;
+        document.body.appendChild(el);
+    }
+    return el;
+}
 
 function loadCharts() {
     const root = CFG_GLPI.root_doc;
@@ -297,52 +319,85 @@ function loadCharts() {
                 });
             }
 
-            if (document.getElementById('chart-incident-resolution') !== null && data.incidentResolution) {  
-            const ir = data.incidentResolution;  
-            const total = ir.values.reduce((a, b) => a + b, 0);  
-        
-            document.getElementById('chart-incident-resolution-total').textContent = total;  
-            const variationEl = document.getElementById('chart-incident-resolution-variation');  
-            const isPositive = ir.variation >= 0;  
-            variationEl.innerHTML = `<span style="color:${isPositive ? '#2ecc71' : '#e74c3c'}">  
-                ${isPositive ? '▲' : '▼'} ${Math.abs(ir.variation)}%  
-            </span>`;  
-        
-            const legendEl = document.getElementById('chart-incident-resolution-legend');  
-            legendEl.innerHTML = ir.labels.map((label, i) => `  
-                <li><span style="display:inline-block;width:10px;height:10px;border-radius:50%;  
-                    background:${ir.colors[i]};margin-right:6px;"></span>${label}</li>  
-            `).join('');  
-        
-            new Chart(document.getElementById('chart-incident-resolution'), {  
-                type: 'doughnut',  
-                data: {  
-                    labels: ir.labels,  
-                    datasets: [{  
-                        data: ir.values,  
-                        backgroundColor: ir.colors,  
-                    }]  
-                },  
-                options: {  
-                    plugins: {  
-                        legend: { display: false },  
-                        datalabels: {  
-                            color: '#333',  
-                            formatter: (value) => {  
-                                const pct = total > 0 ? Math.round((value / total) * 100) : 0;  
-                                return value + ' (' + pct + '%)';  
-                            },  
-                            anchor: 'end',  
-                            align: 'end',  
-                            offset: 8,  
-                            // labels reliés par une ligne : nécessite chartjs-plugin-datalabels  
-                            // avec 'align: "end", anchor: "end"' et l'option de connecteur  
-                        },  
-                    },  
-                    maintainAspectRatio: false,  
-                },  
-            });  
-        }
+            const ttrIntervalsData = data.ttrDistribution;
+            const total = ttrIntervalsData.values.reduce((a, b) => a + b, 0);
+            const centerIntervalsVariationPlugin = {
+                id: 'chart-ttr-intervals-variation',
+                afterDraw(chart) {
+                    const { ctx, chartArea: { left, top, right, bottom } } = chart;
+                    const centerX = (left + right) / 2;
+                    const centerY = (top + bottom) / 2;
+                    const variation = 0;
+                    const isPositive = variation >= 0;
+
+                    ctx.save();
+                    ctx.textAlign = 'center';
+
+                    const mainFontSize = 32; // 2rem ≈ 32px  
+                    const subFontSize = 14;
+                    const gap = 4;
+                    const totalHeight = mainFontSize + gap + subFontSize;
+                    const startY = centerY - totalHeight / 2;
+
+                    // Texte principal  
+                    ctx.font = 'bold 2rem sans-serif';
+                    ctx.fillStyle = '#000';
+                    ctx.textBaseline = 'top';
+                    ctx.fillText(total, centerX, startY);
+
+                    ctx.font = '14px sans-serif';
+                    ctx.fillStyle = isPositive ? '#2ecc71' : '#e74c3c';
+                    ctx.textBaseline = 'top';
+                    ctx.fillText(`${isPositive ? '▲' : '▼'} ${variation.toFixed(1)}%`, centerX, startY + mainFontSize + gap)
+
+                    ctx.restore();
+                    chart.$centerTextBox = { x: centerX - 40, y: centerY - 20, width: 80, height: 40 };
+                }
+            };
+
+            // TTR intervals donut
+            const chartTTRIntervals = new Chart(document.getElementById('chart-ttr-intervals'), {
+                type: 'doughnut',
+                data: {
+                    labels: ttrIntervalsData.labels,
+                    datasets: [{
+                        data: ttrIntervalsData.values,
+                        backgroundColor: ttrIntervalsData.colors,
+                    }]
+                },
+                options: {
+                    layout: {
+                        padding: { bottom: 20 }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                usePointStyle: true,
+                                pointStyle: 'circle'
+                            },
+                            title: {
+                                display: true,
+                                text: __('Resolution Time', 'ticketsstatistics'),
+                                font: { weight: 'bold' }
+                            }
+                        },
+                        datalabels: {
+                            color: '#333',
+                            formatter: (value) => {
+                                const pct = total > 0 ? Math.round((value / total) * 100) : 0;
+                                return value + ' (' + pct + '%)';
+                            },
+                            clamp: true,
+                            anchor: 'end',
+                            align: 'end',
+                        },
+                    },
+                    maintainAspectRatio: false,
+                },
+                plugins: [centerIntervalsVariationPlugin]
+            });
+            attachCenterTooltip(chartTTRIntervals, __('Variation of tickets between the selected period and the previous one', 'ticketsstatistics'));
 
             // Priority donut
             if (document.getElementById('chart-priority') !== null) {
@@ -551,29 +606,6 @@ function loadCharts() {
                     },
                 }
             });
-
-            if (document.getElementById('chart-monthly-volume') !== null) {  
-                new Chart(document.getElementById('chart-monthly-volume'), {  
-                    type: 'bar',  
-                    data: {  
-                        labels: data.monthlyVolume.labels,  
-                        datasets: [{  
-                            label: __('Tickets', 'ticketsstatistics'),  
-                            data: data.monthlyVolume.values,  
-                            backgroundColor: '#0d6efd',  
-                        }],  
-                    },  
-                    options: {  
-                        plugins: {  
-                            datalabels: { anchor: 'end', align: 'end' },  
-                        },  
-                        scales: {  
-                            x: { ticks: { maxRotation: 45, minRotation: 45 } },  
-                            y: { beginAtZero: true },  
-                        },  
-                    },  
-                });  
-            }
 
             const citiesDataLabels = {
                 anchor: 'end',
@@ -815,7 +847,70 @@ function loadCharts() {
                     }
                 }
             });
+
+            // Monthly volume bar (Per Month)
+            new Chart(document.getElementById('chart-monthly-volume'), {
+                type: 'bar',
+                data: {
+                    labels: data.perMonth.labels,
+                    datasets: [{
+                        label: __('Tickets', 'ticketsstatistics'),
+                        data: data.perMonth.values,
+                        backgroundColor: '#0d6efd',
+                    }],
+                },
+                options: {
+                    plugins: {
+                        legend: { display: false },
+                        datalabels: { anchor: 'end', align: 'end' },
+                    },
+                    scales: {
+                        x: { ticks: { maxRotation: 45, minRotation: 45 } },
+                        y: { beginAtZero: true },
+                    },
+                },
+            });
         });
+}
+
+/**
+ * Attaches a tooltip to the center of a chart when hovering over the center text box.
+ * @param {Chart} chart 
+ * @param {string} tooltipContent
+ */
+function attachCenterTooltip(chart, tooltipContent) {
+    const tooltipEl = ensureHoverTooltip();
+
+    chart.canvas.addEventListener('mousemove', function (evt) {
+        const box = chart.$centerTextBox;
+        if (!box) {
+            tooltipEl.style.display = 'none';
+            return;
+        }
+
+        const rect = chart.canvas.getBoundingClientRect();
+        const x = evt.clientX - rect.left;
+        const y = evt.clientY - rect.top;
+
+        const inside = x >= box.x && x <= box.x + box.width &&
+            y >= box.y && y <= box.y + box.height;
+
+        if (inside) {
+            tooltipEl.textContent = tooltipContent;
+            tooltipEl.style.left = (evt.clientX + 12) + 'px';
+            tooltipEl.style.top = (evt.clientY + 12) + 'px';
+            tooltipEl.style.display = 'block';
+            chart.canvas.style.cursor = 'help';
+        } else {
+            tooltipEl.style.display = 'none';
+            chart.canvas.style.cursor = 'default';
+        }
+    });
+
+    chart.canvas.addEventListener('mouseleave', function () {
+        tooltipEl.style.display = 'none';
+        chart.canvas.style.cursor = 'default';
+    });
 }
 
 function fillTownsTable(data) {
