@@ -324,7 +324,64 @@ $includeMissc = \Plugin::isPluginActive('cfaomobility');
             </div>
         </div>
     </div>
-</div>
+
+    <!-- Charts row 6: TTR -->
+    <div class="row g-3 mb-3">
+        <div class="col-md-12">  
+            <div class="col-12">  
+                <div class="card shadow-sm">  
+                    <div class="card-header d-flex align-items-center justify-content-between">  
+                        <?= __('Monthly Volume of Incident Tickets', 'ticketsstatistics') ?>  
+                    </div>  
+                    <div class="card-body d-flex align-items-center">  
+                        <div style="position:relative; width:60%; max-width:400px;">  
+                            <canvas id="chart-incident-resolution" style="height: 280px; max-height:280px"></canvas>  
+                            <div id="chart-incident-resolution-center" style="  
+                                position:absolute; top:50%; left:50%;  
+                                transform:translate(-50%, -50%); text-align:center;">  
+                                <div id="chart-incident-resolution-total" style="font-size:2rem; font-weight:bold;"></div>  
+                                <div id="chart-incident-resolution-variation"></div>  
+                            </div>  
+                        </div>  
+                        <div class="ms-4">  
+                            <div class="fw-semibold mb-2"><?= __('Resolution Time', 'ticketsstatistics') ?></div>  
+                            <ul id="chart-incident-resolution-legend" class="list-unstyled"></ul>  
+                        </div>  
+                    </div>  
+                </div>  
+            </div>  
+        </div>
+    </div>
+
+    <!-- Charts row 7: TTR -->
+    <div class="row g-3 mb-3">
+        <div class="col-md-12">
+            <?php  
+                $showMonthlyVolume = in_array($period, ['last90', 'thisyear', 'lastyear'], true);  
+                if ($period === 'custom' && !empty($_GET['date_from']) && !empty($_GET['date_to'])) {  
+                    $from = new DateTime($_GET['date_from']);  
+                    $to   = new DateTime($_GET['date_to']);  
+                    $showMonthlyVolume = $to->diff($from)->days >= 90;  
+                }  
+            ?>  
+            <?php if ($showMonthlyVolume): ?>  
+                <!-- Charts row: Monthly volume -->  
+                <div class="row g-3 mb-3">  
+                    <div class="col-12">  
+                        <div class="card shadow-sm">  
+                            <div class="card-header">  
+                                <?= __("Total number of tickets for the year", 'ticketsstatistics') ?>  
+                            </div>  
+                            <div class="card-body">  
+                                <canvas id="chart-monthly-volume" style="height: 38 0px; max-height:380px"></canvas>   
+                            </div>  
+                        </div>  
+                    </div>  
+                </div>  
+            <?php endif; ?>
+        </div>
+    </div>               
+    
 
 <div class="modal fade" id="ts-tickets-modal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-xl modal-dialog-scrollable">
