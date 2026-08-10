@@ -1021,3 +1021,31 @@ msgstr ""
 #, php-format
 msgid "Computer #%d"
 msgstr ""
+
+#: ajax/tickets.php:107
+msgid "Month"
+msgstr ""
+
+#: front/dashboard.php:343
+msgid "Monthly Volume of Tickets"
+msgstr ""
+
+#: front/dashboard.php:332
+msgid "Open tickets by age"
+msgstr ""
+
+#: ajax/tickets.php:104 public/js/period.js:500
+msgid "Opened duration"
+msgstr ""
+
+#: ajax/tickets.php:113 public/js/period.js:442
+msgid "Resolution Time"
+msgstr ""
+
+#: front/dashboard.php:321
+msgid "Resolved tickets by TTR intervals"
+msgstr ""
+
+#: public/js/period.js:470
+msgid "Variation of tickets between the selected period and the previous one"
+msgstr ""

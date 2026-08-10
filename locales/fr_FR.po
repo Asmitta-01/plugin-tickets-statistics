@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: TicketsStatistics\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-04-10 11:11+0100\n"
-"PO-Revision-Date: 2026-08-07 10:44+0100\n"
+"PO-Revision-Date: 2026-08-10 12:04+0100\n"
 "Last-Translator: Codex\n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -1038,3 +1038,31 @@ msgstr "Logiciel"
 #, php-format
 msgid "Computer #%d"
 msgstr "Ordinateur n°%d"
+
+#: ajax/tickets.php:107
+msgid "Month"
+msgstr "Mois"
+
+#: front/dashboard.php:343
+msgid "Monthly Volume of Tickets"
+msgstr "Volume mensuel des tickets"
+
+#: front/dashboard.php:332
+msgid "Open tickets by age"
+msgstr "Tickets ouverts par durée"
+
+#: ajax/tickets.php:104 public/js/period.js:500
+msgid "Opened duration"
+msgstr "Durée d'ouverture"
+
+#: ajax/tickets.php:113 public/js/period.js:442
+msgid "Resolution Time"
+msgstr "Temps de résolution"
+
+#: front/dashboard.php:321
+msgid "Resolved tickets by TTR intervals"
+msgstr "Tickets résolus par intervalle de TTR"
+
+#: public/js/period.js:470
+msgid "Variation of tickets between the selected period and the previous one"
+msgstr "Variation des tickets entre la période sélectionnée et la précédente"
