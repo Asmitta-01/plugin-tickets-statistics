@@ -363,6 +363,7 @@ function loadCharts() {
                     datasets: [{
                         data: ttrIntervalsData.values,
                         backgroundColor: ttrIntervalsData.colors,
+                        hoverOffset: 12
                     }]
                 },
                 options: {
@@ -398,6 +399,66 @@ function loadCharts() {
                 plugins: [centerIntervalsVariationPlugin]
             });
             attachCenterTooltip(chartTTRIntervals, __('Variation of tickets between the selected period and the previous one', 'ticketsstatistics'));
+
+            // Open tickets by age (New/Assigned/Waiting)
+            if (data.openAgeDistribution) {
+                const openAge = data.openAgeDistribution;
+                const totalOpen = openAge.values.reduce((a, b) => a + b, 0);
+
+                new Chart(document.getElementById('chart-open-age'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: openAge.labels,
+                        datasets: [{
+                            data: openAge.values,
+                            backgroundColor: openAge.colors,
+                            hoverOffset: 12,
+                        }],
+                    },
+                    options: {
+                        onClick: function (_, elements) {
+                            if (!elements || !elements.length) {
+                                return;
+                            }
+
+                            const point = elements[0];
+                            const bucketLabel = openAge.labels[point.index] || '';
+
+                            openTicketsModal({
+                                type: 'open_age',
+                                label: bucketLabel,
+                            });
+                        },
+                        maintainAspectRatio: false,
+                        layout: {
+                            padding: { bottom: 20 }
+                        },
+                        plugins: {
+                            legend: {
+                                position: 'right',
+                                labels: {
+                                    usePointStyle: true,
+                                    pointStyle: 'circle',
+                                },
+                                title: {
+                                    display: true,
+                                    text: __('Opened duration', 'ticketsstatistics'),
+                                    font: { weight: 'bold' },
+                                }
+                            },
+                            datalabels: {
+                                color: '#333',
+                                anchor: 'end',
+                                align: 'end',
+                                formatter: function (value) {
+                                    const pct = totalOpen > 0 ? Math.round((value / totalOpen) * 100) : 0;
+                                    return value + ' (' + pct + '%)';
+                                },
+                            },
+                        },
+                    },
+                });
+            }
 
             // Priority donut
             if (document.getElementById('chart-priority') !== null) {
@@ -979,6 +1040,11 @@ function openTicketsModal(filters, openFullListPage = false) {
             fullListBtn.onclick = function () {
                 const req = new URLSearchParams();
                 req.set('period', params.get('period') || 'thismonth');
+                req.set('type', filters.type || '');
+                req.set('label', filters.label || '');
+                if (filters.status_group) {
+                    req.set('status_group', filters.status_group);
+                }
                 const openStatusesGlobal = params.get('open_statuses_global');
                 if (openStatusesGlobal !== null) {
                     req.set('open_statuses_global', openStatusesGlobal);

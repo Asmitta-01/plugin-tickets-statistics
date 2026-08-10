@@ -81,6 +81,9 @@ function ticketsstatistics_get_period_bounds(string $period, ?string $dateFrom, 
 }
 
 $counterKey = (string) ($_GET['counter_key'] ?? '');
+$type       = (string) ($_GET['type'] ?? '');
+$label      = trim((string) ($_GET['label'] ?? ''));
+$statusGroup = (string) ($_GET['status_group'] ?? '');
 $period     = (string) ($_GET['period'] ?? 'thismonth');
 $dateFrom   = $_GET['date_from'] ?? null;
 $dateTo     = $_GET['date_to'] ?? null;
@@ -99,7 +102,8 @@ $statusGroups = [
     ''              => [],
 ];
 
-$group = array_key_exists($counterKey, $statusGroups) ? $counterKey : '';
+$effectiveGroup = $counterKey !== '' ? $counterKey : $statusGroup;
+$group = array_key_exists($effectiveGroup, $statusGroups) ? $effectiveGroup : '';
 $statuses = $statusGroups[$group];
 $isMissc = ($group === 'missc');
 $isOpenStatusCounter = in_array($group, ['new', 'incoming', 'assigned', 'waiting'], true);
@@ -108,14 +112,14 @@ $isOpenStatusCounter = in_array($group, ['new', 'incoming', 'assigned', 'waiting
 
 $criteria = [];
 
-if (!$isMissc && count($statuses) === 1) {
+if ($type !== 'open_age' && !$isMissc && count($statuses) === 1) {
     $criteria[] = [
         'field'      => 12, // Status
         'searchtype' => 'equals',
         'value'      => $statuses[0],
         'link'       => 'AND',
     ];
-} elseif (!$isMissc && count($statuses) > 1) {
+} elseif ($type !== 'open_age' && !$isMissc && count($statuses) > 1) {
     $first = true;
     foreach ($statuses as $status) {
         $criteria[] = [
@@ -137,7 +141,77 @@ if ($isMissc) {
     ];
 }
 
-if (!$openStatusesGlobal || !$isOpenStatusCounter) {
+if ($type === 'open_age') {
+    if ($group === '') {
+        $statuses = [\Ticket::INCOMING, \Ticket::ASSIGNED, \Ticket::WAITING];
+    }
+
+    if (count($statuses) === 1) {
+        $criteria[] = [
+            'field'      => 12, // Status
+            'searchtype' => 'equals',
+            'value'      => $statuses[0],
+            'link'       => 'AND',
+        ];
+    } elseif (count($statuses) > 1) {
+        $first = true;
+        $criteria[] = [
+            'link' => 'AND',
+            'criteria' => [],
+        ];
+        foreach ($statuses as $status) {
+            $criteria[count($criteria) - 1]['criteria'][] = [
+                'field'      => 12, // Status
+                'searchtype' => 'equals',
+                'value'      => $status,
+                'link'       => $first ? 'AND' : 'OR',
+            ];
+            $first = false;
+        }
+    }
+
+    $now = new \DateTimeImmutable('now');
+    $bucketFrom = null;
+    $bucketTo = null;
+    $labelKey = array_search($label, \GlpiPlugin\Ticketsstatistics\PeriodFilter::getOpenAgeBuckets(), true);
+
+    switch ($labelKey) {
+        case '< 24h':
+            $bucketFrom = $now->modify('-1 day')->format('Y-m-d H:i:s');
+            break;
+        case '1 - 3j':
+            $bucketFrom = $now->modify('-3 days')->format('Y-m-d H:i:s');
+            $bucketTo = $now->modify('-1 day')->format('Y-m-d H:i:s');
+            break;
+        case '3 - 7j':
+            $bucketFrom = $now->modify('-7 days')->format('Y-m-d H:i:s');
+            $bucketTo = $now->modify('-3 days')->format('Y-m-d H:i:s');
+            break;
+        case '> 7j':
+            $bucketTo = $now->modify('-7 days')->format('Y-m-d H:i:s');
+            break;
+    }
+
+    if ($bucketFrom !== null) {
+        $criteria[] = [
+            'field'      => 15, // Creation date
+            'searchtype' => 'morethan',
+            'value'      => $bucketFrom,
+            'link'       => 'AND',
+        ];
+    }
+
+    if ($bucketTo !== null) {
+        $criteria[] = [
+            'field'      => 15, // Creation date
+            'searchtype' => 'lessthan',
+            'value'      => $bucketTo,
+            'link'       => 'AND',
+        ];
+    }
+}
+
+if ($type !== 'open_age' && (!$openStatusesGlobal || !$isOpenStatusCounter)) {
     if ($from !== null) {
         $criteria[] = [
             'field'      => 15, // Creation date

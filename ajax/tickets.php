@@ -63,6 +63,9 @@ function ticketsstatistics_build_title(string $type, string $label, string $stat
         case 'perday':
             $parts[] = __('Date', 'ticketsstatistics');
             break;
+        case 'open_age':
+            $parts[] = __('Open duration', 'ticketsstatistics');
+            break;
     }
 
     if ($label !== '') {
@@ -107,7 +110,8 @@ $dateFrom = $_GET['date_from'] ?? null;
 $dateTo   = $_GET['date_to']   ?? null;
 
 $isOpenStatusCounter = $type === 'counter' && in_array($status_group, ['new', 'incoming', 'assigned', 'waiting'], true);
-if (!$openStatusesGlobal || !$isOpenStatusCounter) {
+$isOpenAgeDrilldown = $type === 'open_age';
+if (!$isOpenAgeDrilldown && (!$openStatusesGlobal || !$isOpenStatusCounter)) {
     \GlpiPlugin\Ticketsstatistics\PeriodFilter::apply($where, $table, $period, $dateFrom, $dateTo);
 }
 \GlpiPlugin\Ticketsstatistics\CategoryFilter::apply($where, $table, $categoryId);
@@ -188,6 +192,26 @@ switch ($type) {
                 $where["$misscTable.missc_number"] = ['<>', ''];
             }
             break;
+        }
+        break;
+    case 'open_age':
+        $where["$table.status"] = [\Ticket::INCOMING, \Ticket::ASSIGNED, \Ticket::WAITING];
+        $where[] = new \QueryExpression("$table.`date` IS NOT NULL AND $table.`date` <> '0000-00-00 00:00:00'");
+        $labelKey = array_search($label, \GlpiPlugin\Ticketsstatistics\PeriodFilter::getOpenAgeBuckets(), true);
+
+        switch ($labelKey) {
+            case '< 24h':
+                $where[] = new \QueryExpression("TIMESTAMPDIFF(HOUR, $table.`date`, NOW()) < 24");
+                break;
+            case '1 - 3j':
+                $where[] = new \QueryExpression("TIMESTAMPDIFF(HOUR, $table.`date`, NOW()) >= 24 AND TIMESTAMPDIFF(HOUR, $table.`date`, NOW()) < 72");
+                break;
+            case '3 - 7j':
+                $where[] = new \QueryExpression("TIMESTAMPDIFF(HOUR, $table.`date`, NOW()) >= 72 AND TIMESTAMPDIFF(HOUR, $table.`date`, NOW()) < 168");
+                break;
+            case '> 7j':
+                $where[] = new \QueryExpression("TIMESTAMPDIFF(HOUR, $table.`date`, NOW()) >= 168");
+                break;
         }
         break;
     case 'missc':

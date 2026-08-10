@@ -524,5 +524,46 @@ $ttrDistribution = [
     'colors' => \GlpiPlugin\Ticketsstatistics\TicketsStatistics::getTTRColors()
 ];
 
+// --- Open tickets age distribution (all open statuses combined) ---
+$openAgeLabels = array_values(\GlpiPlugin\Ticketsstatistics\PeriodFilter::getOpenAgeBuckets());
+$openAgeDistribution = [
+    'labels' => $openAgeLabels,
+    'values' => [0, 0, 0, 0],
+    'colors' => \GlpiPlugin\Ticketsstatistics\TicketsStatistics::getTTRColors(),
+];
+$openAgeWhere = ["$table.is_deleted" => 0] + getEntitiesRestrictCriteria($table);
+\GlpiPlugin\Ticketsstatistics\CategoryFilter::apply($openAgeWhere, $table, $categoryId);
 
-echo json_encode(compact('counters', 'priority', 'misscs', 'category', 'cityData', 'perday', 'resolution', 'solvedView', 'ttrDistribution', 'perMonth'));
+$openAgeWhere["$table.status"] = [\Ticket::INCOMING, \Ticket::ASSIGNED, \Ticket::WAITING];
+$openAgeWhere[] = new \QueryExpression("$table.`date` IS NOT NULL AND $table.`date` <> '0000-00-00 00:00:00'");
+
+foreach (
+    $DB->request([
+        'SELECT'  => [
+            new \QueryExpression("
+            CASE
+                WHEN TIMESTAMPDIFF(HOUR, $table.`date`, NOW()) < 24 THEN '< 24h'
+                WHEN TIMESTAMPDIFF(HOUR, $table.`date`, NOW()) < 72 THEN '1 - 3j'
+                WHEN TIMESTAMPDIFF(HOUR, $table.`date`, NOW()) < 168 THEN '3 - 7j'
+                ELSE '> 7j'
+            END AS bucket
+            "),
+            'COUNT DISTINCT' => "$table.id AS cpt",
+        ],
+        'FROM'    => $table,
+        'WHERE'   => $openAgeWhere,
+        'GROUPBY' => [new \QueryExpression('bucket')],
+    ]) as $row
+) {
+    $bucket = (string) ($row['bucket'] ?? '');
+    $count = (int) ($row['cpt'] ?? 0);
+
+    $bucketIndex = array_search($bucket, array_keys(\GlpiPlugin\Ticketsstatistics\PeriodFilter::getOpenAgeBuckets()), true);
+    if ($bucketIndex === false) {
+        continue;
+    }
+
+    $openAgeDistribution['values'][$bucketIndex] = $count;
+}
+
+echo json_encode(compact('counters', 'priority', 'misscs', 'category', 'cityData', 'perday', 'resolution', 'solvedView', 'ttrDistribution', 'openAgeDistribution', 'perMonth'));

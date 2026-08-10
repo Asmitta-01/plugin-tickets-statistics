@@ -19,6 +19,16 @@ class PeriodFilter
         ];
     }
 
+    public static function getOpenAgeBuckets(): array
+    {
+        return [
+            '< 24h' => __('Less than 24 hours', 'ticketsstatistics'),
+            '1 - 3j' => __('1 to 3 days', 'ticketsstatistics'),
+            '3 - 7j' => __('3 to 7 days', 'ticketsstatistics'),
+            '> 7j' => __('More than 7 days', 'ticketsstatistics'),
+        ];
+    }
+
     public static function getPeriodLabel(string $period): string
     {
         return self::getAvailablePeriods()[$period] ?? $period;

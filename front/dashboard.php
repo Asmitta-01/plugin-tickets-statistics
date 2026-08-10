@@ -325,7 +325,7 @@ $includeMissc = \Plugin::isPluginActive('cfaomobility');
         </div>
     </div>
 
-    <!-- Charts row 6: Tickets resolution intervals -->
+    <!-- Charts row 6: Tickets resolution intervals + Open tickets age -->
     <div class="row g-3 mb-3">
         <div class="col-md-6">
             <div class="card shadow-sm">
@@ -334,6 +334,17 @@ $includeMissc = \Plugin::isPluginActive('cfaomobility');
                 </div>
                 <div class="card-body d-flex align-items-center">
                     <canvas id="chart-ttr-intervals" style="height: 280px; max-height:280px"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header d-flex align-items-center justify-content-between">
+                    <?= __('Open tickets by age', 'ticketsstatistics') ?>
+                </div>
+                <div class="card-body d-flex align-items-center">
+                    <canvas id="chart-open-age" style="height: 280px; max-height:280px"></canvas>
                 </div>
             </div>
         </div>
