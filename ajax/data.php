@@ -487,13 +487,22 @@ $solvedView = [
     'avg_ttr'            => $solvedAvgTtr,
 ];
 
-// --- Tickets by resolution time bucket ---  
+// --- Tickets by resolution time bucket (résolus/fermés uniquement, base = date de création,
+// alignée sur le compteur "Resolved / Closed" de la rangée "Big numbers — creation-date view") ---
 $ttrBuckets = [
     't < 2h'    => 0,
     '2h <= t < 4h'  => 0,
-    '4h <= t < 16h' => 0,
+    '4h <= t < 8h'  => 0,
+    '8h <= t < 16h' => 0,
     't >= 16h'   => 0,
 ];
+
+// Même base que $counters['solved_closed'] (ligne ~60-70) : $where = date de création
+// + entité + catégorie, avec le statut résolu/fermé. Aucun filtre de durée supplémentaire,
+// pour garantir que la somme des buckets == $counters['solved_closed'].
+$ttrWhere = array_merge($where, [
+    "$table.status" => [\Ticket::SOLVED, \Ticket::CLOSED],
+]);
 
 foreach (
     $DB->request([
@@ -502,16 +511,15 @@ foreach (
                 CASE
                     WHEN COALESCE(NULLIF($table.`solve_delay_stat`, 0), $table.`close_delay_stat`) < 7200 THEN 't < 2h'
                     WHEN COALESCE(NULLIF($table.`solve_delay_stat`, 0), $table.`close_delay_stat`) < 14400 THEN '2h <= t < 4h'
-                    WHEN COALESCE(NULLIF($table.`solve_delay_stat`, 0), $table.`close_delay_stat`) < 57600 THEN '4h <= t < 16h'
+                    WHEN COALESCE(NULLIF($table.`solve_delay_stat`, 0), $table.`close_delay_stat`) < 28800 THEN '4h <= t < 8h'
+                    WHEN COALESCE(NULLIF($table.`solve_delay_stat`, 0), $table.`close_delay_stat`) < 57600 THEN '8h <= t < 16h'
                     ELSE 't >= 16h'
                 END AS `bucket`
             "),
             'COUNT DISTINCT' => "$table.id AS cpt",
         ],
         'FROM'    => $table,
-        'WHERE'   => $where + [
-            new \QueryExpression("COALESCE(NULLIF($table.`solve_delay_stat`, 0), $table.`close_delay_stat`) IS NOT NULL"),
-        ],
+        'WHERE'   => $ttrWhere,
         'GROUPBY' => new \QueryExpression('`bucket`'),
     ]) as $row
 ) {
@@ -521,14 +529,14 @@ foreach (
     }
 }
 
-// Calculate total for previous period for comparison
+// Calculate total for previous period for comparison (même base : date de création)
 $previousWhere = ["$table.is_deleted" => 0] + getEntitiesRestrictCriteria($table);
 \GlpiPlugin\Ticketsstatistics\CategoryFilter::apply($previousWhere, $table, $categoryId);
-\GlpiPlugin\Ticketsstatistics\PeriodFilter::applyPreviousSolvedDate($previousWhere, $table, $period, $dateFrom, $dateTo);
+\GlpiPlugin\Ticketsstatistics\PeriodFilter::applyPrevious($previousWhere, $table, $period, $dateFrom, $dateTo);
 
-$previousTtrWhere = $previousWhere + [
-    new \QueryExpression("COALESCE(NULLIF($table.`solve_delay_stat`, 0), $table.`close_delay_stat`) IS NOT NULL"),
-];
+$previousTtrWhere = array_merge($previousWhere, [
+    "$table.status" => [\Ticket::SOLVED, \Ticket::CLOSED],
+]);
 
 $previousTotalIter = $DB->request([
     'COUNT' => 'cpt',
@@ -548,8 +556,8 @@ $ttrDistribution = [
 $openAgeLabels = array_values(\GlpiPlugin\Ticketsstatistics\PeriodFilter::getOpenAgeBuckets());
 $openAgeDistribution = [
     'labels' => $openAgeLabels,
-    'values' => [0, 0, 0, 0],
-    'colors' => \GlpiPlugin\Ticketsstatistics\TicketsStatistics::getTTRColors(),
+    'values' => array_fill(0, count($openAgeLabels), 0),
+    'colors' => \GlpiPlugin\Ticketsstatistics\TicketsStatistics::getOpenAgeColors(),
 ];
 $openAgeWhere = ["$table.is_deleted" => 0] + getEntitiesRestrictCriteria($table);
 \GlpiPlugin\Ticketsstatistics\CategoryFilter::apply($openAgeWhere, $table, $categoryId);

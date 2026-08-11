@@ -315,25 +315,12 @@ class PeriodFilter
     {
         [$from, $to] = self::resolveBounds($period, $dateFrom, $dateTo);
 
-        switch ($period) {
-            case 'thismonth':
-            case 'lastmonth':
-                $prevTo   = (clone $from)->modify('-1 second');
-                $prevFrom = (clone $prevTo)->modify('first day of this month')->setTime(0, 0, 0);
-                break;
-            case 'thisyear':
-            case 'lastyear':
-                $prevTo   = (clone $from)->modify('-1 second');
-                $prevFrom = (clone $prevTo)->modify('first day of january this year')->setTime(0, 0, 0);
-                break;
-            default:
-                // Périodes basées sur un nombre de jours (last7, last30, last90, custom, ...):
-                // même durée, immédiatement avant la période courante.
-                $lengthInSeconds = $to->getTimestamp() - $from->getTimestamp();
-                $prevTo   = (clone $from)->modify('-1 second');
-                $prevFrom = (clone $prevTo)->modify('-' . $lengthInSeconds . ' seconds');
-                break;
-        }
+        // Quel que soit le type de période (jours, mois, année, plage personnalisée),
+        // la période précédente doit avoir exactement la même durée que la période
+        // courante et se terminer immédiatement avant son début.
+        $lengthInSeconds = $to->getTimestamp() - $from->getTimestamp();
+        $prevTo   = (clone $from)->modify('-1 second');
+        $prevFrom = (clone $prevTo)->modify('-' . $lengthInSeconds . ' seconds');
 
         return [$prevFrom, $prevTo];
     }

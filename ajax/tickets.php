@@ -120,10 +120,11 @@ $dateTo   = $_GET['date_to']   ?? null;
 
 $isOpenStatusCounter = $type === 'counter' && in_array($status_group, ['new', 'incoming', 'assigned', 'waiting'], true);
 $isOpenAgeDrilldown = $type === 'open_age';
+// ttr_bucket utilise désormais la même base (date de création) que le compteur solved_closed :
+// pas besoin de l'exclure ici, le filtre de statut est ajouté dans le case ci-dessous.
 if (!$isOpenAgeDrilldown && (!$openStatusesGlobal || !$isOpenStatusCounter)) {
     \GlpiPlugin\Ticketsstatistics\PeriodFilter::apply($where, $table, $period, $dateFrom, $dateTo);
 }
-\GlpiPlugin\Ticketsstatistics\CategoryFilter::apply($where, $table, $categoryId);
 
 $joins = [
     $cat_table => ['ON' => [$cat_table => 'id', $table => 'itilcategories_id']],
@@ -200,24 +201,30 @@ switch ($type) {
         break;
 
     case 'ttr_bucket':
-        $delay_expr = "COALESCE(NULLIF($table.`solve_delay_stat`, 0), $table.`close_delay_stat`)";
-        $where[] = new \QueryExpression("$delay_expr IS NOT NULL");
+    // Doit correspondre exactement aux critères du donut (ajax/data.php) :
+    // date de création (comme le compteur "Resolved / Closed"), statut résolu/fermé.
+    $where["$table.status"] = [\Ticket::SOLVED, \Ticket::CLOSED];
 
-        switch ($label) {
-            case 't < 2h':
-                $where[] = new \QueryExpression("$delay_expr < 7200");
-                break;
-            case '2h <= t < 4h':
-                $where[] = new \QueryExpression("$delay_expr >= 7200 AND $delay_expr < 14400");
-                break;
-            case '4h <= t < 16h':
-                $where[] = new \QueryExpression("$delay_expr >= 14400 AND $delay_expr < 57600");
-                break;
-            default: // 't >= 16h'
-                $where[] = new \QueryExpression("$delay_expr >= 57600");
-                break;
-        }
-        break;
+    $delay_expr = "COALESCE(NULLIF($table.`solve_delay_stat`, 0), $table.`close_delay_stat`)";
+
+    switch ($label) {
+        case 't < 2h':
+            $where[] = new \QueryExpression("$delay_expr < 7200");
+            break;
+        case '2h <= t < 4h':
+            $where[] = new \QueryExpression("$delay_expr >= 7200 AND $delay_expr < 14400");
+            break;
+        case '4h <= t < 8h':
+            $where[] = new \QueryExpression("$delay_expr >= 14400 AND $delay_expr < 28800");
+            break;
+        case '8h <= t < 16h':
+            $where[] = new \QueryExpression("$delay_expr >= 28800 AND $delay_expr < 57600");
+            break;
+        default: // 't >= 16h'
+            $where[] = new \QueryExpression("$delay_expr >= 57600");
+            break;
+    }
+    break;  
 
     case 'counter':
         if ($status_group === 'missc') {

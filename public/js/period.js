@@ -355,8 +355,7 @@ function loadCharts() {
                     ctx.font = '14px sans-serif';
                     ctx.fillStyle = isPositive ? '#2ecc71' : '#e74c3c';
                     ctx.textBaseline = 'top';
-                    ctx.fillText(`${isPositive ? '▼' : '▲'} ${variation.toFixed(1)}%`, centerX, startY + mainFontSize + gap)
-
+                    ctx.fillText(`${isPositive ? '▼' : '▲'} ${Math.abs(variation).toFixed(1)}%`, centerX, startY + mainFontSize + gap)
                     ctx.restore();
                     chart.$centerTextBox = { x: centerX - 40, y: centerY - 20, width: 80, height: 40 };
                 }
