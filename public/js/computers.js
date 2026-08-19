@@ -549,8 +549,11 @@ document.addEventListener('DOMContentLoaded', function () {
                     y: {
                         stacked: true,
                         ticks: {
+                            autoSkip: false,
+                            fontSize: 11,
                             callback: function (val) {
-                                return this.getLabelForValue(val).split(' '); // découpe en plusieurs lignes  
+                                const yLabel = this.getLabelForValue(val);
+                                return yLabel.length > 13 ? yLabel.split(' ') : yLabel; // découpe en plusieurs lignes
                             }
                         }
                     },
