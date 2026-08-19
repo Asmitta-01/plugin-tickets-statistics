@@ -104,6 +104,7 @@ if ($includeMissc) {
     $counters['missc'] = (int) $iter->current()['cpt'];
 }
 
+$misscs = null;
 if ($includeMissc) {
     // Total tickets with a missc number + breakdown by status
     $misscs = [
