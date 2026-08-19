@@ -105,7 +105,7 @@ $statusGroups = [
 $effectiveGroup = $counterKey !== '' ? $counterKey : $statusGroup;
 $group = array_key_exists($effectiveGroup, $statusGroups) ? $effectiveGroup : '';
 $statuses = $statusGroups[$group];
-$isMissc = ($group === 'missc');
+$isMissc = $group === 'missc';
 $isOpenStatusCounter = in_array($group, ['new', 'incoming', 'assigned', 'waiting'], true);
 
 [$from, $toExclusive] = ticketsstatistics_get_period_bounds($period, $dateFrom, $dateTo);
@@ -116,7 +116,7 @@ if ($isMissc) {
     $criteria[] = [
         'field'      => 5200, // MISSC Number
         'searchtype' => 'notcontains',
-        'value'      => '^$',
+        'value'      => 'NULL',
         'link'       => 'AND',
     ];
 } elseif ($type === 'open_age') {
