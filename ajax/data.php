@@ -569,7 +569,7 @@ foreach (
         ],
         'FROM'    => $table,
         'WHERE'   => $where + [
-            new \QueryExpression("COALESCE(NULLIF($table.`solve_delay_stat`, 0), $table.`close_delay_stat`) IS NOT NULL"),
+            "$table.status" => [\Ticket::SOLVED, \Ticket::CLOSED],
         ],
         'GROUPBY' => new \QueryExpression('`bucket`'),
     ]) as $row
@@ -583,10 +583,10 @@ foreach (
 // Calculate total for previous period for comparison
 $previousWhere = ["$table.is_deleted" => 0] + getEntitiesRestrictCriteria($table);
 \GlpiPlugin\Ticketsstatistics\CategoryFilter::apply($previousWhere, $table, $categoryId);
-\GlpiPlugin\Ticketsstatistics\PeriodFilter::applyPreviousSolvedDate($previousWhere, $table, $period, $dateFrom, $dateTo);
+\GlpiPlugin\Ticketsstatistics\PeriodFilter::applyPrevious($previousWhere, $table, $period, $dateFrom, $dateTo);
 
 $previousTtrWhere = $previousWhere + [
-    new \QueryExpression("COALESCE(NULLIF($table.`solve_delay_stat`, 0), $table.`close_delay_stat`) IS NOT NULL"),
+    "$table.status" => [\Ticket::SOLVED, \Ticket::CLOSED],
 ];
 
 $previousTotalIter = $DB->request([

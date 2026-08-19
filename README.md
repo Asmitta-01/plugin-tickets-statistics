@@ -114,9 +114,9 @@ This section explains the meaning of the values shown in the dashboard.
 
 ### Resolved tickets by TTR intervals
 
-- **Source**: Tickets with a resolution time (`solve_delay_stat` or `close_delay_stat`) within the selected period.
+- **Source**: Resolved and closed tickets among those created in the selected period (`date`), having a resolution time (`solve_delay_stat` or `close_delay_stat`).
 - **Buckets**: Tickets are grouped into predefined time intervals: `< 2h`, `2h-4h`, `4h-8h`, `8h-16h`, and `>= 16h`.
-- **Center value**: The total number of resolved tickets in the period, and the percentage variation compared to the previous period.
+- **Center value**: The total number of resolved/closed tickets among those created in the selected period, and the percentage variation compared to resolved/closed tickets among those created in the previous period.
 
 ### Open tickets by age
 

@@ -1059,9 +1059,13 @@ msgstr "Durée d'ouverture"
 msgid "Resolution Time"
 msgstr "Temps de résolution"
 
-#: front/dashboard.php:321
+#: front/dashboard.php:334
 msgid "Resolved tickets by TTR intervals"
 msgstr "Tickets résolus par intervalle de TTR"
+
+#: front/dashboard.php:335
+msgid "Resolved tickets by TTR intervals among tickets created in the selected period"
+msgstr "Tickets résolus/clos parmi ceux créés durant la période sélectionnée, groupés par intervalle de TTR. La valeur au centre indique le total et la variation par rapport aux tickets résolus parmi ceux créés lors de la période précédente."
 
 #: public/js/period.js:470
 msgid "Variation of tickets between the selected period and the previous one"

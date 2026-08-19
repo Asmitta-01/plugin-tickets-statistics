@@ -330,7 +330,10 @@ $includeMissc = \Plugin::isPluginActive('cfaomobility');
         <div class="col-md-6">
             <div class="card shadow-sm">
                 <div class="card-header d-flex align-items-center justify-content-between">
-                    <?= __('Resolved tickets by TTR intervals', 'ticketsstatistics') ?>
+                    <div>
+                        <?= __('Resolved tickets by TTR intervals', 'ticketsstatistics') ?>
+                        <span data-bs-toggle="tooltip" title="<?= __('Resolved tickets by TTR intervals among tickets created in the selected period', 'ticketsstatistics') ?>" class="ms-1"><i class="ti ti-info-circle align-bottom"></i></span>
+                    </div>
                 </div>
                 <div class="card-body d-flex align-items-center">
                     <canvas id="chart-ttr-intervals" style="height: 280px; max-height:280px"></canvas>

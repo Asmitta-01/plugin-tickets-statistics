@@ -1042,8 +1042,12 @@ msgstr ""
 msgid "Resolution Time"
 msgstr ""
 
-#: front/dashboard.php:321
+#: front/dashboard.php:334
 msgid "Resolved tickets by TTR intervals"
+msgstr ""
+
+#: front/dashboard.php:335
+msgid "Resolved tickets by TTR intervals among tickets created in the selected period"
 msgstr ""
 
 #: public/js/period.js:470

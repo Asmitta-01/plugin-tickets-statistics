@@ -201,7 +201,7 @@ switch ($type) {
 
     case 'ttr_bucket':
         $delay_expr = "COALESCE(NULLIF($table.`solve_delay_stat`, 0), $table.`close_delay_stat`)";
-        $where[] = new \QueryExpression("$delay_expr IS NOT NULL");
+        $where[] = ["$table.status" => [\Ticket::SOLVED, \Ticket::CLOSED]];
 
         switch ($label) {
             case 't < 2h':
