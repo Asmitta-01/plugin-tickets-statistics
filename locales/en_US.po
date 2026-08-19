@@ -1082,3 +1082,7 @@ msgstr "3 to 7 days"
 #: src/PeriodFilter.php:28
 msgid "More than 7 days"
 msgstr "More than 7 days"
+
+#: front/dashboard.php:103
+msgid "Download stats in Markdown"
+msgstr "Download stats in Markdown"

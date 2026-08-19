@@ -32,6 +32,11 @@ document.addEventListener('DOMContentLoaded', function () {
     const downloadLowPdfButton = document.getElementById('ticketsstatisticsDownloadLowPdfBtn');
     downloadLowPdfButton.addEventListener('click', (ev) => exportPageToPDF(ev, true));
 
+    const downloadMarkdownButton = document.getElementById('ticketsstatisticsDownloadMarkdownBtn');
+    if (downloadMarkdownButton) {
+        downloadMarkdownButton.addEventListener('click', exportDashboardToMarkdown);
+    }
+
     Array.from(document.getElementsByClassName('ts-reset-chart')).forEach(el => el.addEventListener('click', function () {
         const canvas = document.getElementById(this.dataset.canvas);
         const chart = Chart.getChart(canvas);
@@ -147,6 +152,281 @@ async function exportPageToPDF(event, lowQuality = false) {
     btn.innerHTML = btnContent;
 }
 
+/**
+ * Exports current dashboard statistics to a structured Markdown document.
+ */
+function exportDashboardToMarkdown(event) {
+    if (event) {
+        event.preventDefault();
+    }
+
+    if (!window.lastDashboardData) {
+        const root = CFG_GLPI.root_doc;
+        const params = new URLSearchParams(document.location.search);
+        const url = root + '/plugins/ticketsstatistics/ajax/data.php' + '?' + params.toString();
+
+        fetch(url)
+            .then(r => r.json())
+            .then(data => {
+                window.lastDashboardData = data;
+                triggerMarkdownDownload(data);
+            })
+            .catch(err => {
+                console.error('Failed to load data for Markdown export', err);
+            });
+        return;
+    }
+
+    triggerMarkdownDownload(window.lastDashboardData);
+}
+
+function triggerMarkdownDownload(data) {
+    const md = generateDashboardMarkdown(data);
+    const blob = new Blob([md], { type: 'text/markdown;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+
+    const selectedPeriod = document.querySelector('#ts-period option:checked');
+    let periodText = selectedPeriod ? selectedPeriod.textContent.trim().replace(/[^a-zA-Z0-9_-]/g, '_') : 'period';
+    const dateStr = new Date().toISOString().slice(0, 10);
+    a.download = `Tickets_Statistics_${periodText}_${dateStr}.md`;
+
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
+/**
+ * Generates clear, readable and structured Markdown representation of dashboard stats for AI/human analysis.
+ */
+function generateDashboardMarkdown(data) {
+    const selectedPeriod = document.querySelector('#ts-period option:checked');
+    let periodLabel = selectedPeriod ? selectedPeriod.textContent.trim() : 'N/A';
+    const periodValue = document.getElementById('ts-period')?.value || '';
+    if (periodValue === 'custom') {
+        const from = document.getElementById('ts-date-from')?.value;
+        const to = document.getElementById('ts-date-to')?.value;
+        if (from && to) {
+            periodLabel = `${from} to ${to}`;
+        }
+    }
+
+    const selectedCategory = document.querySelector('#ts-category select option:checked');
+    const categoryLabel = selectedCategory ? selectedCategory.textContent.trim() : __('All categories', 'ticketsstatistics');
+
+    const openStatusesGlobal = document.getElementById('ts-open-statuses-global')?.checked;
+
+    const calcPct = (val, tot) => tot > 0 ? ((val / tot) * 100).toFixed(1) + '%' : '0.0%';
+
+    const lines = [];
+    lines.push('# GLPI - Tickets Statistics Report');
+    lines.push('');
+    lines.push(`- **Generated on:** ${new Date().toLocaleString()}`);
+    lines.push(`- **Selected Period:** ${periodLabel}`);
+    lines.push(`- **Selected ITIL Category:** ${categoryLabel}`);
+    lines.push(`- **Global Open Statuses Mode:** ${openStatusesGlobal ? 'Enabled' : 'Disabled'}`);
+    lines.push('');
+    lines.push('---');
+    lines.push('');
+
+    // 1. Executive Summary
+    lines.push('## 1. Executive Summary');
+    lines.push('');
+    lines.push('### Tickets Created in Period (Creation-Date View)');
+    lines.push('');
+    lines.push('| Status | Tickets Count | Share (%) |');
+    lines.push('|---|---:|---:|');
+
+    const totalTickets = data.counters?.total || 0;
+    const statusItems = [
+        { label: 'New (Incoming)', val: data.counters?.incoming || 0 },
+        { label: 'Assigned', val: data.counters?.assigned || 0 },
+        { label: 'Pending (Waiting)', val: data.counters?.waiting || 0 },
+        { label: 'Resolved / Closed', val: (data.counters?.solved || 0) + (data.counters?.closed || 0) },
+    ];
+    if (data.counters?.missc !== undefined) {
+        statusItems.push({ label: 'MISSC', val: data.counters.missc });
+    }
+
+    statusItems.forEach(item => {
+        lines.push(`| ${item.label} | ${item.val} | ${calcPct(item.val, totalTickets)} |`);
+    });
+    lines.push(`| **Total Created** | **${totalTickets}** | **100.0%** |`);
+    lines.push('');
+
+    if (data.solvedView) {
+        lines.push('### Resolution Activity in Period (Resolved-Date View)');
+        lines.push('');
+        lines.push(`- **Resolved / Closed in Period:** ${data.solvedView.resolved_in_period || 0}`);
+        lines.push(`- **Opened in Period:** ${data.solvedView.opened_in_period || 0}`);
+        lines.push(`- **Average Resolution Time (TTR):** ${data.solvedView.avg_ttr || 0} h`);
+        lines.push('');
+    }
+
+    lines.push('---');
+    lines.push('');
+
+    // 2. Tickets by Priority
+    if (data.priority && data.priority.labels && data.priority.labels.length) {
+        lines.push('## 2. Tickets by Priority');
+        lines.push('');
+        lines.push('| Priority Level | Count | Share (%) |');
+        lines.push('|---|---:|---:|');
+        const prioTotal = data.priority.values.reduce((a, b) => a + b, 0);
+        data.priority.labels.forEach((label, i) => {
+            const val = data.priority.values[i] || 0;
+            lines.push(`| ${label} | ${val} | ${calcPct(val, prioTotal)} |`);
+        });
+        lines.push(`| **Total** | **${prioTotal}** | **100.0%** |`);
+        lines.push('');
+        lines.push('---');
+        lines.push('');
+    }
+
+    // 3. MISSC Support Matching (if present)
+    if (data.misscs && data.misscs.labels && data.misscs.labels.length) {
+        lines.push('## 3. MISSC Support Matching');
+        lines.push('');
+        lines.push('| MISSC Status | Count | Share (%) |');
+        lines.push('|---|---:|---:|');
+        const misscTotal = data.misscs.values.reduce((a, b) => a + b, 0);
+        data.misscs.labels.forEach((label, i) => {
+            const val = data.misscs.values[i] || 0;
+            let displayLabel = label;
+            if (label === 'new') displayLabel = 'New';
+            else if (label === 'in_progress') displayLabel = 'In progress';
+            else if (label === 'resolved') displayLabel = 'Resolved / Closed';
+            lines.push(`| ${displayLabel} | ${val} | ${calcPct(val, misscTotal)} |`);
+        });
+        lines.push(`| **Total MISSC** | **${misscTotal}** | **100.0%** |`);
+        lines.push('');
+        lines.push('---');
+        lines.push('');
+    }
+
+    // 4. Tickets by ITIL Category
+    if (data.category && data.category.labels && data.category.labels.length) {
+        lines.push('## 4. Tickets by ITIL Category');
+        lines.push('');
+        lines.push('| Category | Count | Share (%) |');
+        lines.push('|---|---:|---:|');
+        const catTotal = Array.from(data.category.values).reduce((a, b) => a + b, 0);
+        data.category.labels.forEach((label, i) => {
+            const val = data.category.values[i] || 0;
+            lines.push(`| ${label || 'None'} | ${val} | ${calcPct(val, catTotal)} |`);
+        });
+        lines.push(`| **Total** | **${catTotal}** | **100.0%** |`);
+        lines.push('');
+        lines.push('---');
+        lines.push('');
+    }
+
+    // 5. Tickets by Location (Top 10 Cities)
+    if (data.cityData && data.cityData.labels && data.cityData.labels.length) {
+        lines.push('## 5. Tickets by Location (Top 10 Towns)');
+        lines.push('');
+        lines.push('| Town / City | New | In Progress | Resolved / Closed | Total |');
+        lines.push('|---|---:|---:|---:|---:|');
+        data.cityData.labels.forEach((city, i) => {
+            const newCount = data.cityData.values?.new?.[i] || 0;
+            const inProgCount = data.cityData.values?.in_progress?.[i] || 0;
+            const resCount = data.cityData.values?.resolved?.[i] || 0;
+            const cityTotal = newCount + inProgCount + resCount;
+            lines.push(`| ${city || 'Unknown'} | ${newCount} | ${inProgCount} | ${resCount} | ${cityTotal} |`);
+        });
+        lines.push('');
+        lines.push('---');
+        lines.push('');
+    }
+
+    // 6. Resolved Tickets by TTR Intervals
+    if (data.ttrDistribution && data.ttrDistribution.labels && data.ttrDistribution.labels.length) {
+        const ttrTotal = data.ttrDistribution.values.reduce((a, b) => a + b, 0);
+        const prevTotal = data.ttrDistribution.previousTotal || 0;
+        let variationStr = 'N/A';
+        if (prevTotal > 0) {
+            const varNum = ((ttrTotal - prevTotal) / prevTotal) * 100;
+            variationStr = `${varNum >= 0 ? '+' : ''}${varNum.toFixed(1)}%`;
+        }
+
+        lines.push('## 6. Resolved Tickets by Resolution Time (TTR) Intervals');
+        lines.push('');
+        lines.push(`- **Total Resolved (created in period):** ${ttrTotal}`);
+        lines.push(`- **Previous Period Total:** ${prevTotal}`);
+        lines.push(`- **Period-over-Period Variation:** ${variationStr}`);
+        lines.push('');
+        lines.push('| Resolution Time (TTR) Interval | Count | Share (%) |');
+        lines.push('|---|---:|---:|');
+        data.ttrDistribution.labels.forEach((label, i) => {
+            const val = data.ttrDistribution.values[i] || 0;
+            lines.push(`| ${label} | ${val} | ${calcPct(val, ttrTotal)} |`);
+        });
+        lines.push(`| **Total** | **${ttrTotal}** | **100.0%** |`);
+        lines.push('');
+        lines.push('---');
+        lines.push('');
+    }
+
+    // 7. Open Tickets by Age Bracket
+    if (data.openAgeDistribution && data.openAgeDistribution.labels && data.openAgeDistribution.labels.length) {
+        const openTotal = data.openAgeDistribution.values.reduce((a, b) => a + b, 0);
+        lines.push('## 7. Open Tickets by Age Bracket');
+        lines.push('');
+        lines.push(`- **Total Open Tickets:** ${openTotal}`);
+        lines.push('');
+        lines.push('| Age Bracket | Count | Share (%) |');
+        lines.push('|---|---:|---:|');
+        data.openAgeDistribution.labels.forEach((label, i) => {
+            const val = data.openAgeDistribution.values[i] || 0;
+            lines.push(`| ${label} | ${val} | ${calcPct(val, openTotal)} |`);
+        });
+        lines.push(`| **Total Open** | **${openTotal}** | **100.0%** |`);
+        lines.push('');
+        lines.push('---');
+        lines.push('');
+    }
+
+    // 8. Monthly Volume of Tickets
+    if (data.perMonth && data.perMonth.labels && data.perMonth.labels.length) {
+        const yearTotal = data.perMonth.values.reduce((a, b) => a + b, 0);
+        lines.push('## 8. Monthly Volume of Tickets (Year Overview)');
+        lines.push('');
+        lines.push('| Month | Month Key | Tickets Opened | Share (%) |');
+        lines.push('|---|---|---:|---:|');
+        data.perMonth.labels.forEach((label, i) => {
+            const key = data.perMonth.keys?.[i] || '';
+            const val = data.perMonth.values[i] || 0;
+            lines.push(`| ${label} | ${key} | ${val} | ${calcPct(val, yearTotal)} |`);
+        });
+        lines.push(`| **Total Year** | | **${yearTotal}** | **100.0%** |`);
+        lines.push('');
+        lines.push('---');
+        lines.push('');
+    }
+
+    // 9. Daily Activity & Resolution Trends
+    if (data.perday && data.perday.labels && data.perday.labels.length) {
+        lines.push('## 9. Daily Ticket Activity');
+        lines.push('');
+        lines.push('| Date | Tickets Opened | Tickets Closed | Avg TTR (h) |');
+        lines.push('|---|---:|---:|---:|');
+        data.perday.labels.forEach((date, i) => {
+            const opened = data.perday.opened?.[i] ?? 0;
+            const closed = data.perday.closed?.[i] ?? 0;
+            const resIdx = data.resolution?.labels?.indexOf(date);
+            const avgTtr = resIdx !== undefined && resIdx >= 0 && data.resolution?.values?.[resIdx] !== undefined
+                ? data.resolution.values[resIdx] + ' h'
+                : '-';
+            lines.push(`| ${date} | ${opened} | ${closed} | ${avgTtr} |`);
+        });
+        lines.push('');
+    }
+
+    return lines.join('\n');
+}
+
 function initCounterCardsModalLinks() {
     const statusGroupByCounter = {
         incoming: 'incoming',
@@ -245,6 +525,7 @@ function loadCharts() {
     fetch(url)
         .then(r => r.json())
         .then(data => {
+            window.lastDashboardData = data;
             // Big number counters — creation-date view
             document.querySelectorAll('.ts-count').forEach(el => {
                 const status = el.dataset.status;

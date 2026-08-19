@@ -98,6 +98,10 @@ $includeMissc = \Plugin::isPluginActive('cfaomobility');
                     <i class='ti ti-file-download'></i>
                     <?= __('Download PDF in low quality', 'ticketsstatistics') ?>
                 </a>
+                <a class="dropdown-item" id="ticketsstatisticsDownloadMarkdownBtn" href="#">
+                    <i class='ti ti-file-text'></i>
+                    <?= __('Download stats in Markdown', 'ticketsstatistics') ?>
+                </a>
             </div>
         </div>
 
