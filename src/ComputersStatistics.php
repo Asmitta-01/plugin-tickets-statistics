@@ -390,8 +390,9 @@ class ComputersStatistics
         global $CFG_GLPI;
 
         $where = [
-            'glpi_computers.is_deleted'  => 0,
-            'glpi_computers.is_template' => 0,
+            'glpi_computers.is_deleted'       => 0,
+            'glpi_computers.is_template'      => 0,
+            'glpi_computers.manufacturers_id' => ['<>', 0],
         ] + self::getEntitiesRestrictCriteria('glpi_computers', $entityId);
 
         if ($townId > 0) {

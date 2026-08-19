@@ -555,8 +555,9 @@ class AssetStatistics
         global $DB;
 
         $where = [
-            'glpi_computers.is_deleted'  => 0,
-            'glpi_computers.is_template' => 0,
+            'glpi_computers.is_deleted'       => 0,
+            'glpi_computers.is_template'      => 0,
+            'glpi_computers.manufacturers_id' => ['<>', 0],
         ] + self::getEntitiesRestrictCriteria('glpi_computers', true, $entityId);
 
         if ($townId > 0) {

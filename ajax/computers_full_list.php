@@ -113,6 +113,7 @@ if ($scope === 'counter') {
 } elseif ($scope === 'town_type') {
     $townId = ComputersStatistics::getTownIdByName($town);
     $addCriterion(3, 'equals', $townId);
+    $addCriterion(23, 'notequals', 0); // Fabricant non nul
 
     $computerTypeIds = ComputersStatistics::getComputerTypeIdsByKey($typeKey);
     if (count($computerTypeIds) === 1) {
