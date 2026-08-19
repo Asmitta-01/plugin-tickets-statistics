@@ -47,8 +47,8 @@ $latestVersionLabel = $counters['latest_version'] !== ''
             <?= __('Computers Statistics', 'ticketsstatistics') ?>
         </h2>
 
-        <a href="/plugins/ticketsstatistics/front/assets.php" class="btn btn-sm btn-outline-secondary">
-            <i class="ti ti-arrow-left me-1"></i> <?= __('Back to assets dashboard', 'ticketsstatistics') ?>
+        <a href="/plugins/ticketsstatistics/front/assets.php" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" title="<?= __('View assets dashboard', 'ticketsstatistics') ?>">
+            <i class="ti ti-devices me-1"></i> <?= __('Assets dashboard', 'ticketsstatistics') ?>
         </a>
     </div>
 

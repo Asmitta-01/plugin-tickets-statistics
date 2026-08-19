@@ -56,7 +56,7 @@ function plugin_ticketsstatistics_redefine_menus($menu)
 
     // Redirect default dashboard to our custom one
     $menu['helpdesk']['default_dashboard'] = '/plugins/ticketsstatistics/front/dashboard.php';
-    $menu['assets']['default_dashboard'] = '/plugins/ticketsstatistics/front/assets.php';
+    $menu['assets']['default_dashboard'] = '/plugins/ticketsstatistics/front/computers.php';
 
     return $menu;
 }

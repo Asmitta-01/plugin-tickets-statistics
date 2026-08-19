@@ -42,21 +42,21 @@ msgstr "Consulter les statistiques des techniciens"
 msgid "Technicians Stats"
 msgstr "Statistiques des techniciens"
 
-#: front/assets.php:127
-msgid "View computers OS statistics"
-msgstr "Voir les statistiques OS des ordinateurs"
-
-#: front/assets.php:128
-msgid "Computers Stats"
-msgstr "Statistiques des ordinateurs"
+#: front/assets.php:131 front/assets.php:132
+msgid "Back to computers dashboard"
+msgstr "Retour au tableau de bord des machines"
 
 #: front/computers.php:25 front/computers.php:32
 msgid "Computers Statistics"
 msgstr "Statistiques des ordinateurs"
 
-#: front/computers.php:36
-msgid "Back to assets dashboard"
-msgstr "Retour au tableau de bord des actifs"
+#: front/computers.php:49
+msgid "View assets dashboard"
+msgstr "Voir le tableau de bord des actifs"
+
+#: front/computers.php:50
+msgid "Assets dashboard"
+msgstr "Tableau de bord des actifs"
 
 #: front/computers.php:70
 msgid "Computers on Windows 11"
@@ -69,11 +69,11 @@ msgstr "Ordinateurs sous Windows 11 25H2"
 #: front/computers.php:25
 #, php-format
 msgid "Computers on latest Windows version (%s)"
-msgstr "Ordinateurs sur la derniere version Windows (%s)"
+msgstr "Ordinateurs sur la dernière version Windows (%s)"
 
 #: front/computers.php:26
 msgid "Computers on latest Windows version"
-msgstr "Ordinateurs sur la derniere version Windows"
+msgstr "Ordinateurs sur la dernière version Windows"
 
 #: front/computers.php:92
 msgid "Computers to update"

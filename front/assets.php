@@ -128,8 +128,8 @@ if ($showManufacturerChart) {
             <i class="ti ti-devices me-2"></i>
             <?= __('Assets Statistics', 'ticketsstatistics') ?>
         </h2>
-        <a href="/plugins/ticketsstatistics/front/computers.php" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" title="<?= __('View computers OS statistics', 'ticketsstatistics') ?>">
-            <i class="ti ti-device-laptop me-1"></i> <?= __('Computers Stats', 'ticketsstatistics') ?>
+        <a href="/plugins/ticketsstatistics/front/computers.php" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" title="<?= __('Back to computers dashboard', 'ticketsstatistics') ?>">
+            <i class="ti ti-arrow-left me-1"></i> <?= __('Back to computers dashboard', 'ticketsstatistics') ?>
         </a>
     </div>
 
