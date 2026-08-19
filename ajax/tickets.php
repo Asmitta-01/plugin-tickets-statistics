@@ -210,8 +210,11 @@ switch ($type) {
             case '2h <= t < 4h':
                 $where[] = new \QueryExpression("$delay_expr >= 7200 AND $delay_expr < 14400");
                 break;
-            case '4h <= t < 16h':
-                $where[] = new \QueryExpression("$delay_expr >= 14400 AND $delay_expr < 57600");
+            case '4h <= t < 8h':
+                $where[] = new \QueryExpression("$delay_expr >= 14400 AND $delay_expr < 28800");
+                break;
+            case '8h <= t < 16h':
+                $where[] = new \QueryExpression("$delay_expr >= 28800 AND $delay_expr < 57600");
                 break;
             default: // 't >= 16h'
                 $where[] = new \QueryExpression("$delay_expr >= 57600");

@@ -51,6 +51,17 @@ class TicketsStatistics
             '#49bf4d',
             '#0241ec',
             '#ff8000',
+            '#9b59b6',
+            '#C00000',
+        ];
+    }
+
+    public static function getOpenAgeColors(): array
+    {
+        return [
+            '#49bf4d',
+            '#0241ec',
+            '#ff8000',
             '#C00000',
         ];
     }
