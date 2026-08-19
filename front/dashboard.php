@@ -260,31 +260,29 @@ $includeMissc = \Plugin::isPluginActive('cfaomobility');
         </div>
     </div>
 
-    <!-- Charts row 3 -->
-    <div class="card shadow-sm h-100 mb-3">
-        <div class="card-header d-flex align-items-center justify-content-between">
-            <span><?= __('Tickets by town (splitted)', 'ticketsstatistics') ?></span>
-            <div class="w-md-50">
-                <?php \GlpiPlugin\Ticketsstatistics\TicketsStatistics::showStatusGroupButtons('ts-towns-status-group'); ?>
+    <!-- Charts row 3: Tickets resolution intervals + Open tickets age -->
+    <div class="row g-3 mb-3">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header d-flex align-items-center justify-content-between">
+                    <div>
+                        <?= __('Resolved tickets by TTR intervals', 'ticketsstatistics') ?>
+                        <span data-bs-toggle="tooltip" title="<?= __('Resolved tickets by TTR intervals among tickets created in the selected period', 'ticketsstatistics') ?>" class="ms-1"><i class="ti ti-info-circle align-bottom"></i></span>
+                    </div>
+                </div>
+                <div class="card-body d-flex align-items-center">
+                    <canvas id="chart-ttr-intervals" style="height: 280px; max-height:280px"></canvas>
+                </div>
             </div>
         </div>
-        <div class="card-body d-flex align-items-center justify-content-center">
-            <div class="row g-3 mb-3">
-                <div class="col-md-4">
-                    <div class="border-end">
-                        <canvas id="chart-city-new" style="height:280px; max-height:280px">
-                        </canvas>
-                    </div>
+
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header d-flex align-items-center justify-content-between">
+                    <?= __('Open tickets by age', 'ticketsstatistics') ?>
                 </div>
-                <div class="col-md-4">
-                    <div class="border-end">
-                        <canvas id="chart-city-resolved" style="height:280px; max-height:280px">
-                        </canvas>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <canvas id="chart-city-progress" style="height:280px; max-height:280px">
-                    </canvas>
+                <div class="card-body d-flex align-items-center">
+                    <canvas id="chart-open-age" style="height: 280px; max-height:280px"></canvas>
                 </div>
             </div>
         </div>
@@ -329,29 +327,31 @@ $includeMissc = \Plugin::isPluginActive('cfaomobility');
         </div>
     </div>
 
-    <!-- Charts row 6: Tickets resolution intervals + Open tickets age -->
-    <div class="row g-3 mb-3">
-        <div class="col-md-6">
-            <div class="card shadow-sm">
-                <div class="card-header d-flex align-items-center justify-content-between">
-                    <div>
-                        <?= __('Resolved tickets by TTR intervals', 'ticketsstatistics') ?>
-                        <span data-bs-toggle="tooltip" title="<?= __('Resolved tickets by TTR intervals among tickets created in the selected period', 'ticketsstatistics') ?>" class="ms-1"><i class="ti ti-info-circle align-bottom"></i></span>
-                    </div>
-                </div>
-                <div class="card-body d-flex align-items-center">
-                    <canvas id="chart-ttr-intervals" style="height: 280px; max-height:280px"></canvas>
-                </div>
+    <!-- Charts row 6: Tickets by town (splitted) -->
+    <div class="card shadow-sm h-100 mb-3">
+        <div class="card-header d-flex align-items-center justify-content-between">
+            <span><?= __('Tickets by town (splitted)', 'ticketsstatistics') ?></span>
+            <div class="w-md-50">
+                <?php \GlpiPlugin\Ticketsstatistics\TicketsStatistics::showStatusGroupButtons('ts-towns-status-group'); ?>
             </div>
         </div>
-
-        <div class="col-md-6">
-            <div class="card shadow-sm">
-                <div class="card-header d-flex align-items-center justify-content-between">
-                    <?= __('Open tickets by age', 'ticketsstatistics') ?>
+        <div class="card-body d-flex align-items-center justify-content-center">
+            <div class="row g-3 mb-3">
+                <div class="col-md-4">
+                    <div class="border-end">
+                        <canvas id="chart-city-new" style="height:280px; max-height:280px">
+                        </canvas>
+                    </div>
                 </div>
-                <div class="card-body d-flex align-items-center">
-                    <canvas id="chart-open-age" style="height: 280px; max-height:280px"></canvas>
+                <div class="col-md-4">
+                    <div class="border-end">
+                        <canvas id="chart-city-resolved" style="height:280px; max-height:280px">
+                        </canvas>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <canvas id="chart-city-progress" style="height:280px; max-height:280px">
+                    </canvas>
                 </div>
             </div>
         </div>
