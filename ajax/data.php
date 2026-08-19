@@ -313,16 +313,72 @@ foreach (
     $openedByDay[$row['day']] = (int) $row['cpt'];
 }
 
-// Agrégation par mois (Volume mensuel: tickets ouverts par mois)
-$perMonth = ['labels' => [], 'values' => [], 'keys' => []];
-$openedByMonth = [];
-foreach ($openedByDay as $day => $count) {
-    $month = substr($day, 0, 7); // 'YYYY-MM-DD' -> 'YYYY-MM'
-    $openedByMonth[$month] = ($openedByMonth[$month] ?? 0) + $count;
+// Volume mensuel: tickets ouverts par mois sur l'année de la période sélectionnée
+$currentYear  = (int) date('Y');
+$currentMonth = (int) date('n');
+
+$targetYear = $currentYear;
+if ($period === 'lastyear') {
+    $targetYear = $currentYear - 1;
+} elseif ($period === 'lastmonth') {
+    $targetYear = (int) (new \DateTime('first day of last month'))->format('Y');
+} elseif ($period === 'custom') {
+    if ($dateTo && \DateTime::createFromFormat('Y-m-d', $dateTo) !== false) {
+        $targetYear = (int) (new \DateTime($dateTo))->format('Y');
+    } elseif ($dateFrom && \DateTime::createFromFormat('Y-m-d', $dateFrom) !== false) {
+        $targetYear = (int) (new \DateTime($dateFrom))->format('Y');
+    }
 }
-$perMonth['keys']   = array_keys($openedByMonth);
-$perMonth['labels'] = array_map(fn($month) => mb_ucfirst(TicketsStatistics::formatMonthLocalized($month)), $perMonth['keys']);
-$perMonth['values'] = array_values($openedByMonth);
+
+if ($targetYear === $currentYear) {
+    $endMonth = $currentMonth;
+} elseif ($targetYear < $currentYear) {
+    $endMonth = 12;
+} else {
+    if ($period === 'custom' && $dateTo && \DateTime::createFromFormat('Y-m-d', $dateTo) !== false) {
+        $endMonth = (int) (new \DateTime($dateTo))->format('n');
+    } else {
+        $endMonth = 12;
+    }
+}
+
+$monthlyCounts = [];
+for ($m = 1; $m <= $endMonth; $m++) {
+    $monthKey = sprintf('%04d-%02d', $targetYear, $m);
+    $monthlyCounts[$monthKey] = 0;
+}
+
+$startMonthDate = sprintf('%04d-01-01 00:00:00', $targetYear);
+$endMonthDateObj = new \DateTime(sprintf('%04d-%02d-01', $targetYear, $endMonth));
+$endMonthDate = $endMonthDateObj->format('Y-m-t') . ' 23:59:59';
+
+$monthWhere = ["$table.is_deleted" => 0] + getEntitiesRestrictCriteria($table);
+\GlpiPlugin\Ticketsstatistics\CategoryFilter::apply($monthWhere, $table, $categoryId);
+$monthWhere[] = new \QueryExpression("$table.`date` >= '$startMonthDate' AND $table.`date` <= '$endMonthDate'");
+
+foreach (
+    $DB->request([
+        'SELECT'  => [
+            'COUNT DISTINCT' => "$table.id AS cpt",
+            new \QueryExpression("DATE_FORMAT($table.`date`, '%Y-%m') AS `month`"),
+        ],
+        'FROM'    => $table,
+        'WHERE'   => $monthWhere,
+        'GROUPBY' => new \QueryExpression('`month`'),
+        'ORDER'   => new \QueryExpression('`month` ASC'),
+    ]) as $row
+) {
+    $monthKey = (string) ($row['month'] ?? '');
+    if (isset($monthlyCounts[$monthKey])) {
+        $monthlyCounts[$monthKey] = (int) $row['cpt'];
+    }
+}
+
+$perMonth = [
+    'keys'   => array_keys($monthlyCounts),
+    'labels' => array_map(fn($month) => mb_ucfirst(TicketsStatistics::formatMonthLocalized($month)), array_keys($monthlyCounts)),
+    'values' => array_values($monthlyCounts),
+];
 
 
 // Tickets clôturés par jour
