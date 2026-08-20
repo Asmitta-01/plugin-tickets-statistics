@@ -74,10 +74,9 @@ class ComputersStatistics
         $where = [
             'glpi_computers.is_deleted'                    => 0,
             'glpi_computers.is_template'                   => 0,
-            'glpi_items_softwareversions.itemtype'         => 'Computer',
-            'glpi_items_softwareversions.is_deleted'       => 0,
-            'glpi_items_softwareversions.is_deleted_item'  => 0,
-            'glpi_softwares.name'                          => ['LIKE', 'Microsoft Windows 11%'],
+            'glpi_items_operatingsystems.itemtype'         => 'Computer',
+            'glpi_items_operatingsystems.is_deleted'       => 0,
+            'glpi_operatingsystems.name'                   => ['LIKE', 'Microsoft Windows 1%'],
             'glpi_items_deviceprocessors.itemtype'         => 'Computer',
         ] + self::getEntitiesRestrictCriteria('glpi_computers', $entityId);
 
@@ -94,22 +93,16 @@ class ComputersStatistics
                 ],
                 'FROM'       => 'glpi_computers',
                 'INNER JOIN' => [
-                    'glpi_items_softwareversions' => [
+                    'glpi_items_operatingsystems' => [
                         'ON' => [
-                            'glpi_items_softwareversions' => 'items_id',
+                            'glpi_items_operatingsystems' => 'items_id',
                             'glpi_computers'              => 'id',
                         ],
                     ],
-                    'glpi_softwareversions' => [
+                    'glpi_operatingsystems' => [
                         'ON' => [
-                            'glpi_softwareversions'       => 'id',
-                            'glpi_items_softwareversions' => 'softwareversions_id',
-                        ],
-                    ],
-                    'glpi_softwares' => [
-                        'ON' => [
-                            'glpi_softwares'        => 'id',
-                            'glpi_softwareversions' => 'softwares_id',
+                            'glpi_operatingsystems'       => 'id',
+                            'glpi_items_operatingsystems' => 'operatingsystems_id',
                         ],
                     ],
                     'glpi_items_deviceprocessors' => [
@@ -158,10 +151,9 @@ class ComputersStatistics
         $where = [
             'glpi_computers.is_deleted'                    => 0,
             'glpi_computers.is_template'                   => 0,
-            'glpi_items_softwareversions.itemtype'         => 'Computer',
-            'glpi_items_softwareversions.is_deleted'       => 0,
-            'glpi_items_softwareversions.is_deleted_item'  => 0,
-            'glpi_softwares.name'                          => ['LIKE', 'Microsoft Windows 11%'],
+            'glpi_items_operatingsystems.itemtype'         => 'Computer',
+            'glpi_items_operatingsystems.is_deleted'       => 0,
+            'glpi_operatingsystems.name'                   => ['LIKE', 'Microsoft Windows 1%'],
         ] + self::getEntitiesRestrictCriteria('glpi_computers', $entityId);
 
         if ($townId > 0) {
@@ -180,31 +172,32 @@ class ComputersStatistics
                 'glpi_computers.entities_id AS entity_id',
                 'glpi_locations.town',
                 'glpi_entities.completename AS entity_name',
-                'glpi_softwareversions.name AS version_os',
-                'glpi_items_softwareversions.id AS rel_id',
+                'glpi_operatingsystems.name AS os_name',
+                'glpi_operatingsystemversions.name AS version_os',
+                'glpi_items_operatingsystems.id AS rel_id',
             ],
             'FROM'       => 'glpi_computers',
             'INNER JOIN' => [
-                'glpi_items_softwareversions' => [
+                'glpi_items_operatingsystems' => [
                     'ON' => [
-                        'glpi_items_softwareversions' => 'items_id',
+                        'glpi_items_operatingsystems' => 'items_id',
                         'glpi_computers'              => 'id',
                     ],
                 ],
-                'glpi_softwareversions' => [
+                'glpi_operatingsystems' => [
                     'ON' => [
-                        'glpi_softwareversions'       => 'id',
-                        'glpi_items_softwareversions' => 'softwareversions_id',
-                    ],
-                ],
-                'glpi_softwares' => [
-                    'ON' => [
-                        'glpi_softwares'        => 'id',
-                        'glpi_softwareversions' => 'softwares_id',
+                        'glpi_operatingsystems'       => 'id',
+                        'glpi_items_operatingsystems' => 'operatingsystems_id',
                     ],
                 ],
             ],
             'LEFT JOIN'  => [
+                'glpi_operatingsystemversions' => [
+                    'ON' => [
+                        'glpi_operatingsystemversions' => 'id',
+                        'glpi_items_operatingsystems'  => 'operatingsystemversions_id',
+                    ],
+                ],
                 'glpi_users' => [
                     'ON' => [
                         'glpi_users'     => 'id',
@@ -227,7 +220,7 @@ class ComputersStatistics
             'WHERE'      => $where,
             'ORDER'      => [
                 'glpi_computers.id ASC',
-                'glpi_items_softwareversions.id DESC',
+                'glpi_items_operatingsystems.id DESC',
             ],
         ]);
 
@@ -241,19 +234,24 @@ class ComputersStatistics
 
             $seen[$computerId] = true;
             $computerName = (string) ($row['computer_name'] ?? '');
+            $osName = (string) ($row['os_name'] ?? '');
+            $isWin11 = str_contains($osName, 'Windows 11');
+
             $result[] = [
                 'id' => $computerId,
                 'name' => $computerName !== '' ? $computerName : sprintf(__('Computer #%d', 'ticketsstatistics'), $computerId),
                 'user_name' => (string) ($row['owner_firstname'] ?? '') . ' ' . ($row['owner_realname'] ?? ''),
                 'serial' => (string) ($row['serial'] ?? ''),
                 'inventory_number' => (string) ($row['otherserial'] ?? ''),
+                'os_name' => $osName,
+                'is_win11' => $isWin11,
                 'version_os' => (string) ($row['version_os'] ?? ''),
                 'town' => (string) (($row['town'] ?? '') ?: __('Unknown', 'ticketsstatistics')),
                 'entity' => (string) (($row['entity_name'] ?? '') ?: __('Unknown', 'ticketsstatistics')),
                 'entity_id' => (int) ($row['entity_id'] ?? 0),
                 'last_update' => \Html::convDateTime((string) ($row['date_mod'] ?? '')),
                 'kb_codes' => [],
-                'url' => $CFG_GLPI['root_doc'] . '/front/computer.form.php?id=' . $computerId,
+                'url' => ($CFG_GLPI['root_doc'] ?? '') . '/front/computer.form.php?id=' . $computerId,
             ];
         }
 
@@ -264,6 +262,9 @@ class ComputersStatistics
     {
         $latest = '';
         foreach ($rows as $row) {
+            if (empty($row['is_win11'])) {
+                continue;
+            }
             $version = trim((string) ($row['version_os'] ?? ''));
             if ($version === '') {
                 continue;
@@ -470,7 +471,7 @@ class ComputersStatistics
                 'entity_id' => (int) ($row['entity_id'] ?? 0),
                 'last_update' => \Html::convDateTime((string) ($row['date_mod'] ?? '')),
                 'kb_codes' => [],
-                'url' => $CFG_GLPI['root_doc'] . '/front/computer.form.php?id=' . $computerId,
+                'url' => ($CFG_GLPI['root_doc'] ?? '') . '/front/computer.form.php?id=' . $computerId,
             ];
         }
 
@@ -724,11 +725,13 @@ class ComputersStatistics
 
         if ($scope === 'counter') {
             if ($counterKey === 'windows') {
-                $rows = $latestWindows;
+                $rows = array_filter($latestWindows, function ($row) {
+                    return !empty($row['is_win11']);
+                });
                 $title .= ' - ' . __('Computers on Windows 11', 'ticketsstatistics');
             } elseif ($counterKey === 'latest_version') {
                 foreach ($latestWindows as $row) {
-                    if ((string) ($row['version_os'] ?? '') === $latestVersion) {
+                    if (!empty($row['is_win11']) && (string) ($row['version_os'] ?? '') === $latestVersion) {
                         $rows[] = $row;
                     }
                 }
@@ -737,7 +740,7 @@ class ComputersStatistics
                     : __('Computers on latest Windows version', 'ticketsstatistics'));
             } elseif ($counterKey === 'to_update') {
                 foreach ($latestWindows as $row) {
-                    if ((string) ($row['version_os'] ?? '') !== $latestVersion) {
+                    if (empty($row['is_win11']) || (string) ($row['version_os'] ?? '') !== $latestVersion) {
                         $rows[] = $row;
                     }
                 }

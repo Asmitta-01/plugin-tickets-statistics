@@ -489,25 +489,25 @@ class AssetStatistics
     public static function getWindowsOsCounters(int $townId, int $entityId = 0): array
     {
         $latestWindows = self::getLatestWindowsByComputer($townId, $entityId);
-        $windows = 0;
+        $windows11Count = 0;
+        $totalWindows = count($latestWindows);
         $latestVersion = '';
         $latestVersionCount = 0;
-        $countsByVersion = [];
+        $countsByWin11Version = [];
 
         foreach ($latestWindows as $row) {
-            $windows++;
-            $versionOs = trim((string) ($row['version_os'] ?? ''));
-            if ($versionOs === '') {
-                continue;
+            $isWin11 = !empty($row['is_win11']);
+            if ($isWin11) {
+                $windows11Count++;
             }
 
-            if (!isset($countsByVersion[$versionOs])) {
-                $countsByVersion[$versionOs] = 0;
+            $versionOs = trim((string) ($row['version_os'] ?? ''));
+            if ($isWin11 && $versionOs !== '') {
+                $countsByWin11Version[$versionOs] = ($countsByWin11Version[$versionOs] ?? 0) + 1;
             }
-            $countsByVersion[$versionOs]++;
         }
 
-        foreach ($countsByVersion as $version => $count) {
+        foreach ($countsByWin11Version as $version => $count) {
             if ($latestVersion === '' || self::compareWindowsVersions($version, $latestVersion) > 0) {
                 $latestVersion = $version;
                 $latestVersionCount = (int) $count;
@@ -515,12 +515,13 @@ class AssetStatistics
         }
 
         return [
-            'windows' => $windows,
+            'windows'              => $windows11Count,
+            'windows_total'        => $totalWindows,
             'latest_version_count' => $latestVersionCount,
-            'latest_version' => $latestVersion,
-            'to_update' => max(0, $windows - $latestVersionCount),
-            'obsolete' => ComputersStatistics::countObsoleteWindowsComputers($townId, $entityId),
-            'kb_total' => self::countDeployedKb($townId, $entityId),
+            'latest_version'       => $latestVersion,
+            'to_update'            => max(0, $totalWindows - $latestVersionCount),
+            'obsolete'             => ComputersStatistics::countObsoleteWindowsComputers($townId, $entityId),
+            'kb_total'             => self::countDeployedKb($townId, $entityId),
         ];
     }
 
@@ -875,7 +876,7 @@ class AssetStatistics
     }
 
     /**
-     * Count how many computers have Windows 11 installed, with optional town filter.
+     * Count how many computers have Windows 10 or 11 installed, with optional town filter.
      */
     private static function countWindowsComputers(int $townId, int $entityId = 0): int
     {
@@ -884,10 +885,9 @@ class AssetStatistics
         $where = [
             'glpi_computers.is_deleted'                    => 0,
             'glpi_computers.is_template'                   => 0,
-            'glpi_items_softwareversions.itemtype'         => 'Computer',
-            'glpi_items_softwareversions.is_deleted'       => 0,
-            'glpi_items_softwareversions.is_deleted_item'  => 0,
-            'glpi_softwares.name'                          => ['LIKE', 'Microsoft Windows 11%'],
+            'glpi_items_operatingsystems.itemtype'         => 'Computer',
+            'glpi_items_operatingsystems.is_deleted'       => 0,
+            'glpi_operatingsystems.name'                   => ['LIKE', 'Microsoft Windows 1%'],
         ] + self::getEntitiesRestrictCriteria('glpi_computers', true, $entityId);
 
         if ($townId > 0) {
@@ -900,22 +900,16 @@ class AssetStatistics
             ],
             'FROM'       => 'glpi_computers',
             'INNER JOIN' => [
-                'glpi_items_softwareversions' => [
+                'glpi_items_operatingsystems' => [
                     'ON' => [
-                        'glpi_items_softwareversions' => 'items_id',
+                        'glpi_items_operatingsystems' => 'items_id',
                         'glpi_computers'              => 'id',
                     ],
                 ],
-                'glpi_softwareversions' => [
+                'glpi_operatingsystems' => [
                     'ON' => [
-                        'glpi_softwareversions'       => 'id',
-                        'glpi_items_softwareversions' => 'softwareversions_id',
-                    ],
-                ],
-                'glpi_softwares' => [
-                    'ON' => [
-                        'glpi_softwares'        => 'id',
-                        'glpi_softwareversions' => 'softwares_id',
+                        'glpi_operatingsystems'       => 'id',
+                        'glpi_items_operatingsystems' => 'operatingsystems_id',
                     ],
                 ],
             ],
@@ -926,7 +920,7 @@ class AssetStatistics
     }
 
     /**
-     * @return array<int, array{computer_id: int, version_os: string, town: string, entity: string, entity_id: int}>
+     * @return array<int, array{computer_id: int, os_name: string, is_win11: bool, version_os: string, town: string, entity: string, entity_id: int}>
      */
     private static function getLatestWindowsByComputer(int $townId, int $entityId = 0): array
     {
@@ -935,10 +929,9 @@ class AssetStatistics
         $where = [
             'glpi_computers.is_deleted'                    => 0,
             'glpi_computers.is_template'                   => 0,
-            'glpi_items_softwareversions.itemtype'         => 'Computer',
-            'glpi_items_softwareversions.is_deleted'       => 0,
-            'glpi_items_softwareversions.is_deleted_item'  => 0,
-            'glpi_softwares.name'                          => ['LIKE', 'Microsoft Windows 11%'],
+            'glpi_items_operatingsystems.itemtype'         => 'Computer',
+            'glpi_items_operatingsystems.is_deleted'       => 0,
+            'glpi_operatingsystems.name'                   => ['LIKE', 'Microsoft Windows 1%'],
         ] + self::getEntitiesRestrictCriteria('glpi_computers', true, $entityId);
 
         if ($townId > 0) {
@@ -949,33 +942,34 @@ class AssetStatistics
             'SELECT'     => [
                 'glpi_computers.id AS computer_id',
                 'glpi_computers.entities_id AS entity_id',
-                'glpi_softwareversions.name AS version_os',
+                'glpi_operatingsystems.name AS os_name',
+                'glpi_operatingsystemversions.name AS version_os',
                 'glpi_locations.town',
                 'glpi_entities.completename AS entity_name',
-                'glpi_items_softwareversions.id AS rel_id',
+                'glpi_items_operatingsystems.id AS rel_id',
             ],
             'FROM'       => 'glpi_computers',
             'INNER JOIN' => [
-                'glpi_items_softwareversions' => [
+                'glpi_items_operatingsystems' => [
                     'ON' => [
-                        'glpi_items_softwareversions' => 'items_id',
+                        'glpi_items_operatingsystems' => 'items_id',
                         'glpi_computers'              => 'id',
                     ],
                 ],
-                'glpi_softwareversions' => [
+                'glpi_operatingsystems' => [
                     'ON' => [
-                        'glpi_softwareversions'       => 'id',
-                        'glpi_items_softwareversions' => 'softwareversions_id',
-                    ],
-                ],
-                'glpi_softwares' => [
-                    'ON' => [
-                        'glpi_softwares'        => 'id',
-                        'glpi_softwareversions' => 'softwares_id',
+                        'glpi_operatingsystems'       => 'id',
+                        'glpi_items_operatingsystems' => 'operatingsystems_id',
                     ],
                 ],
             ],
             'LEFT JOIN' => [
+                'glpi_operatingsystemversions' => [
+                    'ON' => [
+                        'glpi_operatingsystemversions' => 'id',
+                        'glpi_items_operatingsystems'  => 'operatingsystemversions_id',
+                    ],
+                ],
                 'glpi_locations' => [
                     'ON' => [
                         'glpi_locations' => 'id',
@@ -992,7 +986,7 @@ class AssetStatistics
             'WHERE'      => $where,
             'ORDER'      => [
                 'glpi_computers.id ASC',
-                'glpi_items_softwareversions.id DESC',
+                'glpi_items_operatingsystems.id DESC',
             ],
         ]);
 
@@ -1006,8 +1000,13 @@ class AssetStatistics
             }
 
             $seenComputers[$computerId] = true;
+            $osName = (string) ($row['os_name'] ?? '');
+            $isWin11 = str_contains($osName, 'Windows 11');
+
             $result[] = [
                 'computer_id' => $computerId,
+                'os_name'     => $osName,
+                'is_win11'    => $isWin11,
                 'version_os'  => (string) ($row['version_os'] ?? ''),
                 'town'        => (string) ($row['town'] ?? ''),
                 'entity'      => (string) ($row['entity_name'] ?? ''),

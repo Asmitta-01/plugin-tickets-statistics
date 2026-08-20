@@ -60,7 +60,7 @@ if ($townId > 0 && !($scope === 'counter' && $counterKey === 'obsolete') && $sco
 if ($scope === 'counter') {
     if ($counterKey === 'windows') {
         $addCriterion(45, 'contains', 'Microsoft Windows 11');
-    } elseif ($counterKey === 'latest_version' || $counterKey === 'to_update') {
+    } elseif ($counterKey === 'latest_version') {
         $latestVersion = ComputersStatistics::getLatestWindowsVersion(
             ComputersStatistics::getLatestWindowsComputers($townId, $entityId)
         );
@@ -68,9 +68,9 @@ if ($scope === 'counter') {
         if ($latestVersion !== '') {
             // Get OperatingSystemVersion ID for the latest version to filter by.
             $osVersionId = ComputersStatistics::getOperatingSystemIDByName($latestVersion);
-            $addCriterion(46, $counterKey === 'to_update' ? 'notequals' : 'equals', $osVersionId);
+            $addCriterion(46, 'equals', $osVersionId);
         }
-    } elseif ($counterKey === 'obsolete') {
+    } elseif ($counterKey === 'to_update' || $counterKey === 'obsolete') {
         $resolved = ComputersStatistics::resolveComputersScope([
             'scope' => $scope,
             'counter_key' => $counterKey,
@@ -100,7 +100,7 @@ if ($scope === 'counter') {
         $addCriterion(2, 'equals', -1);
     }
 } elseif ($scope === 'version' || $scope === 'town_version') {
-    $addCriterion(45, 'contains', 'Microsoft Windows 11');
+    $addCriterion(45, 'contains', 'Microsoft Windows');
     $osVersionId = ComputersStatistics::getOperatingSystemIDByName($version);
     $addCriterion(46, 'equals', $osVersionId);
     if ($scope === 'town_version' && $townId == 0) {
@@ -131,7 +131,7 @@ if ($scope === 'counter') {
         $addCriterion($groupCriteria);
     }
 } elseif ($scope === 'entity_version') {
-    $addCriterion(45, 'contains', 'Microsoft Windows 11');
+    $addCriterion(45, 'contains', 'Microsoft Windows');
     $osVersionId = ComputersStatistics::getOperatingSystemIDByName($version);
     $addCriterion(46, 'equals', $osVersionId);
 
