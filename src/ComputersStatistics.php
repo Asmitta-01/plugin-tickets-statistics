@@ -43,9 +43,9 @@ class ComputersStatistics
             return false;
         }
 
-        if (preg_match('/\\b(Core\\s+m3-8100Y|N200)\\b/i', $processor)) {
-            return true;
-        }
+        // if (preg_match('/\\b(Core\\s+m3-8100Y|N200)\\b/i', $processor)) {
+        //     return true;
+        // }
 
         if (preg_match('/i[3579]-([0-9]{4,5})/i', $processor, $matches)) {
             $model = $matches[1];
