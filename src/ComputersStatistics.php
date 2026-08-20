@@ -39,26 +39,40 @@ class ComputersStatistics
 
     private static function isProcessorGenerationLowerThan8(string $processor): bool
     {
-        if (preg_match('/\\b(11th|12th|13th)\\b/i', $processor) || stripos($processor, 'Ultra') !== false) {
+        if (preg_match('/\b(10th|11th|12th|13th|14th|15th)\b/i', $processor) || stripos($processor, 'Ultra') !== false) {
             return false;
         }
 
-        // if (preg_match('/\\b(Core\\s+m3-8100Y|N200)\\b/i', $processor)) {
-        //     return true;
-        // }
+        if (preg_match('/\bN[123]00\b/i', $processor) || preg_match('/Core\s+m3-8100Y/i', $processor)) {
+            return false;
+        }
 
-        if (preg_match('/i[3579]-([0-9]{4,5})/i', $processor, $matches)) {
+        if (preg_match('/i[3579]-([0-9]{3,5})(?:G[147])?/i', $processor, $matches)) {
             $model = $matches[1];
-            $generation = strlen($model) === 4
-                ? (int) $model[0]
-                : (int) substr($model, 0, 2);
+            if (strlen($model) === 5) {
+                $generation = (int) substr($model, 0, 2);
+            } elseif (strlen($model) === 4) {
+                // Handle 10th Gen Ice Lake processors (e.g. 1065G7, 1035G1, 1005G1)
+                $generation = str_starts_with($model, '10') ? 10 : (int) $model[0];
+            } else {
+                $generation = 1;
+            }
 
             return $generation < 8;
         }
 
-        if (preg_match('/Xeon\\s+\\w+\\s+([0-9]{4})/i', $processor, $matches)) {
+        if (preg_match('/Xeon\s+(?:Silver|Gold|Platinum|Bronze|[EWX])?\s*([0-9]{4})/i', $processor, $matches)) {
             $generation = (int) $matches[1][0];
             return $generation < 8;
+        }
+
+        if (preg_match('/Pentium\s+Gold\s+G([0-9]{4})/i', $processor, $matches)) {
+            $gen = (int) $matches[1][0];
+            return $gen < 5;
+        }
+
+        if (preg_match('/\b(Pentium|Celeron|Core\s*2|Dual-Core)\b/i', $processor)) {
+            return true;
         }
 
         return false;
