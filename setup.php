@@ -32,7 +32,7 @@
  */
 
 /** @phpstan-ignore theCodingMachineSafe.function (safe to assume this isn't already defined) */
-define('PLUGIN_TICKETSSTATISTICS_VERSION', '0.8.3');
+define('PLUGIN_TICKETSSTATISTICS_VERSION', '0.8.4');
 
 // Minimal GLPI version, inclusive
 /** @phpstan-ignore theCodingMachineSafe.function (safe to assume this isn't already defined) */

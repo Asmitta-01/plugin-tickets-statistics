@@ -1,13 +1,13 @@
 # TicketsStatistics GLPI plugin
 
-![Version](https://img.shields.io/badge/Version-0.8.1-2563eb)
+![Version](https://img.shields.io/badge/Version-0.8.4-2563eb)
 ![PHP](https://img.shields.io/badge/PHP-%3E%3D8.3-777bb4)
 ![GLPI](https://img.shields.io/badge/GLPI-10.0.16%20to%2011.0.6-0ea5e9)
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Asmitta-01/plugin-tickets-statistics)
 
 TicketsStatistics adds a dedicated reporting dashboard to GLPI for helpdesk ticket activity, plus town-based ticket, asset, and computer/patch analytics.
 
-**Current release:** 0.8.1
+**Current release:** 0.8.4
 
 ## Table of contents
 
@@ -52,7 +52,6 @@ Dedicated technicians statistics page with assignment and performance metrics.
 
 Dedicated page, filterable by town:
 
-- Cards: Windows 11 computers, latest Windows version (auto-detected), computers to update, total KB patches deployed
 - Cards: Windows 11 computers, latest Windows version (auto-detected), computers to update, obsolete computers (CPU generation < 8), total KB patches deployed
 - Charts: Windows by OS version, Windows by site and OS version (stacked), latest KB patches and installations
 - Charts: Windows by OS version, Windows by site and OS version (stacked), latest KB patches and installations

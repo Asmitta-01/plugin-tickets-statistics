@@ -309,7 +309,8 @@ document.addEventListener('DOMContentLoaded', function () {
         } else if (index === 1) {
             color = '#f59e0b';
         } else {
-            color = 'hsl(' + (((index - 2) * 57) % 360) + ', 68%, 52%)';
+            const lightness = Math.max(16, 54 - (index - 2) * 10);
+            color = 'hsl(0, 78%, ' + lightness + '%)';
         }
 
         versionColorMap[version] = color;
