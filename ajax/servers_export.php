@@ -24,7 +24,10 @@ $entityId = (int) ($_GET['entity_id'] ?? 0);
 $counterKey = (string) ($_GET['counter_key'] ?? 'total');
 
 $resolved = ServersStatistics::resolveServersScope([
-    'counter_key' => $counterKey,
+    'scope'       => $_GET['scope'] ?? '',
+    'counter_key' => $_GET['counter_key'] ?? '',
+    'nature_key'  => $_GET['nature_key'] ?? '',
+    'model'       => $_GET['model'] ?? '',
     'town_id'     => $townId,
     'entity_id'   => $entityId,
 ]);

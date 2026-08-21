@@ -42,6 +42,20 @@ document.addEventListener('DOMContentLoaded', function () {
         return String(value == null ? '' : value);
     };
 
+    const parseJsonData = function (raw, fallback) {
+        if (!raw) {
+            return fallback;
+        }
+        try {
+            return JSON.parse(raw);
+        } catch (_) {
+            return fallback;
+        }
+    };
+
+    const natureChartData = parseJsonData(dataEl.dataset.natureChart, { labels: [], values: [], colors: [], keys: [] });
+    const modelChartData = parseJsonData(dataEl.dataset.modelChart, { labels: [], values: [], colors: [] });
+
     const renderLoader = function () {
         return '<p class="text-center my-4">'
             + '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>'
@@ -57,7 +71,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const rows = servers.map(function (server) {
             const badgeClass = server.is_hypervisor
                 ? 'bg-purple text-white'
-                : (server.is_virtual ? 'bg-warning text-dark' : 'bg-success text-white');
+                : (server.is_virtual ? 'bg-warning text-white' : 'bg-success text-white');
 
             const hostedVmsBadge = server.hosted_vms_count > 0
                 ? '<span class="badge bg-indigo-lt fw-bold">' + server.hosted_vms_count + '</span>'
@@ -185,6 +199,113 @@ document.addEventListener('DOMContentLoaded', function () {
             });
     };
 
+    Chart.register(ChartDataLabels);
+
+    // 1. Nature Doughnut Chart
+    const natureCanvas = document.getElementById('ts-servers-nature-chart');
+    if (natureCanvas && Array.isArray(natureChartData.labels) && natureChartData.labels.length > 0) {
+        new Chart(natureCanvas, {
+            type: 'doughnut',
+            data: {
+                labels: natureChartData.labels,
+                datasets: [{
+                    data: natureChartData.values,
+                    backgroundColor: natureChartData.colors,
+                    hoverOffset: 12,
+                }],
+            },
+            options: {
+                maintainAspectRatio: false,
+                onClick: function (_, elements) {
+                    if (!elements || !elements.length) {
+                        return;
+                    }
+                    const index = elements[0].index;
+                    const key = (natureChartData.keys && natureChartData.keys[index]) ? natureChartData.keys[index] : 'total';
+                    openServersModal({
+                        scope: 'nature',
+                        nature_key: key,
+                    });
+                },
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                    },
+                    datalabels: {
+                        color: '#fff',
+                        clamp: true,
+                        align: 'center',
+                        formatter: function (value, context) {
+                            const total = context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                            const percent = total > 0 ? Math.round((value / total) * 100) : 0;
+                            return percent > 0 ? percent + '%\n(' + value + ')' : '';
+                        },
+                    },
+                },
+            },
+        });
+    }
+
+    // 2. Hardware / Model Bar Chart
+    const modelCanvas = document.getElementById('ts-servers-model-chart');
+    if (modelCanvas && Array.isArray(modelChartData.labels) && modelChartData.labels.length > 0) {
+        new Chart(modelCanvas, {
+            type: 'bar',
+            data: {
+                labels: modelChartData.labels,
+                datasets: [{
+                    data: modelChartData.values,
+                    backgroundColor: modelChartData.colors,
+                    borderRadius: 4,
+                }],
+            },
+            options: {
+                indexAxis: 'y',
+                maintainAspectRatio: false,
+                onClick: function (_, elements) {
+                    if (!elements || !elements.length) {
+                        return;
+                    }
+                    const index = elements[0].index;
+                    const modelName = modelChartData.labels[index] || '';
+                    openServersModal({
+                        scope: 'model',
+                        model: modelName,
+                    });
+                },
+                plugins: {
+                    legend: {
+                        display: false,
+                    },
+                    datalabels: {
+                        color: '#374151',
+                        anchor: 'end',
+                        align: 'end',
+                        formatter: function (value) {
+                            return value > 0 ? String(value) : '';
+                        },
+                    },
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        ticks: { precision: 0 },
+                    },
+                    y: {
+                        ticks: {
+                            autoSkip: false,
+                            callback: function (val) {
+                                const yLabel = this.getLabelForValue(val);
+                                return yLabel.length > 25 ? yLabel.substring(0, 22) + '...' : yLabel;
+                            },
+                        },
+                    },
+                },
+            },
+        });
+    }
+
+    // Card click handlers
     document.querySelectorAll('.ts-servers-card[data-counter-key]').forEach(function (card) {
         card.addEventListener('click', function () {
             const counterKey = card.dataset.counterKey || 'total';

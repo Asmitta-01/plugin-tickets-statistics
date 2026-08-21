@@ -1171,3 +1171,25 @@ msgstr "Unable to load servers."
 msgid "Display limited to %d servers. Use full list or CSV for all entries."
 msgstr "Display limited to %d servers. Use full list or CSV for all entries."
 
+#: front/servers.php
+msgid "Servers by nature"
+msgstr "Servers by nature"
+
+#: front/servers.php
+msgid "Servers by hardware / model"
+msgstr "Servers by hardware / model"
+
+#: src/ServersStatistics.php
+msgid "VM / Container"
+msgstr "VM / Container"
+
+#: src/ServersStatistics.php
+msgid "Unspecified"
+msgstr "Unspecified"
+
+#: src/ServersStatistics.php
+#, php-format
+msgid "Hardware / Model: %s"
+msgstr "Hardware / Model: %s"
+
+

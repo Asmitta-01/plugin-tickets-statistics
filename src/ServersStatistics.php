@@ -269,12 +269,106 @@ class ServersStatistics
     }
 
     /**
+     * @return array{labels: string[], values: int[], colors: string[], keys: string[]}
+     */
+    public static function getServersNatureBreakdown(int $townId = 0, int $entityId = 0): array
+    {
+        $servers = self::getAllServers($townId, $entityId);
+        $counts = [
+            'physical'    => 0,
+            'virtual'     => 0,
+            'hypervisors' => 0,
+        ];
+
+        foreach ($servers as $s) {
+            if (!empty($s['is_hypervisor'])) {
+                $counts['hypervisors']++;
+            } elseif (!empty($s['is_virtual'])) {
+                $counts['virtual']++;
+            } else {
+                $counts['physical']++;
+            }
+        }
+
+        return [
+            'labels' => [
+                __('Physical', 'ticketsstatistics'),
+                __('Virtual', 'ticketsstatistics'),
+                __('Virtualization host', 'ticketsstatistics'),
+            ],
+            'values' => [
+                $counts['physical'],
+                $counts['virtual'],
+                $counts['hypervisors'],
+            ],
+            'colors' => [
+                '#22c55e',
+                '#f76707',
+                '#ae3ec9 ',
+            ],
+            'keys'   => [
+                'physical_only',
+                'virtual',
+                'hypervisors',
+            ],
+        ];
+    }
+
+    /**
+     * @return array{labels: string[], values: int[], colors: string[]}
+     */
+    public static function getServersModelBreakdown(int $townId = 0, int $entityId = 0): array
+    {
+        $servers = self::getAllServers($townId, $entityId);
+        $models = [];
+
+        foreach ($servers as $s) {
+            $hw = trim(($s['manufacturer'] !== '-' ? $s['manufacturer'] : '') . ' ' . ($s['model'] !== '-' ? $s['model'] : ''));
+            if ($hw === '') {
+                $hw = !empty($s['is_virtual']) ? __('VM / Container', 'ticketsstatistics') : __('Unspecified', 'ticketsstatistics');
+            }
+            $models[$hw] = ($models[$hw] ?? 0) + 1;
+        }
+
+        arsort($models);
+
+        $palette = [
+            '#0ea5e9',
+            '#6366f1',
+            '#8b5cf6',
+            '#ec4899',
+            '#f43f5e',
+            '#f59e0b',
+            '#10b981',
+            '#14b8a6',
+            '#06b6d4',
+            '#3b82f6',
+        ];
+
+        $labels = array_keys($models);
+        $values = array_values($models);
+        $colors = [];
+        foreach ($labels as $idx => $lbl) {
+            $colors[] = $palette[$idx % count($palette)];
+        }
+
+        return [
+            'labels' => $labels,
+            'values' => $values,
+            'colors' => $colors,
+        ];
+    }
+
+    /**
      * @param array<string, mixed> $input
      * @return array{title: string, count: int, rows: array<int, array<string, mixed>>}
      */
     public static function resolveServersScope(array $input): array
     {
-        $counterKey = (string) ($input['counter_key'] ?? 'total');
+        $scope = (string) ($input['scope'] ?? '');
+        $counterKey = (string) ($input['counter_key'] ?? '');
+        $natureKey = (string) ($input['nature_key'] ?? '');
+        $modelKey = (string) ($input['model'] ?? '');
         $townId = (int) ($input['town_id'] ?? 0);
         $entityId = (int) ($input['entity_id'] ?? 0);
 
@@ -282,21 +376,39 @@ class ServersStatistics
         $rows = [];
         $title = __('Servers', 'ticketsstatistics');
 
-        if ($counterKey === 'physical') {
+        if ($scope === 'model' && $modelKey !== '') {
+            foreach ($allServers as $s) {
+                $hw = trim(($s['manufacturer'] !== '-' ? $s['manufacturer'] : '') . ' ' . ($s['model'] !== '-' ? $s['model'] : ''));
+                if ($hw === '') {
+                    $hw = !empty($s['is_virtual']) ? __('VM / Container', 'ticketsstatistics') : __('Unspecified', 'ticketsstatistics');
+                }
+                if (mb_strtolower($hw) === mb_strtolower($modelKey)) {
+                    $rows[] = $s;
+                }
+            }
+            $title .= ' - ' . sprintf(__('Hardware / Model: %s', 'ticketsstatistics'), $modelKey);
+        } elseif ($counterKey === 'physical' || $natureKey === 'physical') {
             foreach ($allServers as $s) {
                 if (empty($s['is_virtual'])) {
                     $rows[] = $s;
                 }
             }
             $title .= ' - ' . __('Physical servers', 'ticketsstatistics');
-        } elseif ($counterKey === 'virtual') {
+        } elseif ($natureKey === 'physical_only') {
+            foreach ($allServers as $s) {
+                if (empty($s['is_virtual']) && empty($s['is_hypervisor'])) {
+                    $rows[] = $s;
+                }
+            }
+            $title .= ' - ' . __('Physical servers', 'ticketsstatistics');
+        } elseif ($counterKey === 'virtual' || $natureKey === 'virtual') {
             foreach ($allServers as $s) {
                 if (!empty($s['is_virtual'])) {
                     $rows[] = $s;
                 }
             }
             $title .= ' - ' . __('Virtual servers', 'ticketsstatistics');
-        } elseif ($counterKey === 'hypervisors') {
+        } elseif ($counterKey === 'hypervisors' || $natureKey === 'hypervisors') {
             foreach ($allServers as $s) {
                 if (!empty($s['is_hypervisor'])) {
                     $rows[] = $s;

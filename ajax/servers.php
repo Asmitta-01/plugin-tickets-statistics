@@ -22,7 +22,10 @@ if (!\Session::haveRight('dashboard', READ)) {
 const TICKETSSTATISTICS_SERVERS_MODAL_LIMIT = 100;
 
 $resolved = ServersStatistics::resolveServersScope([
-    'counter_key' => $_GET['counter_key'] ?? 'total',
+    'scope'       => $_GET['scope'] ?? '',
+    'counter_key' => $_GET['counter_key'] ?? '',
+    'nature_key'  => $_GET['nature_key'] ?? '',
+    'model'       => $_GET['model'] ?? '',
     'town_id'     => (int) ($_GET['town_id'] ?? 0),
     'entity_id'   => (int) ($_GET['entity_id'] ?? 0),
 ]);

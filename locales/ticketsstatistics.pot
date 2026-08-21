@@ -1162,3 +1162,25 @@ msgstr ""
 msgid "Display limited to %d servers. Use full list or CSV for all entries."
 msgstr ""
 
+#: front/servers.php
+msgid "Servers by nature"
+msgstr ""
+
+#: front/servers.php
+msgid "Servers by hardware / model"
+msgstr ""
+
+#: src/ServersStatistics.php
+msgid "VM / Container"
+msgstr ""
+
+#: src/ServersStatistics.php
+msgid "Unspecified"
+msgstr ""
+
+#: src/ServersStatistics.php
+#, php-format
+msgid "Hardware / Model: %s"
+msgstr ""
+
+

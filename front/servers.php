@@ -23,6 +23,8 @@ $entityId = (int) ($_GET['entity'] ?? \Session::getActiveEntity());
 
 $counters = ServersStatistics::getServersCounters($townId, $entityId);
 $servers = ServersStatistics::getAllServers($townId, $entityId);
+$natureBreakdown = ServersStatistics::getServersNatureBreakdown($townId, $entityId);
+$modelBreakdown = ServersStatistics::getServersModelBreakdown($townId, $entityId);
 
 global $CFG_GLPI;
 $serversAjaxUrl = ($CFG_GLPI['root_doc'] ?? '') . '/plugins/ticketsstatistics/ajax/servers.php';
@@ -129,6 +131,40 @@ $serversFullListUrl = ($CFG_GLPI['root_doc'] ?? '') . '/plugins/ticketsstatistic
         </div>
     </div>
 
+    <div class="row g-3 mb-4">
+        <div class="col-lg-5">
+            <div class="card shadow-sm h-100">
+                <div class="card-header">
+                    <h3 class="card-title mb-0">
+                        <i class="ti ti-chart-pie me-1"></i>
+                        <?= __('Servers by nature', 'ticketsstatistics') ?>
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div style="position: relative; height: 320px;">
+                        <canvas id="ts-servers-nature-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-7">
+            <div class="card shadow-sm h-100">
+                <div class="card-header">
+                    <h3 class="card-title mb-0">
+                        <i class="ti ti-chart-bar me-1"></i>
+                        <?= __('Servers by hardware / model', 'ticketsstatistics') ?>
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div style="position: relative; height: 320px;">
+                        <canvas id="ts-servers-model-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="card shadow-sm mb-4">
         <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
             <h3 class="card-title mb-0">
@@ -171,7 +207,7 @@ $serversFullListUrl = ($CFG_GLPI['root_doc'] ?? '') . '/plugins/ticketsstatistic
                                 <?php
                                 $badgeClass = !empty($s['is_hypervisor'])
                                     ? 'bg-purple text-white'
-                                    : (!empty($s['is_virtual']) ? 'bg-warning text-dark' : 'bg-success text-white');
+                                    : (!empty($s['is_virtual']) ? 'bg-warning text-white' : 'bg-success text-white');
                                 ?>
                                 <tr>
                                     <td><?= (int) $s['id'] ?></td>
@@ -242,6 +278,8 @@ $serversFullListUrl = ($CFG_GLPI['root_doc'] ?? '') . '/plugins/ticketsstatistic
 </div>
 
 <div id="ts-servers-chart-data"
+    data-nature-chart="<?= htmlspecialchars(json_encode($natureBreakdown, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT), ENT_QUOTES, 'UTF-8') ?>"
+    data-model-chart="<?= htmlspecialchars(json_encode($modelBreakdown, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT), ENT_QUOTES, 'UTF-8') ?>"
     data-servers-ajax-url="<?= htmlspecialchars($serversAjaxUrl, ENT_QUOTES, 'UTF-8') ?>"
     data-servers-export-url="<?= htmlspecialchars($serversExportUrl, ENT_QUOTES, 'UTF-8') ?>"
     data-servers-full-list-url="<?= htmlspecialchars($serversFullListUrl, ENT_QUOTES, 'UTF-8') ?>"

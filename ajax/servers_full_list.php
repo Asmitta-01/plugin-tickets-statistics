@@ -23,7 +23,10 @@ $townId = (int) ($_GET['town_id'] ?? 0);
 $entityId = (int) ($_GET['entity_id'] ?? 0);
 
 $resolved = ServersStatistics::resolveServersScope([
-    'counter_key' => $counterKey,
+    'scope'       => $_GET['scope'] ?? '',
+    'counter_key' => $_GET['counter_key'] ?? '',
+    'nature_key'  => $_GET['nature_key'] ?? '',
+    'model'       => $_GET['model'] ?? '',
     'town_id'     => $townId,
     'entity_id'   => $entityId,
 ]);

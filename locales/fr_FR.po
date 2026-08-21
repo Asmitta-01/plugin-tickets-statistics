@@ -1179,3 +1179,25 @@ msgstr "Impossible de charger les serveurs."
 msgid "Display limited to %d servers. Use full list or CSV for all entries."
 msgstr "Affichage limité à %d serveurs. Utilisez la liste complète ou l'export CSV pour voir toutes les entrées."
 
+#: front/servers.php
+msgid "Servers by nature"
+msgstr "Serveurs par nature"
+
+#: front/servers.php
+msgid "Servers by hardware / model"
+msgstr "Serveurs par matériel / modèle"
+
+#: src/ServersStatistics.php
+msgid "VM / Container"
+msgstr "VM / Conteneur"
+
+#: src/ServersStatistics.php
+msgid "Unspecified"
+msgstr "Non spécifié"
+
+#: src/ServersStatistics.php
+#, php-format
+msgid "Hardware / Model: %s"
+msgstr "Matériel / Modèle : %s"
+
+
