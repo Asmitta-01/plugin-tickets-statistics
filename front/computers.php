@@ -47,9 +47,14 @@ $latestVersionLabel = $counters['latest_version'] !== ''
             <?= __('Computers Statistics', 'ticketsstatistics') ?>
         </h2>
 
-        <a href="/plugins/ticketsstatistics/front/assets.php" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" title="<?= __('View assets dashboard', 'ticketsstatistics') ?>">
-            <i class="ti ti-devices me-1"></i> <?= __('Assets dashboard', 'ticketsstatistics') ?>
-        </a>
+        <div class="d-flex gap-2">
+            <a href="<?= ($CFG_GLPI['root_doc'] ?? '') ?>/plugins/ticketsstatistics/front/servers.php" class="btn btn-sm btn-outline-primary" data-bs-toggle="tooltip" title="<?= __('View servers dashboard', 'ticketsstatistics') ?>">
+                <i class="ti ti-server me-1"></i> <?= __('Servers dashboard', 'ticketsstatistics') ?>
+            </a>
+            <a href="<?= ($CFG_GLPI['root_doc'] ?? '') ?>/plugins/ticketsstatistics/front/assets.php" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" title="<?= __('View assets dashboard', 'ticketsstatistics') ?>">
+                <i class="ti ti-devices me-1"></i> <?= __('Assets dashboard', 'ticketsstatistics') ?>
+            </a>
+        </div>
     </div>
 
     <div class="alert alert-secondary mb-3">

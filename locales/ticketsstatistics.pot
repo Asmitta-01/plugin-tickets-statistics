@@ -1077,3 +1077,88 @@ msgstr ""
 #: front/dashboard.php:103
 msgid "Download stats in Markdown"
 msgstr ""
+
+#: front/servers.php
+msgid "Servers Statistics"
+msgstr ""
+
+#: front/servers.php
+msgid "Servers dashboard"
+msgstr ""
+
+#: front/servers.php
+msgid "View servers dashboard"
+msgstr ""
+
+#: front/servers.php
+msgid "Total servers"
+msgstr ""
+
+#: front/servers.php
+msgid "Physical servers"
+msgstr ""
+
+#: front/servers.php
+msgid "Virtual servers"
+msgstr ""
+
+#: front/servers.php
+msgid "Virtualization hosts"
+msgstr ""
+
+#: front/servers.php
+msgid "Physical servers hosting virtual machines"
+msgstr ""
+
+#: front/servers.php
+msgid "Servers inventory"
+msgstr ""
+
+#: front/servers.php
+msgid "Hardware / Model"
+msgstr ""
+
+#: front/servers.php
+msgid "Hosted VMs"
+msgstr ""
+
+#: src/ServersStatistics.php
+msgid "Virtual"
+msgstr ""
+
+#: src/ServersStatistics.php
+msgid "Physical"
+msgstr ""
+
+#: src/ServersStatistics.php
+msgid "Virtualization host"
+msgstr ""
+
+#: src/ServersStatistics.php
+msgid "Server #%d"
+msgstr ""
+
+#: public/js/servers.js
+msgid "server"
+msgstr ""
+
+#: public/js/servers.js
+msgid "servers"
+msgstr ""
+
+#: public/js/servers.js
+msgid "Loading servers..."
+msgstr ""
+
+#: public/js/servers.js
+msgid "No servers found for this selection."
+msgstr ""
+
+#: public/js/servers.js
+msgid "Unable to load servers."
+msgstr ""
+
+#: public/js/servers.js
+msgid "Display limited to %d servers. Use full list or CSV for all entries."
+msgstr ""
+

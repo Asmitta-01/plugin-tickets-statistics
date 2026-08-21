@@ -1094,3 +1094,88 @@ msgstr "Plus de 7 jours"
 #: front/dashboard.php:103
 msgid "Download stats in Markdown"
 msgstr "Télécharger les statistiques en Markdown"
+
+#: front/servers.php
+msgid "Servers Statistics"
+msgstr "Statistiques des serveurs"
+
+#: front/servers.php
+msgid "Servers dashboard"
+msgstr "Tableau de bord des serveurs"
+
+#: front/servers.php
+msgid "View servers dashboard"
+msgstr "Voir le tableau de bord des serveurs"
+
+#: front/servers.php
+msgid "Total servers"
+msgstr "Total serveurs"
+
+#: front/servers.php
+msgid "Physical servers"
+msgstr "Serveurs physiques"
+
+#: front/servers.php
+msgid "Virtual servers"
+msgstr "Serveurs virtuels"
+
+#: front/servers.php
+msgid "Virtualization hosts"
+msgstr "Hôtes de virtualisation"
+
+#: front/servers.php
+msgid "Physical servers hosting virtual machines"
+msgstr "Serveurs physiques hébergeant des machines virtuelles"
+
+#: front/servers.php
+msgid "Servers inventory"
+msgstr "Inventaire des serveurs"
+
+#: front/servers.php
+msgid "Hardware / Model"
+msgstr "Matériel / Modèle"
+
+#: front/servers.php
+msgid "Hosted VMs"
+msgstr "VM hébergées"
+
+#: src/ServersStatistics.php
+msgid "Virtual"
+msgstr "Virtuel"
+
+#: src/ServersStatistics.php
+msgid "Physical"
+msgstr "Physique"
+
+#: src/ServersStatistics.php
+msgid "Virtualization host"
+msgstr "Hôte de virtualisation"
+
+#: src/ServersStatistics.php
+msgid "Server #%d"
+msgstr "Serveur n°%d"
+
+#: public/js/servers.js
+msgid "server"
+msgstr "serveur"
+
+#: public/js/servers.js
+msgid "servers"
+msgstr "serveurs"
+
+#: public/js/servers.js
+msgid "Loading servers..."
+msgstr "Chargement des serveurs..."
+
+#: public/js/servers.js
+msgid "No servers found for this selection."
+msgstr "Aucun serveur trouvé pour cette sélection."
+
+#: public/js/servers.js
+msgid "Unable to load servers."
+msgstr "Impossible de charger les serveurs."
+
+#: public/js/servers.js
+msgid "Display limited to %d servers. Use full list or CSV for all entries."
+msgstr "Affichage limité à %d serveurs. Utilisez la liste complète ou l'export CSV pour voir toutes les entrées."
+

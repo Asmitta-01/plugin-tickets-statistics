@@ -133,6 +133,10 @@ function plugin_init_ticketsstatistics(): void
         $PLUGIN_HOOKS[\Glpi\Plugin\Hooks::ADD_JAVASCRIPT]['ticketsstatistics'][] = $pluginAssetsRoot . 'js/computers.js';
     }
 
+    if (strpos($uri, "plugins/ticketsstatistics/front/servers.php") !== false) {
+        $PLUGIN_HOOKS[\Glpi\Plugin\Hooks::ADD_JAVASCRIPT]['ticketsstatistics'][] = $pluginAssetsRoot . 'js/servers.js';
+    }
+
     // Check for pending redirect after session is ready  
     if (isset($_SESSION['plugin_redirect'])) {
         $redirect = $_SESSION['plugin_redirect'];
