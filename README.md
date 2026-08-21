@@ -1,13 +1,13 @@
 # TicketsStatistics GLPI plugin
 
-![Version](https://img.shields.io/badge/Version-0.8.4-2563eb)
+![Version](https://img.shields.io/badge/Version-0.9.0-2563eb)
 ![PHP](https://img.shields.io/badge/PHP-%3E%3D8.3-777bb4)
 ![GLPI](https://img.shields.io/badge/GLPI-10.0.16%20to%2011.0.6-0ea5e9)
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Asmitta-01/plugin-tickets-statistics)
 
-TicketsStatistics adds a dedicated reporting dashboard to GLPI for helpdesk ticket activity, plus town-based ticket, asset, and computer/patch analytics.
+TicketsStatistics adds a dedicated reporting dashboard to GLPI for helpdesk ticket activity, plus town-based ticket, asset, computer/patch, and server analytics.
 
-**Current release:** 0.8.4
+**Current release:** 0.9.0
 
 ## Table of contents
 
@@ -28,6 +28,7 @@ TicketsStatistics adds a dedicated reporting dashboard to GLPI for helpdesk tick
 - Ticket creation trends per day
 - Period filters, including custom date ranges
 - PDF export of the dashboard
+- **Markdown export** (`#ticketsstatisticsDownloadMarkdownBtn`) for automated AI analysis and reporting
 
 ### Resolved period view
 
@@ -50,14 +51,25 @@ Dedicated technicians statistics page with assignment and performance metrics.
 
 ### Computers & patch statistics
 
-Dedicated page, filterable by town:
+Dedicated page, filterable by town and entity:
 
-- Cards: Windows 11 computers, latest Windows version (auto-detected), computers to update, obsolete computers (CPU generation < 8), total KB patches deployed
-- Charts: Windows by OS version, Windows by site and OS version (stacked), latest KB patches and installations
+- Cards: Windows 11 computers, latest Windows version (auto-detected), computers to update (capturing older Windows 11 and Windows 10 machines), obsolete computers (CPU generation < 8), total KB patches deployed
 - Charts: Windows by OS version, Windows by site and OS version (stacked), latest KB patches and installations
 - Additional charts: computers by town split by type (laptop, desktop, server, VMware, other), and Windows compliance by entity and OS version (stacked)
+- Adaptive color palette: green for latest version, amber for previous version, and darkening shades of red for older Windows releases
+- Enhanced CPU generation detection: accurately handles Intel 10th Gen Ice Lake G-series (e.g. `i7-1065G7`, `i5-1035G1`), Intel Core Ultra, N-series, and Xeon processors
+- Direct navigation button to the **Servers dashboard**
 - Interactions: clicking cards/charts opens detail modals, with CSV export and GLPI full-list opening where applicable
-- Obsolete computers rule: a computer is considered obsolete when the detected CPU generation is lower than 8.
+
+### Servers statistics
+
+Dedicated page (`front/servers.php`), accessible from the computers and assets dashboards:
+
+- Overview cards: **Total servers**, **Physical servers**, **Virtual servers**, and **Virtualization hosts** (hypervisors hosting VMs)
+- **Pie Chart (by nature)**: Visual breakdown of servers by nature (Physical, Virtual, Virtualization host) with consistent badge colors
+- **Bar Chart (by hardware / model)**: Horizontal distribution of servers across hardware models and virtual container environments
+- **Interactive drilldown**: Clicking any counter card, pie slice, or bar opens a detailed modal with server list, CSV export, and GLPI search redirect
+- **Servers inventory table**: Responsive table with instant client-side text filtering and full CSV export
 
 ### Central dashboard widget
 
@@ -66,7 +78,8 @@ Stats widget embedded in the GLPI central dashboard (Tab 0): ticket status dough
 ### GLPI integration
 
 - Full list opens `computer.php` with GLPI `criteria[...]` URL parameters, so the native GLPI search engine handles filtering directly
-- Shared computers helpers live in a class-based service, `src/ComputersStatistics.php`
+- Shared computers helpers live in `src/ComputersStatistics.php`
+- Dedicated server service lives in `src/ServersStatistics.php`
 
 ## Data displayed (what each value means)
 

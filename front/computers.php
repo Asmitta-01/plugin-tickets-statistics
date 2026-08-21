@@ -48,7 +48,7 @@ $latestVersionLabel = $counters['latest_version'] !== ''
         </h2>
 
         <div class="d-flex gap-2">
-            <a href="<?= ($CFG_GLPI['root_doc'] ?? '') ?>/plugins/ticketsstatistics/front/servers.php" class="btn btn-sm btn-outline-primary" data-bs-toggle="tooltip" title="<?= __('View servers dashboard', 'ticketsstatistics') ?>">
+            <a href="<?= ($CFG_GLPI['root_doc'] ?? '') ?>/plugins/ticketsstatistics/front/servers.php" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" title="<?= __('View servers dashboard', 'ticketsstatistics') ?>">
                 <i class="ti ti-server me-1"></i> <?= __('Servers dashboard', 'ticketsstatistics') ?>
             </a>
             <a href="<?= ($CFG_GLPI['root_doc'] ?? '') ?>/plugins/ticketsstatistics/front/assets.php" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" title="<?= __('View assets dashboard', 'ticketsstatistics') ?>">
