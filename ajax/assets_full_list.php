@@ -77,6 +77,11 @@ switch ($counterKey) {
         $typeKey = rtrim($counterKey, 's'); // 'laptops' -> 'laptop', etc.
         $computerTypeIds = \GlpiPlugin\Ticketsstatistics\ComputersStatistics::getComputerTypeIdsByKey($typeKey);
         
+        if ($counterKey === 'servers') {
+            $vmwareIds = \GlpiPlugin\Ticketsstatistics\ComputersStatistics::getComputerTypeIdsByKey('vmware');
+            $computerTypeIds = array_values(array_unique(array_merge($computerTypeIds, $vmwareIds)));
+        }
+        
         if (count($computerTypeIds) === 1) {
             $addCriterion(4, 'equals', $computerTypeIds[0]);
         } elseif (count($computerTypeIds) > 1) {

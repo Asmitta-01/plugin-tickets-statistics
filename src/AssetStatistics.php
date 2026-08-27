@@ -1091,34 +1091,11 @@ class AssetStatistics
             ],
         ];
 
-        if ($category === 'laptop') {
-            $where[] = new \QueryExpression("
-                (
-                    glpi_computers.computertypes_id NOT IN (4, 5)
-                    AND (
-                        glpi_computertypes.name LIKE '%laptop%'
-                        OR glpi_computertypes.name LIKE '%portable%'
-                        OR glpi_computertypes.name LIKE '%notebook%'
-                        OR glpi_computertypes.name LIKE '%convertible%'
-                    )
-                )
-            ");
+        $typeIds = \GlpiPlugin\Ticketsstatistics\ComputersStatistics::getComputerTypeIdsByKey($category);
+        if (count($typeIds) > 0) {
+            $where['glpi_computers.computertypes_id'] = $typeIds;
         } else {
-            // Desktop & Tower
-            $where[] = new \QueryExpression("
-                (
-                    glpi_computers.computertypes_id NOT IN (4, 5)
-                    AND (
-                        glpi_computertypes.name IS NULL
-                        OR glpi_computertypes.name = ''
-                        OR glpi_computertypes.name LIKE '%desktop%'
-                        OR glpi_computertypes.name LIKE '%bureau%'
-                        OR glpi_computertypes.name LIKE '%tower%'
-                        OR glpi_computertypes.name LIKE '%tour%'
-                        OR glpi_computertypes.name LIKE '%other%'
-                    )
-                )
-            ");
+            $where['glpi_computers.computertypes_id'] = -1;
         }
 
         if ($townId > 0) {
@@ -1176,14 +1153,17 @@ class AssetStatistics
             ],
         ];
 
-        $where[] = new \QueryExpression("
-            (
-                glpi_computers.computertypes_id IN (4, 5)
-                OR glpi_computertypes.name LIKE '%server%'
-                OR glpi_computertypes.name LIKE '%serveur%'
-                OR glpi_computertypes.name LIKE '%vmware%'
-            )
-        ");
+        $typeIds = array_merge(
+            \GlpiPlugin\Ticketsstatistics\ComputersStatistics::getComputerTypeIdsByKey('server'),
+            \GlpiPlugin\Ticketsstatistics\ComputersStatistics::getComputerTypeIdsByKey('vmware')
+        );
+        $typeIds = array_unique($typeIds);
+
+        if (count($typeIds) > 0) {
+            $where['glpi_computers.computertypes_id'] = $typeIds;
+        } else {
+            $where['glpi_computers.computertypes_id'] = -1;
+        }
 
         if ($townId > 0) {
             $leftJoin['glpi_locations'] = [
@@ -1371,42 +1351,21 @@ class AssetStatistics
                     ],
                 ];
 
-                if ($counterKey === 'laptops') {
-                    $where[] = new \QueryExpression("
-                        (
-                            glpi_computers.computertypes_id NOT IN (4, 5)
-                            AND (
-                                glpi_computertypes.name LIKE '%laptop%'
-                                OR glpi_computertypes.name LIKE '%portable%'
-                                OR glpi_computertypes.name LIKE '%notebook%'
-                                OR glpi_computertypes.name LIKE '%convertible%'
-                            )
-                        )
-                    ");
-                } elseif ($counterKey === 'desktops') {
-                    $where[] = new \QueryExpression("
-                        (
-                            glpi_computers.computertypes_id NOT IN (4, 5)
-                            AND (
-                                glpi_computertypes.name IS NULL
-                                OR glpi_computertypes.name = ''
-                                OR glpi_computertypes.name LIKE '%desktop%'
-                                OR glpi_computertypes.name LIKE '%bureau%'
-                                OR glpi_computertypes.name LIKE '%tower%'
-                                OR glpi_computertypes.name LIKE '%tour%'
-                                OR glpi_computertypes.name LIKE '%other%'
-                            )
-                        )
-                    ");
-                } elseif ($counterKey === 'servers') {
-                    $where[] = new \QueryExpression("
-                        (
-                            glpi_computers.computertypes_id IN (4, 5)
-                            OR glpi_computertypes.name LIKE '%server%'
-                            OR glpi_computertypes.name LIKE '%serveur%'
-                            OR glpi_computertypes.name LIKE '%vmware%'
-                        )
-                    ");
+                if (in_array($counterKey, ['laptops', 'desktops', 'servers'], true)) {
+                    $typeKey = rtrim($counterKey, 's'); // 'laptops' -> 'laptop', etc.
+                    $typeIds = \GlpiPlugin\Ticketsstatistics\ComputersStatistics::getComputerTypeIdsByKey($typeKey);
+                    
+                    if ($counterKey === 'servers') {
+                        $vmwareIds = \GlpiPlugin\Ticketsstatistics\ComputersStatistics::getComputerTypeIdsByKey('vmware');
+                        $typeIds = array_unique(array_merge($typeIds, $vmwareIds));
+                    }
+                    
+                    if (count($typeIds) > 0) {
+                        $where['glpi_computers.computertypes_id'] = $typeIds;
+                    } else {
+                        // Force no match if no types found
+                        $where['glpi_computers.computertypes_id'] = -1;
+                    }
                 }
             } elseif ($assetTable === 'glpi_networkequipments') {
                 $leftJoin['glpi_networkequipmenttypes'] = [
