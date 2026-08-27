@@ -39,11 +39,16 @@ foreach (
 }
 
 $counts = [
-    'computers'       => AssetStatistics::countAssets('glpi_computers', $townId, $manufacturerId),
-    'network_devices' => AssetStatistics::countAssets('glpi_networkequipments', $townId, $manufacturerId),
-    'monitors'        => AssetStatistics::countAssets('glpi_monitors', $townId, $manufacturerId),
+    'laptops'   => AssetStatistics::countComputersByCategory('laptop', $townId, $manufacturerId),
+    'desktops'  => AssetStatistics::countComputersByCategory('desktop', $townId, $manufacturerId),
+    'servers'   => AssetStatistics::countServerComputers($townId, $manufacturerId),
+    'monitors'  => AssetStatistics::countAssets('glpi_monitors', $townId, $manufacturerId),
+    'printers'  => AssetStatistics::countAssets('glpi_printers', $townId, $manufacturerId),
+    'switches'  => AssetStatistics::countNetworkEquipmentsByType('switch', $townId, $manufacturerId),
+    'firewalls' => AssetStatistics::countNetworkEquipmentsByType('firewall', $townId, $manufacturerId),
 ];
 $totalAssets = array_sum($counts);
+$counts['total'] = $totalAssets;
 
 $showTownChart = $townId <= 0;
 $showManufacturerChart = $manufacturerId <= 0;
@@ -128,7 +133,7 @@ if ($showManufacturerChart) {
             <i class="ti ti-devices me-2"></i>
             <?= __('Assets Statistics', 'ticketsstatistics') ?>
         </h2>
-        <a href="/plugins/ticketsstatistics/front/computers.php" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" title="<?= __('Back to computers dashboard', 'ticketsstatistics') ?>">
+        <a href="<?= $CFG_GLPI['root_doc'] ?>/plugins/ticketsstatistics/front/computers.php" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" title="<?= __('Back to computers dashboard', 'ticketsstatistics') ?>">
             <i class="ti ti-arrow-left me-1"></i> <?= __('Back to computers dashboard', 'ticketsstatistics') ?>
         </a>
     </div>
@@ -170,43 +175,97 @@ if ($showManufacturerChart) {
         </form>
     </div>
 
-    <div class="row g-3 mb-3">
-        <div class="col-md-3">
-            <div class="card shadow-sm h-100 text-center">
-                <div class="card-body">
-                    <i class="ti ti-devices fs-1 text-secondary"></i>
-                    <div class="display-6 fw-bold"><?= $totalAssets ?></div>
-                    <div class="text-muted"><?= __('Total assets', 'ticketsstatistics') ?></div>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0 fw-semibold text-secondary">
+            <i class="ti ti-devices me-2"></i><?= __('Assets overview', 'ticketsstatistics') ?>
+        </h4>
+        <div class="form-check form-switch mb-0 bg-white px-3 py-2 border rounded shadow-sm">
+            <input class="form-check-input ms-0 me-2" type="checkbox" role="switch" id="ts-assets-cards-toggle" style="cursor: pointer;">
+            <label class="fw-semibold" for="ts-assets-cards-toggle" style="cursor: pointer;">
+                <i class="ti ti-adjustments-horizontal me-1 text-primary"></i><?= __('Show all asset types (Monitors, Printers, Switches, Firewalls)', 'ticketsstatistics') ?>
+            </label>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4" id="ts-assets-cards-container">
+        <!-- Primary Group (Moitié 1 - 4 cartes affichées par défaut) -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card shadow-sm h-100 text-center ts-assets-card" data-counter-key="total" style="border-top:3px solid #64748b; cursor: pointer;">
+                <div class="card-body py-3">
+                    <i class="ti ti-devices fs-1" style="color:#64748b"></i>
+                    <div class="display-6 fw-bold"><?= (int) $counts['total'] ?></div>
+                    <div class="text-muted fw-medium"><?= __('Total assets', 'ticketsstatistics') ?></div>
                 </div>
             </div>
         </div>
 
-        <div class="col-md-3">
-            <div class="card shadow-sm h-100 text-center" style="border-top:3px solid #C00000">
-                <div class="card-body">
-                    <i class="ti ti-device-laptop fs-1" style="color:#C00000"></i>
-                    <div class="display-6 fw-bold"><?= $counts['computers'] ?></div>
-                    <div class="text-muted"><?= __('Computers', 'ticketsstatistics') ?></div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card shadow-sm h-100 text-center ts-assets-card" data-counter-key="laptops" style="border-top:3px solid #0ea5e9; cursor: pointer;">
+                <div class="card-body py-3">
+                    <i class="ti ti-device-laptop fs-1" style="color:#0ea5e9"></i>
+                    <div class="display-6 fw-bold"><?= (int) $counts['laptops'] ?></div>
+                    <div class="text-muted fw-medium"><?= __('Laptops', 'ticketsstatistics') ?></div>
                 </div>
             </div>
         </div>
 
-        <div class="col-md-3">
-            <div class="card shadow-sm h-100 text-center" style="border-top:3px solid #16a34a">
-                <div class="card-body">
-                    <i class="ti ti-network fs-1" style="color:#16a34a"></i>
-                    <div class="display-6 fw-bold"><?= $counts['network_devices'] ?></div>
-                    <div class="text-muted"><?= __('Network devices', 'ticketsstatistics') ?></div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card shadow-sm h-100 text-center ts-assets-card" data-counter-key="desktops" style="border-top:3px solid #2563eb; cursor: pointer;">
+                <div class="card-body py-3">
+                    <i class="ti ti-device-desktop-analytics fs-1" style="color:#2563eb"></i>
+                    <div class="display-6 fw-bold"><?= (int) $counts['desktops'] ?></div>
+                    <div class="text-muted fw-medium"><?= __('Desktops', 'ticketsstatistics') ?></div>
                 </div>
             </div>
         </div>
 
-        <div class="col-md-3">
-            <div class="card shadow-sm h-100 text-center" style="border-top:3px solid #f59e0b">
-                <div class="card-body">
+        <div class="col-xl-3 col-md-6">
+            <div class="card shadow-sm h-100 text-center ts-assets-card" data-counter-key="servers" style="border-top:3px solid #7c3aed; cursor: pointer;">
+                <div class="card-body py-3">
+                    <i class="ti ti-server fs-1" style="color:#7c3aed"></i>
+                    <div class="display-6 fw-bold"><?= (int) $counts['servers'] ?></div>
+                    <div class="text-muted fw-medium"><?= __('Servers', 'ticketsstatistics') ?></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Secondary Group (Moitié 2 - 4 cartes masquées par défaut, affichées via le Switch) -->
+        <div class="col-xl-3 col-md-6 ts-assets-secondary-card d-none">
+            <div class="card shadow-sm h-100 text-center ts-assets-card" data-counter-key="monitors" style="border-top:3px solid #f59e0b; cursor: pointer;">
+                <div class="card-body py-3">
                     <i class="ti ti-device-desktop fs-1" style="color:#f59e0b"></i>
-                    <div class="display-6 fw-bold"><?= $counts['monitors'] ?></div>
-                    <div class="text-muted"><?= __('Monitors', 'ticketsstatistics') ?></div>
+                    <div class="display-6 fw-bold"><?= (int) $counts['monitors'] ?></div>
+                    <div class="text-muted fw-medium"><?= __('Monitors', 'ticketsstatistics') ?></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 ts-assets-secondary-card d-none">
+            <div class="card shadow-sm h-100 text-center ts-assets-card" data-counter-key="printers" style="border-top:3px solid #ec4899; cursor: pointer;">
+                <div class="card-body py-3">
+                    <i class="ti ti-printer fs-1" style="color:#ec4899"></i>
+                    <div class="display-6 fw-bold"><?= (int) $counts['printers'] ?></div>
+                    <div class="text-muted fw-medium"><?= __('Printers', 'ticketsstatistics') ?></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 ts-assets-secondary-card d-none">
+            <div class="card shadow-sm h-100 text-center ts-assets-card" data-counter-key="switches" style="border-top:3px solid #16a34a; cursor: pointer;">
+                <div class="card-body py-3">
+                    <i class="ti ti-network fs-1" style="color:#16a34a"></i>
+                    <div class="display-6 fw-bold"><?= (int) $counts['switches'] ?></div>
+                    <div class="text-muted fw-medium"><?= __('Network switches', 'ticketsstatistics') ?></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 ts-assets-secondary-card d-none">
+            <div class="card shadow-sm h-100 text-center ts-assets-card" data-counter-key="firewalls" style="border-top:3px solid #dc2626; cursor: pointer;">
+                <div class="card-body py-3">
+                    <i class="ti ti-shield-lock fs-1" style="color:#dc2626"></i>
+                    <div class="display-6 fw-bold"><?= (int) $counts['firewalls'] ?></div>
+                    <div class="text-muted fw-medium"><?= __('Firewalls', 'ticketsstatistics') ?></div>
                 </div>
             </div>
         </div>
@@ -335,23 +394,34 @@ if ($showManufacturerChart) {
     </div>
 </div>
 
-<div class="modal fade" id="ts-assets-computers-modal" tabindex="-1" aria-hidden="true">
+<?php
+$assetsModalAjaxUrl = $CFG_GLPI['root_doc'] . '/plugins/ticketsstatistics/ajax/assets_modal.php';
+$assetsExportUrl = $CFG_GLPI['root_doc'] . '/plugins/ticketsstatistics/ajax/assets_export.php';
+$assetsFullListUrl = $CFG_GLPI['root_doc'] . '/plugins/ticketsstatistics/ajax/assets_full_list.php';
+?>
+
+<div class="modal fade" id="ts-assets-modal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-xl modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header">
-                <div class="py-md-3">
-                    <h5 class="modal-title mb-0" id="ts-assets-computers-modal-title"><?= __('Computers', 'ticketsstatistics') ?></h5>
-                    <div class="text-muted small" id="ts-assets-computers-modal-count"></div>
+                <div>
+                    <h5 class="modal-title mb-0" id="ts-assets-modal-title"><?= __('Assets', 'ticketsstatistics') ?></h5>
+                    <div class="text-muted small w-auto" id="ts-assets-modal-count"></div>
                 </div>
-                <button class="btn btn-secondary btn-sm ms-auto" disabled id="ts-assets-computers-download-btn" data-bs-toggle="tooltip" title="<?= __('Download as CSV', 'ticketsstatistics') ?>">
-                    <i class="ti ti-file-spreadsheet me-1"></i>
-                    <?= __('Download', 'ticketsstatistics') ?>
-                </button>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="<?= __('Close') ?>"></button>
             </div>
             <div class="modal-body">
-                <div id="ts-assets-computers-modal-alert" class="alert alert-info d-none mb-3"></div>
-                <div id="ts-assets-computers-modal-body"></div>
+                <div id="ts-assets-modal-alert" class="alert alert-info d-none mb-3"></div>
+                <div id="ts-assets-modal-body"></div>
+            </div>
+            <div class="modal-footer">
+                <a href="#" class="btn btn-outline-secondary btn-sm" id="ts-assets-modal-download-btn" target="_blank">
+                    <i class="ti ti-file-spreadsheet me-1"></i> <?= __('CSV Export', 'ticketsstatistics') ?>
+                </a>
+                <a href="#" class="btn btn-primary btn-sm" id="ts-assets-modal-full-btn" target="_blank">
+                    <i class="ti ti-external-link me-1"></i> <?= __('Open full list', 'ticketsstatistics') ?>
+                </a>
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal"><?= __('Close', 'ticketsstatistics') ?></button>
             </div>
         </div>
     </div>
@@ -362,6 +432,11 @@ if ($showTownChart || $showManufacturerChart):
 ?>
     <div
         id="ts-assets-chart-data"
+        data-assets-modal-url="<?= htmlspecialchars($assetsModalAjaxUrl, ENT_QUOTES, 'UTF-8') ?>"
+        data-assets-export-url="<?= htmlspecialchars($assetsExportUrl, ENT_QUOTES, 'UTF-8') ?>"
+        data-assets-full-list-url="<?= htmlspecialchars($assetsFullListUrl, ENT_QUOTES, 'UTF-8') ?>"
+        data-town-id="<?= (int) $townId ?>"
+        data-manufacturer-id="<?= (int) $manufacturerId ?>"
         data-town-chart="<?= htmlspecialchars(json_encode($townChart, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT), ENT_QUOTES, 'UTF-8') ?>"
         data-manufacturer-chart="<?= htmlspecialchars(json_encode($manufacturerChart, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT), ENT_QUOTES, 'UTF-8') ?>"
         data-top-softwares-chart="<?= htmlspecialchars(json_encode(['labels' => array_column($topSoftwares, 'name'), 'values' => array_column($topSoftwares, 'count')], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT), ENT_QUOTES, 'UTF-8') ?>"
@@ -381,6 +456,11 @@ else:
 ?>
     <div
         id="ts-assets-chart-data"
+        data-assets-modal-url="<?= htmlspecialchars($assetsModalAjaxUrl, ENT_QUOTES, 'UTF-8') ?>"
+        data-assets-export-url="<?= htmlspecialchars($assetsExportUrl, ENT_QUOTES, 'UTF-8') ?>"
+        data-assets-full-list-url="<?= htmlspecialchars($assetsFullListUrl, ENT_QUOTES, 'UTF-8') ?>"
+        data-town-id="<?= (int) $townId ?>"
+        data-manufacturer-id="<?= (int) $manufacturerId ?>"
         data-top-softwares-chart="<?= htmlspecialchars(json_encode(['labels' => array_column($topSoftwares, 'name'), 'values' => array_column($topSoftwares, 'count')], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT), ENT_QUOTES, 'UTF-8') ?>"
         data-software-coverage-chart="<?= htmlspecialchars(json_encode($softwareCoverage, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT), ENT_QUOTES, 'UTF-8') ?>"
         data-software-coverage-title="<?= __('Software coverage', 'ticketsstatistics') ?>"

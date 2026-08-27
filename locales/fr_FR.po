@@ -1200,4 +1200,33 @@ msgstr "Non spécifié"
 msgid "Hardware / Model: %s"
 msgstr "Matériel / Modèle : %s"
 
+#: front/assets.php
+msgid "Assets overview"
+msgstr "Vue d'ensemble des actifs"
+
+#: front/assets.php
+msgid "Show all asset types (Monitors, Printers, Switches, Firewalls)"
+msgstr "Afficher tous les équipements (Moniteurs, Imprimantes, Switchs, Pares-feux)"
+
+#: front/assets.php
+msgid "Laptops"
+msgstr "Laptops (Portables)"
+
+#: front/assets.php
+msgid "Desktops"
+msgstr "Desktops (Bureaux)"
+
+#: front/assets.php
+msgid "Physical computers"
+msgstr "Ordinateurs physiques"
+
+#: front/assets.php
+msgid "Network switches"
+msgstr "Switchs réseau"
+
+#: front/assets.php
+msgid "Firewalls"
+msgstr "Pares-feux"
+
+
 

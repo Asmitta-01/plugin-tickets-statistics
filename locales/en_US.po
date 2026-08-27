@@ -1192,4 +1192,33 @@ msgstr "Unspecified"
 msgid "Hardware / Model: %s"
 msgstr "Hardware / Model: %s"
 
+#: front/assets.php
+msgid "Assets overview"
+msgstr "Assets overview"
+
+#: front/assets.php
+msgid "Show all asset types (Monitors, Printers, Switches, Firewalls)"
+msgstr "Show all asset types (Monitors, Printers, Switches, Firewalls)"
+
+#: front/assets.php
+msgid "Laptops"
+msgstr "Laptops"
+
+#: front/assets.php
+msgid "Desktops"
+msgstr "Desktops"
+
+#: front/assets.php
+msgid "Physical computers"
+msgstr "Physical computers"
+
+#: front/assets.php
+msgid "Network switches"
+msgstr "Network switches"
+
+#: front/assets.php
+msgid "Firewalls"
+msgstr "Firewalls"
+
+
 

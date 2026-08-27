@@ -1,6 +1,6 @@
 let tsSoftwareCoverageChart = null;
 let tsAssetsChartDataNode = null;
-let tsAssetsComputersModal = null;
+let tsAssetsModal = null;
 let tsAssetsModalComputers = [];
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -11,9 +11,9 @@ document.addEventListener('DOMContentLoaded', function () {
     tsAssetsChartDataNode = chartDataNode;
 
     if (typeof bootstrap !== 'undefined') {
-        const modalNode = document.getElementById('ts-assets-computers-modal');
+        const modalNode = document.getElementById('ts-assets-modal');
         if (modalNode) {
-            tsAssetsComputersModal = new bootstrap.Modal(modalNode);
+            tsAssetsModal = new bootstrap.Modal(modalNode);
         }
     }
 
@@ -46,7 +46,143 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     initSoftwareCoverageAjax(chartDataNode);
+
+    const toggleInput = document.getElementById('ts-assets-cards-toggle');
+    if (toggleInput) {
+        const savedState = localStorage.getItem('ts_assets_show_all_cards');
+        if (savedState === 'true') {
+            toggleInput.checked = true;
+            document.querySelectorAll('.ts-assets-secondary-card').forEach(function (el) {
+                el.classList.remove('d-none');
+            });
+        }
+
+        toggleInput.addEventListener('change', function () {
+            const isChecked = this.checked;
+            localStorage.setItem('ts_assets_show_all_cards', isChecked ? 'true' : 'false');
+            document.querySelectorAll('.ts-assets-secondary-card').forEach(function (el) {
+                if (isChecked) {
+                    el.classList.remove('d-none');
+                } else {
+                    el.classList.add('d-none');
+                }
+            });
+        });
+    }
+
+    document.querySelectorAll('.ts-assets-card[data-counter-key]').forEach(function (card) {
+        card.addEventListener('click', function () {
+            const counterKey = card.dataset.counterKey || 'total';
+            openAssetsModal(counterKey, chartDataNode);
+        });
+    });
 });
+
+let tsAssetsDrilldownModal = null;
+
+function openAssetsModal(counterKey, chartDataNode) {
+    if (!chartDataNode) {
+        return;
+    }
+
+    const modalUrl = chartDataNode.dataset.assetsModalUrl;
+    const exportUrl = chartDataNode.dataset.assetsExportUrl;
+    const fullListUrl = chartDataNode.dataset.assetsFullListUrl;
+    const townId = chartDataNode.dataset.townId || 0;
+    const manufacturerId = chartDataNode.dataset.manufacturerId || 0;
+
+    const modalNode = document.getElementById('ts-assets-modal');
+    if (!modalNode) {
+        return;
+    }
+
+    if (typeof bootstrap !== 'undefined' && !tsAssetsDrilldownModal) {
+        tsAssetsDrilldownModal = new bootstrap.Modal(modalNode);
+    }
+
+    const titleNode = document.getElementById('ts-assets-modal-title');
+    const countNode = document.getElementById('ts-assets-modal-count');
+    const bodyNode = document.getElementById('ts-assets-modal-body');
+    const alertNode = document.getElementById('ts-assets-modal-alert');
+    const downloadBtn = document.getElementById('ts-assets-modal-download-btn');
+    const fullBtn = document.getElementById('ts-assets-modal-full-btn');
+
+    if (titleNode) titleNode.textContent = 'Chargement...';
+    if (countNode) countNode.textContent = '';
+    if (bodyNode) bodyNode.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary" role="status"></div></div>';
+    if (alertNode) alertNode.classList.add('d-none');
+    if (fullBtn) fullBtn.classList.remove('d-none');
+
+    const params = new URLSearchParams({
+        counter_key: counterKey,
+        town_id: townId,
+        manufacturer_id: manufacturerId
+    });
+
+    if (downloadBtn) {
+        downloadBtn.onclick = null;
+        downloadBtn.classList.remove('disabled');
+        downloadBtn.href = `${exportUrl}?${params.toString()}`;
+    }
+    if (fullBtn) fullBtn.href = `${fullListUrl}?${params.toString()}`;
+
+    if (tsAssetsDrilldownModal) {
+        tsAssetsDrilldownModal.show();
+    }
+
+    fetch(`${modalUrl}?${params.toString()}`)
+        .then(response => response.json())
+        .then(data => {
+            if (titleNode) titleNode.textContent = data.title || 'Actifs';
+            if (countNode) countNode.textContent = `${data.count || 0} élément(s)`;
+
+            if (data.truncated && alertNode) {
+                alertNode.textContent = `Affichage limité aux ${data.limit} premiers éléments. Utilisez l'export CSV ou la liste complète pour voir tout.`;
+                alertNode.classList.remove('d-none');
+            }
+
+            if (!data.assets || data.assets.length === 0) {
+                bodyNode.innerHTML = '<div class="text-muted text-center py-4">Aucun actif trouvé pour cette sélection.</div>';
+                return;
+            }
+
+            let html = '<div class="table-responsive"><table class="table table-hover table-striped align-middle mb-0">';
+            html += '<thead class="table-light"><tr>';
+            html += '<th>Nom</th>';
+            html += '<th>Type</th>';
+            html += '<th>Fabricant</th>';
+            html += '<th>Modèle</th>';
+            html += '<th>N° Série</th>';
+            html += '<th>Commune</th>';
+            html += '<th>Entité</th>';
+            html += '<th class="text-end">Action</th>';
+            html += '</tr></thead><tbody>';
+
+            data.assets.forEach(asset => {
+                html += '<tr>';
+                html += `<td class="fw-semibold">${escapeHtml(asset.name || '-')}</td>`;
+                html += `<td><span class="badge bg-secondary-lt">${escapeHtml(asset.type_name || asset.itemtype)}</span></td>`;
+                html += `<td>${escapeHtml(asset.manufacturer || '-')}</td>`;
+                html += `<td>${escapeHtml(asset.model || '-')}</td>`;
+                html += `<td><code>${escapeHtml(asset.serial || '-')}</code></td>`;
+                html += `<td>${escapeHtml(asset.town || '-')}</td>`;
+                html += `<td>${escapeHtml(asset.entity || '-')}</td>`;
+                html += `<td class="text-end"><a href="${asset.url}" class="btn btn-sm btn-outline-primary" target="_blank"><i class="ti ti-external-link me-1"></i>Ouvrir</a></td>`;
+                html += '</tr>';
+            });
+
+            html += '</tbody></table></div>';
+            bodyNode.innerHTML = html;
+        })
+        .catch(err => {
+            console.error('Error fetching assets modal:', err);
+            bodyNode.innerHTML = '<div class="alert alert-danger">Erreur lors du chargement des actifs.</div>';
+        });
+}
+
+function escapeHtml(str) {
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
 
 function parseChartData(rawValue) {
     if (!rawValue) {
@@ -380,11 +516,16 @@ function openSoftwareCoverageComputersModal(coverage) {
     params.set('match_all', getMatchAllSelection(form) ? '1' : '0');
     params.set('coverage', coverage);
 
-    const titleNode = document.getElementById('ts-assets-computers-modal-title');
-    const countNode = document.getElementById('ts-assets-computers-modal-count');
-    const alertNode = document.getElementById('ts-assets-computers-modal-alert');
-    const bodyNode = document.getElementById('ts-assets-computers-modal-body');
-    const downloadBtn = document.getElementById('ts-assets-computers-download-btn');
+    const titleNode = document.getElementById('ts-assets-modal-title');
+    const countNode = document.getElementById('ts-assets-modal-count');
+    const alertNode = document.getElementById('ts-assets-modal-alert');
+    const bodyNode = document.getElementById('ts-assets-modal-body');
+    const downloadBtn = document.getElementById('ts-assets-modal-download-btn');
+    const fullBtn = document.getElementById('ts-assets-modal-full-btn');
+
+    if (fullBtn) {
+        fullBtn.classList.add('d-none');
+    }
 
     if (titleNode) {
         titleNode.textContent = tsAssetsChartDataNode.dataset.loadingComputersLabel || 'Loading computers...';
@@ -397,13 +538,16 @@ function openSoftwareCoverageComputersModal(coverage) {
         alertNode.classList.add('d-none');
     }
     if (downloadBtn) {
-        downloadBtn.disabled = true;
+        downloadBtn.removeAttribute('href');
+        downloadBtn.classList.add('disabled');
     }
     if (bodyNode) {
         bodyNode.innerHTML = renderComputersLoaderTable();
     }
 
-    tsAssetsComputersModal.show();
+    if (tsAssetsModal) {
+        tsAssetsModal.show();
+    }
 
     fetch(ajaxUrl + '?' + params.toString(), {
         method: 'GET',

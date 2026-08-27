@@ -1065,4 +1065,486 @@ class AssetStatistics
 
         return (int) ($iter->current()['cpt'] ?? 0);
     }
+
+    /**
+     * Count computers by specific workstation category ('laptop' vs 'desktop').
+     */
+    public static function countComputersByCategory(string $category, int $townId = 0, int $manufacturerId = 0): int
+    {
+        global $DB;
+
+        $where = [
+            'glpi_computers.is_deleted'  => 0,
+            'glpi_computers.is_template' => 0,
+        ] + getEntitiesRestrictCriteria('glpi_computers');
+
+        if ($manufacturerId > 0) {
+            $where['glpi_computers.manufacturers_id'] = $manufacturerId;
+        }
+
+        $leftJoin = [
+            'glpi_computertypes' => [
+                'ON' => [
+                    'glpi_computertypes' => 'id',
+                    'glpi_computers'     => 'computertypes_id',
+                ],
+            ],
+        ];
+
+        if ($category === 'laptop') {
+            $where[] = new \QueryExpression("
+                (
+                    glpi_computers.computertypes_id NOT IN (4, 5)
+                    AND (
+                        glpi_computertypes.name LIKE '%laptop%'
+                        OR glpi_computertypes.name LIKE '%portable%'
+                        OR glpi_computertypes.name LIKE '%notebook%'
+                        OR glpi_computertypes.name LIKE '%convertible%'
+                    )
+                )
+            ");
+        } else {
+            // Desktop & Tower
+            $where[] = new \QueryExpression("
+                (
+                    glpi_computers.computertypes_id NOT IN (4, 5)
+                    AND (
+                        glpi_computertypes.name IS NULL
+                        OR glpi_computertypes.name = ''
+                        OR glpi_computertypes.name LIKE '%desktop%'
+                        OR glpi_computertypes.name LIKE '%bureau%'
+                        OR glpi_computertypes.name LIKE '%tower%'
+                        OR glpi_computertypes.name LIKE '%tour%'
+                        OR glpi_computertypes.name LIKE '%other%'
+                    )
+                )
+            ");
+        }
+
+        if ($townId > 0) {
+            $leftJoin['glpi_locations'] = [
+                'ON' => [
+                    'glpi_locations' => 'id',
+                    'glpi_computers' => 'locations_id',
+                ],
+            ];
+            $where['glpi_locations.id'] = $townId;
+        }
+
+        $iter = $DB->request([
+            'COUNT'     => 'cpt',
+            'FROM'      => 'glpi_computers',
+            'LEFT JOIN' => $leftJoin,
+            'WHERE'     => $where,
+        ]);
+        $row = $iter->current();
+
+        return (int) ($row['cpt'] ?? 0);
+    }
+
+    /**
+     * Count physical workstation computers (laptops & desktops, excluding servers/VMware).
+     */
+    public static function countWorkstationComputers(int $townId = 0, int $manufacturerId = 0): int
+    {
+        return self::countComputersByCategory('laptop', $townId, $manufacturerId)
+            + self::countComputersByCategory('desktop', $townId, $manufacturerId);
+    }
+
+    /**
+     * Count server computers (servers & VMware).
+     */
+    public static function countServerComputers(int $townId = 0, int $manufacturerId = 0): int
+    {
+        global $DB;
+
+        $where = [
+            'glpi_computers.is_deleted'  => 0,
+            'glpi_computers.is_template' => 0,
+        ] + getEntitiesRestrictCriteria('glpi_computers');
+
+        if ($manufacturerId > 0) {
+            $where['glpi_computers.manufacturers_id'] = $manufacturerId;
+        }
+
+        $leftJoin = [
+            'glpi_computertypes' => [
+                'ON' => [
+                    'glpi_computertypes' => 'id',
+                    'glpi_computers'     => 'computertypes_id',
+                ],
+            ],
+        ];
+
+        $where[] = new \QueryExpression("
+            (
+                glpi_computers.computertypes_id IN (4, 5)
+                OR glpi_computertypes.name LIKE '%server%'
+                OR glpi_computertypes.name LIKE '%serveur%'
+                OR glpi_computertypes.name LIKE '%vmware%'
+            )
+        ");
+
+        if ($townId > 0) {
+            $leftJoin['glpi_locations'] = [
+                'ON' => [
+                    'glpi_locations' => 'id',
+                    'glpi_computers' => 'locations_id',
+                ],
+            ];
+            $where['glpi_locations.id'] = $townId;
+        }
+
+        $iter = $DB->request([
+            'COUNT'     => 'cpt',
+            'FROM'      => 'glpi_computers',
+            'LEFT JOIN' => $leftJoin,
+            'WHERE'     => $where,
+        ]);
+        $row = $iter->current();
+
+        return (int) ($row['cpt'] ?? 0);
+    }
+
+    /**
+     * Count network equipment by type key ('switch', 'firewall').
+     */
+    public static function countNetworkEquipmentsByType(string $typeKey, int $townId = 0, int $manufacturerId = 0): int
+    {
+        global $DB;
+
+        $where = [
+            'glpi_networkequipments.is_deleted'  => 0,
+            'glpi_networkequipments.is_template' => 0,
+        ] + getEntitiesRestrictCriteria('glpi_networkequipments');
+
+        if ($manufacturerId > 0) {
+            $where['glpi_networkequipments.manufacturers_id'] = $manufacturerId;
+        }
+
+        $leftJoin = [
+            'glpi_networkequipmenttypes' => [
+                'ON' => [
+                    'glpi_networkequipmenttypes' => 'id',
+                    'glpi_networkequipments'     => 'networkequipmenttypes_id',
+                ],
+            ],
+        ];
+
+        if ($typeKey === 'switch') {
+            $where[] = new \QueryExpression("
+                (
+                    glpi_networkequipmenttypes.name LIKE '%switch%'
+                    OR glpi_networkequipments.name LIKE '%switch%'
+                )
+            ");
+        } elseif ($typeKey === 'firewall') {
+            $where[] = new \QueryExpression("
+                (
+                    glpi_networkequipmenttypes.name LIKE '%pare-feu%'
+                    OR glpi_networkequipmenttypes.name LIKE '%firewall%'
+                    OR glpi_networkequipments.name LIKE '%firewall%'
+                    OR glpi_networkequipments.name LIKE '%pare-feu%'
+                )
+            ");
+        }
+
+        if ($townId > 0) {
+            $leftJoin['glpi_locations'] = [
+                'ON' => [
+                    'glpi_locations'         => 'id',
+                    'glpi_networkequipments' => 'locations_id',
+                ],
+            ];
+            $where['glpi_locations.id'] = $townId;
+        }
+
+        $iter = $DB->request([
+            'COUNT'     => 'cpt',
+            'FROM'      => 'glpi_networkequipments',
+            'LEFT JOIN' => $leftJoin,
+            'WHERE'     => $where,
+        ]);
+        $row = $iter->current();
+
+        return (int) ($row['cpt'] ?? 0);
+    }
+
+    /**
+     * Resolve assets list for modal drilldown and CSV export based on counter_key.
+     *
+     * @param array<string, mixed> $input
+     * @return array{title: string, count: int, rows: array<int, array<string, mixed>>}
+     */
+    public static function resolveAssetsScope(array $input): array
+    {
+        $counterKey = (string) ($input['counter_key'] ?? 'total');
+        $townId = (int) ($input['town_id'] ?? 0);
+        $manufacturerId = (int) ($input['manufacturer_id'] ?? 0);
+
+        $DB = \DBConnection::getReadConnection();
+        global $CFG_GLPI;
+
+        $rows = [];
+
+        $tablesToFetch = [];
+        if (in_array($counterKey, ['laptops', 'desktops', 'servers', 'computers'], true)) {
+            $tablesToFetch[] = 'glpi_computers';
+        } elseif ($counterKey === 'monitors') {
+            $tablesToFetch[] = 'glpi_monitors';
+        } elseif ($counterKey === 'printers') {
+            $tablesToFetch[] = 'glpi_printers';
+        } elseif (in_array($counterKey, ['switches', 'firewalls'], true)) {
+            $tablesToFetch[] = 'glpi_networkequipments';
+        } else {
+            // 'total' -> fetch all asset types
+            $tablesToFetch = ['glpi_computers', 'glpi_monitors', 'glpi_printers', 'glpi_networkequipments'];
+        }
+
+        foreach ($tablesToFetch as $assetTable) {
+            $itemtype = match ($assetTable) {
+                'glpi_computers'         => 'Computer',
+                'glpi_monitors'          => 'Monitor',
+                'glpi_printers'          => 'Printer',
+                'glpi_networkequipments' => 'NetworkEquipment',
+                default                  => 'Computer',
+            };
+
+            $formScript = match ($itemtype) {
+                'Computer'         => 'computer.form.php',
+                'Monitor'          => 'monitor.form.php',
+                'Printer'          => 'printer.form.php',
+                'NetworkEquipment' => 'networkequipment.form.php',
+                default            => 'computer.form.php',
+            };
+
+            $where = [
+                "$assetTable.is_deleted"  => 0,
+                "$assetTable.is_template" => 0,
+            ] + getEntitiesRestrictCriteria($assetTable);
+
+            if ($manufacturerId > 0 && $DB->fieldExists($assetTable, 'manufacturers_id')) {
+                $where["$assetTable.manufacturers_id"] = $manufacturerId;
+            }
+
+            $leftJoin = [];
+
+            if ($DB->fieldExists($assetTable, 'manufacturers_id')) {
+                $leftJoin['glpi_manufacturers'] = [
+                    'ON' => [
+                        'glpi_manufacturers' => 'id',
+                        $assetTable          => 'manufacturers_id',
+                    ],
+                ];
+            }
+
+            if ($DB->fieldExists($assetTable, 'locations_id')) {
+                $leftJoin['glpi_locations'] = [
+                    'ON' => [
+                        'glpi_locations' => 'id',
+                        $assetTable      => 'locations_id',
+                    ],
+                ];
+                if ($townId > 0) {
+                    $where['glpi_locations.id'] = $townId;
+                }
+            }
+
+            $leftJoin['glpi_entities'] = [
+                'ON' => [
+                    'glpi_entities' => 'id',
+                    $assetTable     => 'entities_id',
+                ],
+            ];
+
+            if ($assetTable === 'glpi_computers') {
+                $leftJoin['glpi_computertypes'] = [
+                    'ON' => [
+                        'glpi_computertypes' => 'id',
+                        'glpi_computers'     => 'computertypes_id',
+                    ],
+                ];
+                $leftJoin['glpi_computermodels'] = [
+                    'ON' => [
+                        'glpi_computermodels' => 'id',
+                        'glpi_computers'      => 'computermodels_id',
+                    ],
+                ];
+
+                if ($counterKey === 'laptops') {
+                    $where[] = new \QueryExpression("
+                        (
+                            glpi_computers.computertypes_id NOT IN (4, 5)
+                            AND (
+                                glpi_computertypes.name LIKE '%laptop%'
+                                OR glpi_computertypes.name LIKE '%portable%'
+                                OR glpi_computertypes.name LIKE '%notebook%'
+                                OR glpi_computertypes.name LIKE '%convertible%'
+                            )
+                        )
+                    ");
+                } elseif ($counterKey === 'desktops') {
+                    $where[] = new \QueryExpression("
+                        (
+                            glpi_computers.computertypes_id NOT IN (4, 5)
+                            AND (
+                                glpi_computertypes.name IS NULL
+                                OR glpi_computertypes.name = ''
+                                OR glpi_computertypes.name LIKE '%desktop%'
+                                OR glpi_computertypes.name LIKE '%bureau%'
+                                OR glpi_computertypes.name LIKE '%tower%'
+                                OR glpi_computertypes.name LIKE '%tour%'
+                                OR glpi_computertypes.name LIKE '%other%'
+                            )
+                        )
+                    ");
+                } elseif ($counterKey === 'servers') {
+                    $where[] = new \QueryExpression("
+                        (
+                            glpi_computers.computertypes_id IN (4, 5)
+                            OR glpi_computertypes.name LIKE '%server%'
+                            OR glpi_computertypes.name LIKE '%serveur%'
+                            OR glpi_computertypes.name LIKE '%vmware%'
+                        )
+                    ");
+                }
+            } elseif ($assetTable === 'glpi_networkequipments') {
+                $leftJoin['glpi_networkequipmenttypes'] = [
+                    'ON' => [
+                        'glpi_networkequipmenttypes' => 'id',
+                        'glpi_networkequipments'     => 'networkequipmenttypes_id',
+                    ],
+                ];
+                $leftJoin['glpi_networkequipmentmodels'] = [
+                    'ON' => [
+                        'glpi_networkequipmentmodels' => 'id',
+                        'glpi_networkequipments'       => 'networkequipmentmodels_id',
+                    ],
+                ];
+
+                if ($counterKey === 'switches') {
+                    $where[] = new \QueryExpression("
+                        (
+                            glpi_networkequipmenttypes.name LIKE '%switch%'
+                            OR glpi_networkequipments.name LIKE '%switch%'
+                        )
+                    ");
+                } elseif ($counterKey === 'firewalls') {
+                    $where[] = new \QueryExpression("
+                        (
+                            glpi_networkequipmenttypes.name LIKE '%pare-feu%'
+                            OR glpi_networkequipmenttypes.name LIKE '%firewall%'
+                            OR glpi_networkequipments.name LIKE '%firewall%'
+                            OR glpi_networkequipments.name LIKE '%pare-feu%'
+                        )
+                    ");
+                }
+            } elseif ($assetTable === 'glpi_monitors') {
+                $leftJoin['glpi_monitortypes'] = [
+                    'ON' => [
+                        'glpi_monitortypes' => 'id',
+                        'glpi_monitors'     => 'monitortypes_id',
+                    ],
+                ];
+                $leftJoin['glpi_monitormodels'] = [
+                    'ON' => [
+                        'glpi_monitormodels' => 'id',
+                        'glpi_monitors'      => 'monitormodels_id',
+                    ],
+                ];
+            } elseif ($assetTable === 'glpi_printers') {
+                $leftJoin['glpi_printertypes'] = [
+                    'ON' => [
+                        'glpi_printertypes' => 'id',
+                        'glpi_printers'     => 'printertypes_id',
+                    ],
+                ];
+                $leftJoin['glpi_printermodels'] = [
+                    'ON' => [
+                        'glpi_printermodels' => 'id',
+                        'glpi_printers'      => 'printermodels_id',
+                    ],
+                ];
+            }
+
+            $select = [
+                "$assetTable.id",
+                "$assetTable.name",
+                "$assetTable.serial",
+                "$assetTable.otherserial",
+                "$assetTable.date_mod",
+                "glpi_entities.completename AS entity_name",
+            ];
+
+            if ($DB->fieldExists($assetTable, 'manufacturers_id')) {
+                $select[] = "glpi_manufacturers.name AS manufacturer_name";
+            }
+            if ($DB->fieldExists($assetTable, 'locations_id')) {
+                $select[] = "glpi_locations.town";
+                $select[] = "glpi_locations.completename AS location_name";
+            }
+
+            if ($assetTable === 'glpi_computers') {
+                $select[] = "glpi_computertypes.name AS type_name";
+                $select[] = "glpi_computermodels.name AS model_name";
+            } elseif ($assetTable === 'glpi_networkequipments') {
+                $select[] = "glpi_networkequipmenttypes.name AS type_name";
+                $select[] = "glpi_networkequipmentmodels.name AS model_name";
+            } elseif ($assetTable === 'glpi_monitors') {
+                $select[] = "glpi_monitortypes.name AS type_name";
+                $select[] = "glpi_monitormodels.name AS model_name";
+            } elseif ($assetTable === 'glpi_printers') {
+                $select[] = "glpi_printertypes.name AS type_name";
+                $select[] = "glpi_printermodels.name AS model_name";
+            }
+
+            $dbRows = $DB->request([
+                'SELECT'    => $select,
+                'FROM'      => $assetTable,
+                'LEFT JOIN' => $leftJoin,
+                'WHERE'     => $where,
+                'ORDER'     => ["$assetTable.id ASC"],
+            ]);
+
+            foreach ($dbRows as $row) {
+                $id = (int) ($row['id'] ?? 0);
+                if ($id <= 0) {
+                    continue;
+                }
+
+                $rows[] = [
+                    'id'               => $id,
+                    'itemtype'         => $itemtype,
+                    'name'             => (string) ($row['name'] ?? ''),
+                    'serial'           => (string) ($row['serial'] ?? ''),
+                    'inventory_number' => (string) ($row['otherserial'] ?? ''),
+                    'type_name'        => (string) ($row['type_name'] ?? $itemtype),
+                    'manufacturer'     => (string) ($row['manufacturer_name'] ?? '-'),
+                    'model'            => (string) ($row['model_name'] ?? '-'),
+                    'town'             => (string) (($row['town'] ?? '') ?: __('Unknown', 'ticketsstatistics')),
+                    'location'         => (string) (($row['location_name'] ?? '') ?: __('Unknown', 'ticketsstatistics')),
+                    'entity'           => (string) (($row['entity_name'] ?? '') ?: __('Unknown', 'ticketsstatistics')),
+                    'last_update'      => \Html::convDateTime((string) ($row['date_mod'] ?? '')),
+                    'url'              => ($CFG_GLPI['root_doc'] ?? '') . '/front/' . $formScript . '?id=' . $id,
+                ];
+            }
+        }
+
+        $titles = [
+            'total'     => __('Total assets', 'ticketsstatistics'),
+            'laptops'   => __('Laptops', 'ticketsstatistics'),
+            'desktops'  => __('Desktops', 'ticketsstatistics'),
+            'servers'   => __('Servers', 'ticketsstatistics'),
+            'monitors'  => __('Monitors', 'ticketsstatistics'),
+            'printers'  => __('Printers', 'ticketsstatistics'),
+            'switches'  => __('Network switches', 'ticketsstatistics'),
+            'firewalls' => __('Firewalls', 'ticketsstatistics'),
+        ];
+
+        return [
+            'title' => $titles[$counterKey] ?? __('Assets', 'ticketsstatistics'),
+            'count' => count($rows),
+            'rows'  => $rows,
+        ];
+    }
 }
