@@ -22,12 +22,6 @@ $counterKey = (string) ($_GET['counter_key'] ?? 'total');
 $townId = (int) ($_GET['town_id'] ?? 0);
 $manufacturerId = (int) ($_GET['manufacturer_id'] ?? 0);
 
-$resolved = AssetStatistics::resolveAssetsScope([
-    'counter_key'     => $counterKey,
-    'town_id'         => $townId,
-    'manufacturer_id' => $manufacturerId,
-]);
-
 $script = match ($counterKey) {
     'monitors'  => 'monitor.php?reset=reset',
     'printers'  => 'printer.php?reset=reset',
@@ -65,6 +59,7 @@ if ($manufacturerId > 0) {
 switch ($counterKey) {
     case 'monitors':
     case 'printers':
+    case 'total':
         break;
     case 'switches':
         $addCriterion(4, 'contains', 'switch');
@@ -76,19 +71,27 @@ switch ($counterKey) {
         $addCriterion(1, 'contains', 'firewall', 'OR');
         $addCriterion(1, 'contains', 'pare-feu', 'OR');
         break;
-    default:
-        $first = true;
-        foreach ($resolved['rows'] as $row) {
-            $id = (int) ($row['id'] ?? 0);
-            if ($id <= 0) {
-                continue;
+    case 'laptops':
+    case 'desktops':
+    case 'servers':
+        $typeKey = rtrim($counterKey, 's'); // 'laptops' -> 'laptop', etc.
+        $computerTypeIds = \GlpiPlugin\Ticketsstatistics\ComputersStatistics::getComputerTypeIdsByKey($typeKey);
+        
+        if (count($computerTypeIds) === 1) {
+            $addCriterion(4, 'equals', $computerTypeIds[0]);
+        } elseif (count($computerTypeIds) > 1) {
+            $groupCriteria = ['link' => 'AND', 'criteria' => []];
+            foreach ($computerTypeIds as $i => $computerTypeId) {
+                $groupCriteria['criteria'][] = [
+                    'field'      => 4,
+                    'searchtype' => 'equals',
+                    'value'      => $computerTypeId,
+                    'link'       => $i === 0 ? 'AND' : 'OR',
+                ];
             }
-
-            $addCriterion(2, 'equals', $id, $first ? 'AND' : 'OR');
-            $first = false;
-        }
-
-        if ($criteria === []) {
+            $addCriterion($groupCriteria);
+        } else {
+            // No type found for this category, return empty result
             $addCriterion(2, 'equals', -1);
         }
         break;
