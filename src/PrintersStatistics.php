@@ -46,7 +46,7 @@ class PrintersStatistics
     /**
      * Get sum of all printed pages (last_pages_counter).
      */
-    public static function countTotalPages(int $townId = 0, int $manufacturerId = 0): int
+    public static function countTotalPages(int $townId = 0, int $manufacturerId = 0, string $period = 'thisyear', ?string $dateFrom = null, ?string $dateTo = null): int
     {
         global $DB;
 
@@ -59,7 +59,15 @@ class PrintersStatistics
             $where['glpi_printers.manufacturers_id'] = $manufacturerId;
         }
 
-        $leftJoin = [];
+        $leftJoin = [
+            'glpi_printerlogs' => [
+                'ON' => [
+                    'glpi_printers' => 'id',
+                    'glpi_printerlogs' => 'printers_id',
+                ],
+            ]
+        ];
+
         if ($townId > 0) {
             $leftJoin['glpi_locations'] = [
                 'ON' => [
@@ -70,11 +78,58 @@ class PrintersStatistics
             $where['glpi_locations.id'] = $townId;
         }
 
+        PeriodFilter::apply($where, 'glpi_printerlogs', $period, $dateFrom, $dateTo);
+
+        // A simpler query that groups by printer, gets the delta, then PHP sums it up
+        $totalDelta = 0;
+        $hasLogs = false;
+        
+        $req = $DB->request([
+            'SELECT' => [
+                new \QueryExpression("MAX(glpi_printerlogs.total_pages) - MIN(glpi_printerlogs.total_pages) AS delta")
+            ],
+            'FROM' => 'glpi_printers',
+            'LEFT JOIN' => $leftJoin,
+            'WHERE' => $where,
+            'GROUPBY' => ['glpi_printers.id'],
+            'HAVING' => ['delta' => ['>', 0]]
+        ]);
+        
+        foreach ($req as $row) {
+            $hasLogs = true;
+            $totalDelta += (int) $row['delta'];
+        }
+
+        if ($hasLogs) {
+            return $totalDelta;
+        }
+
+        // Fallback if no logs
+        $whereFallback = [
+            'glpi_printers.is_deleted'  => 0,
+            'glpi_printers.is_template' => 0,
+        ] + getEntitiesRestrictCriteria('glpi_printers');
+
+        if ($manufacturerId > 0) {
+            $whereFallback['glpi_printers.manufacturers_id'] = $manufacturerId;
+        }
+
+        $leftJoinFallback = [];
+        if ($townId > 0) {
+            $leftJoinFallback['glpi_locations'] = [
+                'ON' => [
+                    'glpi_locations' => 'id',
+                    'glpi_printers'  => 'locations_id',
+                ],
+            ];
+            $whereFallback['glpi_locations.id'] = $townId;
+        }
+
         $iter = $DB->request([
             'SELECT'    => ['SUM' => 'glpi_printers.last_pages_counter AS total'],
             'FROM'      => 'glpi_printers',
-            'LEFT JOIN' => $leftJoin,
-            'WHERE'     => $where,
+            'LEFT JOIN' => $leftJoinFallback,
+            'WHERE'     => $whereFallback,
         ]);
         $row = $iter->current();
 
@@ -151,21 +206,28 @@ class PrintersStatistics
     /**
      * Get top printers by total pages printed.
      */
-    public static function getTopPrintersByPages(int $townId = 0, int $manufacturerId = 0, int $limit = 8): array
+    public static function getTopPrintersByPages(int $townId = 0, int $manufacturerId = 0, int $limit = 8, string $period = 'thisyear', ?string $dateFrom = null, ?string $dateTo = null): array
     {
         global $DB;
 
         $where = [
             'glpi_printers.is_deleted'  => 0,
             'glpi_printers.is_template' => 0,
-            'glpi_printers.last_pages_counter' => ['>', 0],
         ] + getEntitiesRestrictCriteria('glpi_printers');
 
         if ($manufacturerId > 0) {
             $where['glpi_printers.manufacturers_id'] = $manufacturerId;
         }
 
-        $leftJoin = [];
+        $leftJoin = [
+            'glpi_printerlogs' => [
+                'ON' => [
+                    'glpi_printers' => 'id',
+                    'glpi_printerlogs' => 'printers_id',
+                ],
+            ]
+        ];
+
         if ($townId > 0) {
             $leftJoin['glpi_locations'] = [
                 'ON' => [
@@ -176,16 +238,21 @@ class PrintersStatistics
             $where['glpi_locations.id'] = $townId;
         }
 
+        PeriodFilter::apply($where, 'glpi_printerlogs', $period, $dateFrom, $dateTo);
+
         $results = [];
+        // Calculer le delta (max - min) sur la période
         foreach (
             $DB->request([
                 'SELECT'    => [
                     'glpi_printers.name AS name',
-                    'glpi_printers.last_pages_counter AS pages'
+                    new \QueryExpression("MAX(glpi_printerlogs.total_pages) - MIN(glpi_printerlogs.total_pages) AS pages")
                 ],
                 'FROM'      => 'glpi_printers',
                 'LEFT JOIN' => $leftJoin,
                 'WHERE'     => $where,
+                'GROUPBY'   => ['glpi_printers.id', 'glpi_printers.name'],
+                'HAVING'    => ['pages' => ['>', 0]],
                 'ORDER'     => ['pages DESC'],
                 'LIMIT'     => $limit
             ]) as $row
@@ -196,13 +263,47 @@ class PrintersStatistics
             ];
         }
 
+        // Si la table glpi_printerlogs est vide (aucun delta trouvé), on utilise last_pages_counter par défaut
+        if (empty($results)) {
+            $whereFallback = [
+                'glpi_printers.is_deleted'  => 0,
+                'glpi_printers.is_template' => 0,
+                'glpi_printers.last_pages_counter' => ['>', 0],
+            ] + getEntitiesRestrictCriteria('glpi_printers');
+            
+            if ($manufacturerId > 0) {
+                $whereFallback['glpi_printers.manufacturers_id'] = $manufacturerId;
+            }
+            if ($townId > 0) {
+                $whereFallback['glpi_printers.locations_id'] = $townId;
+            }
+
+            foreach (
+                $DB->request([
+                    'SELECT'    => [
+                        'glpi_printers.name AS name',
+                        'glpi_printers.last_pages_counter AS pages'
+                    ],
+                    'FROM'      => 'glpi_printers',
+                    'WHERE'     => $whereFallback,
+                    'ORDER'     => ['pages DESC'],
+                    'LIMIT'     => $limit
+                ]) as $row
+            ) {
+                $results[] = [
+                    'name'  => (string) ($row['name'] ?? __('Unknown', 'ticketsstatistics')),
+                    'pages' => (int) ($row['pages'] ?? 0),
+                ];
+            }
+        }
+
         return $results;
     }
 
     /**
-     * Get evolution of global page counters over the last 12 months.
+     * Get evolution of global page counters over the selected period.
      */
-    public static function getPagesEvolution(int $townId = 0, int $manufacturerId = 0): array
+    public static function getPagesEvolution(int $townId = 0, int $manufacturerId = 0, string $period = 'thisyear', ?string $dateFrom = null, ?string $dateTo = null): array
     {
         global $DB;
 
@@ -234,11 +335,8 @@ class PrintersStatistics
             $where['glpi_locations.id'] = $townId;
         }
 
-        // We want the max counter for each printer per month, then sum them up.
-        // First get the max counter for each printer for each month over the last 12 months.
-        $lastYearDate = date('Y-m-d 00:00:00', strtotime('-12 months'));
-        $where['glpi_printerlogs.date'] = ['>=', $lastYearDate];
         $where[] = new \QueryExpression("glpi_printerlogs.total_pages > 0");
+        PeriodFilter::apply($where, 'glpi_printerlogs', $period, $dateFrom, $dateTo);
 
         $printerMonthMax = [];
         

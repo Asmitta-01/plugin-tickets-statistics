@@ -12,8 +12,13 @@ if (!\Session::haveRight('dashboard', READ)) {
 $townId = (int) ($_GET['town_id'] ?? 0);
 $manufacturerId = (int) ($_GET['manufacturer_id'] ?? 0);
 
+$period = $_GET['period'] ?? 'thisyear';
+$dateFrom = $_GET['date_from'] ?? null;
+$dateTo = $_GET['date_to'] ?? null;
+$periodLabel = \GlpiPlugin\Ticketsstatistics\PeriodFilter::getPeriodLabel($period);
+
 $totalPrinters = PrintersStatistics::countPrinters($townId, $manufacturerId);
-$totalPages = PrintersStatistics::countTotalPages($townId, $manufacturerId);
+$totalPages = PrintersStatistics::countTotalPages($townId, $manufacturerId, $period, $dateFrom, $dateTo);
 $cartridgeStatuses = PrintersStatistics::getCartridgesStatuses($townId, $manufacturerId);
 
 $totalCartridges = array_sum($cartridgeStatuses);
@@ -42,7 +47,7 @@ $pluginAssetsRoot = ($CFG_GLPI['root_doc'] ?? '') . '/plugins/ticketsstatistics/
 
     <div class="alert alert-secondary mb-3">
         <form class="row g-2 align-items-end" method="get">
-            <div class="col-md-4">
+            <div class="col-md-2">
                 <label for="ts-printers-town" class="form-label mb-1 fw-semibold"><?= __('Town', 'ticketsstatistics') ?></label>
                 <div id="ts-printers-town">
                     <?php \Location::dropdown([
@@ -50,25 +55,45 @@ $pluginAssetsRoot = ($CFG_GLPI['root_doc'] ?? '') . '/plugins/ticketsstatistics/
                         'display_emptychoice' => true,
                         'emptylabel' => __('All towns', 'ticketsstatistics'),
                         'value' => $townId,
-                        'class' => 'form-select form-select-sm w-100'
+                        'class' => 'form-select form-select-sm w-100',
+                        'addicon' => false,
+                        'comments' => false,
                     ]); ?>
                 </div>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-2">
                 <label for="ts-printers-manufacturer" class="form-label mb-1 fw-semibold"><?= __('Manufacturer', 'ticketsstatistics') ?></label>
                 <div id="ts-printers-manufacturer">
                     <?php \Manufacturer::dropdown([
                         'name' => 'manufacturer_id',
                         'display_emptychoice' => true,
-                        'emptylabel' => __('All manufacturers', 'ticketsstatistics'),
+                        'emptylabel' => __('All', 'ticketsstatistics'),
                         'value' => $manufacturerId,
-                        'class' => 'form-select form-select-sm w-100'
+                        'class' => 'form-select form-select-sm w-100',
+                        'addicon' => false,
+                        'comments' => false
                     ]); ?>
                 </div>
             </div>
-            <div class="col-md-4">
-                <button type="submit" class="btn btn-primary w-100 h-100">
-                    <i class="ti ti-filter me-1"></i> <?= __('Apply filters', 'ticketsstatistics') ?>
+            <div class="col-md-2">
+                <label for="ts-period" class="form-label mb-1 fw-semibold"><?= __('Period', 'ticketsstatistics') ?></label>
+                <select class="form-select form-select-sm w-100" id="ts-period" name="period">
+                    <?php foreach (\GlpiPlugin\Ticketsstatistics\PeriodFilter::getAvailablePeriods() as $value => $label): ?>
+                        <option value="<?= $value ?>" <?= $period === $value ? ' selected' : '' ?>><?= htmlspecialchars($label) ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div class="col-md-4" id="ts-custom-period-fields" style="display:<?= $period === 'custom' ? 'block' : 'none' ?>;">
+                <label class="form-label mb-1 fw-semibold"><?= __('Custom range', 'ticketsstatistics') ?></label>
+                <div class="input-group input-group-sm">
+                    <input type="date" class="form-control" id="ts-date-from" name="date_from" value="<?= isset($_GET['date_from']) ? htmlspecialchars($_GET['date_from']) : '' ?>">
+                    <span class="input-group-text">to</span>
+                    <input type="date" class="form-control" id="ts-date-to" name="date_to" value="<?= isset($_GET['date_to']) ? htmlspecialchars($_GET['date_to']) : '' ?>">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="ti ti-filter me-1"></i> <?= __('Apply', 'ticketsstatistics') ?>
                 </button>
             </div>
         </form>
@@ -85,14 +110,14 @@ $pluginAssetsRoot = ($CFG_GLPI['root_doc'] ?? '') . '/plugins/ticketsstatistics/
                 </div>
             </div>
         </div>
-        
+
         <!-- Card 2: Total Printed Pages -->
         <div class="col-xl-3 col-md-6">
             <div class="card shadow-sm h-100 text-center" style="border-top:3px solid #0ea5e9;">
                 <div class="card-body py-3">
                     <i class="ti ti-file-text fs-1" style="color:#0ea5e9"></i>
                     <div class="display-6 fw-bold"><?= number_format($totalPages, 0, '.', ' ') ?></div>
-                    <div class="text-muted fw-medium"><?= __('Total Printed Pages', 'ticketsstatistics') ?></div>
+                    <div class="text-muted fw-medium"><?= __('Total Printed Pages', 'ticketsstatistics') ?> (<?= htmlspecialchars($periodLabel) ?>)</div>
                 </div>
             </div>
         </div>
@@ -151,32 +176,32 @@ $pluginAssetsRoot = ($CFG_GLPI['root_doc'] ?? '') . '/plugins/ticketsstatistics/
         <!-- Printers by Pages -->
         <div class="col-lg-6">
             <div class="card shadow-sm h-100 ts-chart-card" data-counter-key="top_pages" style="cursor: pointer;">
-                <div class="card-header"><?= __('Top Printers by Printed Pages', 'ticketsstatistics') ?></div>
+                <div class="card-header"><?= __('Top Printers by Printed Pages', 'ticketsstatistics') ?> (<?= htmlspecialchars($periodLabel) ?>)</div>
                 <div class="card-body">
                     <canvas id="ts-printers-top-pages-chart" style="height: 320px; max-height: 320px;"></canvas>
                 </div>
             </div>
         </div>
 
-        <!-- Pages Evolution -->
-        <div class="col-lg-6">
-            <div class="card shadow-sm h-100 ts-chart-card" data-counter-key="evolution" style="cursor: pointer;">
-                <div class="card-header"><?= __('Global Page Counters Evolution (12 Months)', 'ticketsstatistics') ?></div>
-                <div class="card-body">
-                    <canvas id="ts-printers-evolution-chart" style="height: 320px; max-height: 320px;"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Charts Row 3 -->
-    <div class="row g-3 mb-4">
         <!-- Cartridges Ink Levels -->
         <div class="col-lg-6">
             <div class="card shadow-sm h-100 ts-chart-card" data-counter-key="ink" style="cursor: pointer;">
                 <div class="card-header"><?= __('Ink/Toner Levels', 'ticketsstatistics') ?></div>
                 <div class="card-body">
                     <canvas id="ts-printers-ink-chart" style="height: 320px; max-height: 320px;"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row 3 -->
+    <div class="row g-3 mb-4">
+        <!-- Pages Evolution -->
+        <div class="col-lg-12">
+            <div class="card shadow-sm h-100 ts-chart-card" data-counter-key="evolution" style="cursor: pointer;">
+                <div class="card-header"><?= __('Global Page Counters Evolution', 'ticketsstatistics') ?> (<?= htmlspecialchars($periodLabel) ?>)</div>
+                <div class="card-body">
+                    <canvas id="ts-printers-evolution-chart" style="height: 320px; max-height: 320px;"></canvas>
                 </div>
             </div>
         </div>
@@ -204,8 +229,8 @@ $pluginAssetsRoot = ($CFG_GLPI['root_doc'] ?? '') . '/plugins/ticketsstatistics/
 </div>
 
 <?php
-$topPrinters = PrintersStatistics::getTopPrintersByPages($townId, $manufacturerId, 8);
-$evolution = PrintersStatistics::getPagesEvolution($townId, $manufacturerId);
+$topPrinters = PrintersStatistics::getTopPrintersByPages($townId, $manufacturerId, 8, $period, $dateFrom, $dateTo);
+$evolution = PrintersStatistics::getPagesEvolution($townId, $manufacturerId, $period, $dateFrom, $dateTo);
 ?>
 <div id="ts-printers-chart-data"
     data-town-id="<?= $townId ?>"
@@ -219,8 +244,7 @@ $evolution = PrintersStatistics::getPagesEvolution($townId, $manufacturerId);
     data-lang-critical="<?= htmlspecialchars(__('< 10% (Critical)', 'ticketsstatistics'), ENT_QUOTES, 'UTF-8') ?>"
     data-lang-low="<?= htmlspecialchars(__('10-30% (Low)', 'ticketsstatistics'), ENT_QUOTES, 'UTF-8') ?>"
     data-lang-good="<?= htmlspecialchars(__('30-70% (Good)', 'ticketsstatistics'), ENT_QUOTES, 'UTF-8') ?>"
-    data-lang-full="<?= htmlspecialchars(__('> 70% (Full)', 'ticketsstatistics'), ENT_QUOTES, 'UTF-8') ?>"
->
+    data-lang-full="<?= htmlspecialchars(__('> 70% (Full)', 'ticketsstatistics'), ENT_QUOTES, 'UTF-8') ?>">
 </div>
 
 <?php \Html::footer(); ?>

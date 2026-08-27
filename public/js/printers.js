@@ -12,6 +12,20 @@ document.addEventListener('DOMContentLoaded', function () {
     const evolutionData = JSON.parse(dataNode.getAttribute('data-evolution-chart') || '[]');
     const inkData = JSON.parse(dataNode.getAttribute('data-ink-chart') || '{}');
 
+    // Period filter logic
+    const periodSelect = document.getElementById('ts-period');
+    const customFields = document.getElementById('ts-custom-period-fields');
+    if (periodSelect && customFields) {
+        periodSelect.addEventListener('change', function() {
+            if (this.value === 'custom') {
+                customFields.style.display = 'block';
+            } else {
+                customFields.style.display = 'none';
+                this.closest('form').submit();
+            }
+        });
+    }
+
     // Modal elements
     const printersModal = new bootstrap.Modal(document.getElementById('ts-printers-modal'));
     const modalTitle = document.getElementById('ts-printers-modal-title');
