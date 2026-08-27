@@ -17,7 +17,7 @@ class AssetStatistics
      * Get entity restriction criteria for a given table, optionally using recursive entity restrictions.
      * If is_recursive is true, the criteria will include all entities under the current entity in the hierarchy.
      */
-    private static function getEntitiesRestrictCriteria(string $table, bool $isRecursive = false, int $entityId = 0): array
+    public static function getEntitiesRestrictCriteria(string $table, bool $isRecursive = false, int $entityId = 0): array
     {
         if ($isRecursive) {
             $dbu = new DbUtils();
@@ -1354,12 +1354,12 @@ class AssetStatistics
                 if (in_array($counterKey, ['laptops', 'desktops', 'servers'], true)) {
                     $typeKey = rtrim($counterKey, 's'); // 'laptops' -> 'laptop', etc.
                     $typeIds = \GlpiPlugin\Ticketsstatistics\ComputersStatistics::getComputerTypeIdsByKey($typeKey);
-                    
+
                     if ($counterKey === 'servers') {
                         $vmwareIds = \GlpiPlugin\Ticketsstatistics\ComputersStatistics::getComputerTypeIdsByKey('vmware');
                         $typeIds = array_unique(array_merge($typeIds, $vmwareIds));
                     }
-                    
+
                     if (count($typeIds) > 0) {
                         $where['glpi_computers.computertypes_id'] = $typeIds;
                     } else {

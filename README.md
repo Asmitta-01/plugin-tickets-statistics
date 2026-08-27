@@ -61,6 +61,18 @@ Dedicated page, filterable by town and entity:
 - Direct navigation button to the **Servers dashboard**
 - Interactions: clicking cards/charts opens detail modals, with CSV export and GLPI full-list opening where applicable
 
+### Printers statistics
+
+Dedicated page (`front/printers.php`), accessible from the assets dashboard:
+
+- Overview cards: **Total Printers**, **Total Printed Pages**, **Cartridges in Stock (New)**, and **Cartridges in Use**
+- **Bar Chart (by model)**: Distribution of printers by hardware model (Top 8)
+- **Bar Chart (by town)**: Distribution of printers by geographical location
+- **Bar Chart (by pages)**: Top printers ranked by total printed pages
+- **Line Chart (evolution)**: Evolution of global page counters over the last 12 months
+- **Doughnut Chart (Ink levels)**: Overview of ink and toner levels (Critical, Low, Good, Full) collected from SNMP
+- **Interactive drilldown**: Clicking on chart segments (models, towns, or top printers) opens a detailed modal with the filtered printer list and direct links to GLPI.
+
 ### Servers statistics
 
 Dedicated page (`front/servers.php`), accessible from the computers and assets dashboards:

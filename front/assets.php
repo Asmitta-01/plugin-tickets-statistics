@@ -133,9 +133,14 @@ if ($showManufacturerChart) {
             <i class="ti ti-devices me-2"></i>
             <?= __('Assets Statistics', 'ticketsstatistics') ?>
         </h2>
-        <a href="<?= $CFG_GLPI['root_doc'] ?>/plugins/ticketsstatistics/front/computers.php" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" title="<?= __('Back to computers dashboard', 'ticketsstatistics') ?>">
-            <i class="ti ti-arrow-left me-1"></i> <?= __('Back to computers dashboard', 'ticketsstatistics') ?>
-        </a>
+        <div class="d-flex gap-2">
+            <a href="<?= $CFG_GLPI['root_doc'] ?>/plugins/ticketsstatistics/front/printers.php" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" title="<?= __('View printers dashboard', 'ticketsstatistics') ?>">
+                <i class="ti ti-printer me-1"></i> <?= __('Printers dashboard', 'ticketsstatistics') ?>
+            </a>
+            <a href="<?= $CFG_GLPI['root_doc'] ?>/plugins/ticketsstatistics/front/computers.php" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" title="<?= __('Back to computers dashboard', 'ticketsstatistics') ?>">
+                <i class="ti ti-arrow-left me-1"></i> <?= __('Back to computers dashboard', 'ticketsstatistics') ?>
+            </a>
+        </div>
     </div>
 
     <div class="alert alert-secondary mb-3">
