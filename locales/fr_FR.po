@@ -1230,3 +1230,57 @@ msgstr "Pares-feux"
 
 
 
+
+msgid "Printers dashboard"
+msgstr "Tableau de bord des imprimantes"
+
+msgid "Printers Dashboard"
+msgstr "Tableau de bord des imprimantes"
+
+msgid "Total Printers"
+msgstr "Total des imprimantes"
+
+msgid "Total Printed Pages"
+msgstr "Total des pages imprimées"
+
+msgid "Cartridges in Stock (New)"
+msgstr "Cartouches en stock (Neuves)"
+
+msgid "Cartridges in Use"
+msgstr "Cartouches en cours d'utilisation"
+
+msgid "Printers by Model (Top 8)"
+msgstr "Imprimantes par modèle (Top 8)"
+
+msgid "Printers by Town"
+msgstr "Imprimantes par ville"
+
+msgid "Top Printers by Printed Pages"
+msgstr "Top imprimantes par pages imprimées"
+
+msgid "Ink/Toner Levels"
+msgstr "Niveaux d'encre / toner"
+
+msgid "Global Page Counters Evolution"
+msgstr "Évolution globale des compteurs de pages"
+
+msgid "Printers Statistics"
+msgstr "Statistiques des imprimantes"
+
+msgid "View printers dashboard"
+msgstr "Voir le tableau de bord des imprimantes"
+
+msgid "Back to assets dashboard"
+msgstr "Retour au tableau de bord des actifs"
+
+msgid "< 10% (Critical)"
+msgstr "< 10% (Critique)"
+
+msgid "10-30% (Low)"
+msgstr "10-30% (Faible)"
+
+msgid "30-70% (Good)"
+msgstr "30-70% (Bon)"
+
+msgid "> 70% (Full)"
+msgstr "> 70% (Plein)"

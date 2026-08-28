@@ -1,13 +1,13 @@
 # TicketsStatistics GLPI plugin
 
-![Version](https://img.shields.io/badge/Version-0.9.1-2563eb)
+![Version](https://img.shields.io/badge/Version-0.10.0-2563eb)
 ![PHP](https://img.shields.io/badge/PHP-%3E%3D8.3-777bb4)
 ![GLPI](https://img.shields.io/badge/GLPI-10.0.16%20to%2011.0.6-0ea5e9)
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Asmitta-01/plugin-tickets-statistics)
 
 TicketsStatistics adds a dedicated reporting dashboard to GLPI for helpdesk ticket activity, plus town-based ticket, asset, computer/patch, and server analytics.
 
-**Current release:** 0.9.1
+**Current release:** 0.10.0
 
 ## Table of contents
 

@@ -1213,3 +1213,57 @@ msgstr ""
 
 
 
+
+msgid "Printers dashboard"
+msgstr ""
+
+msgid "Printers Dashboard"
+msgstr ""
+
+msgid "Total Printers"
+msgstr ""
+
+msgid "Total Printed Pages"
+msgstr ""
+
+msgid "Cartridges in Stock (New)"
+msgstr ""
+
+msgid "Cartridges in Use"
+msgstr ""
+
+msgid "Printers by Model (Top 8)"
+msgstr ""
+
+msgid "Printers by Town"
+msgstr ""
+
+msgid "Top Printers by Printed Pages"
+msgstr ""
+
+msgid "Ink/Toner Levels"
+msgstr ""
+
+msgid "Global Page Counters Evolution"
+msgstr ""
+
+msgid "Printers Statistics"
+msgstr ""
+
+msgid "View printers dashboard"
+msgstr ""
+
+msgid "Back to assets dashboard"
+msgstr ""
+
+msgid "< 10% (Critical)"
+msgstr ""
+
+msgid "10-30% (Low)"
+msgstr ""
+
+msgid "30-70% (Good)"
+msgstr ""
+
+msgid "> 70% (Full)"
+msgstr ""

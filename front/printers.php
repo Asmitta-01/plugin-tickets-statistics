@@ -177,8 +177,15 @@ $pluginAssetsRoot = ($CFG_GLPI['root_doc'] ?? '') . '/plugins/ticketsstatistics/
         <div class="col-lg-6">
             <div class="card shadow-sm h-100 ts-chart-card" data-counter-key="top_pages" style="cursor: pointer;">
                 <div class="card-header"><?= __('Top Printers by Printed Pages', 'ticketsstatistics') ?> (<?= htmlspecialchars($periodLabel) ?>)</div>
-                <div class="card-body">
-                    <canvas id="ts-printers-top-pages-chart" style="height: 320px; max-height: 320px;"></canvas>
+                <div class="card-body d-flex flex-column justify-content-center">
+                    <?php if (!empty($topPrinters)): ?>
+                        <canvas id="ts-printers-top-pages-chart" style="height: 320px; max-height: 320px;"></canvas>
+                    <?php else: ?>
+                        <div class="text-muted text-center py-5">
+                            <i class="ti ti-chart-bar mb-2 fs-1"></i><br>
+                            <?= __('No data available', 'ticketsstatistics') ?>
+                        </div>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
@@ -200,8 +207,15 @@ $pluginAssetsRoot = ($CFG_GLPI['root_doc'] ?? '') . '/plugins/ticketsstatistics/
         <div class="col-lg-12">
             <div class="card shadow-sm h-100 ts-chart-card" data-counter-key="evolution" style="cursor: pointer;">
                 <div class="card-header"><?= __('Global Page Counters Evolution', 'ticketsstatistics') ?> (<?= htmlspecialchars($periodLabel) ?>)</div>
-                <div class="card-body">
-                    <canvas id="ts-printers-evolution-chart" style="height: 320px; max-height: 320px;"></canvas>
+                <div class="card-body d-flex flex-column justify-content-center">
+                    <?php if (!empty($evolution)): ?>
+                        <canvas id="ts-printers-evolution-chart" style="height: 320px; max-height: 320px;"></canvas>
+                    <?php else: ?>
+                        <div class="text-muted text-center py-5">
+                            <i class="ti ti-chart-line mb-2 fs-1"></i><br>
+                            <?= __('No data available', 'ticketsstatistics') ?>
+                        </div>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>

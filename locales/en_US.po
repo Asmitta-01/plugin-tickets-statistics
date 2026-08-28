@@ -1222,3 +1222,57 @@ msgstr "Firewalls"
 
 
 
+
+msgid "Printers dashboard"
+msgstr "Printers dashboard"
+
+msgid "Printers Dashboard"
+msgstr "Printers Dashboard"
+
+msgid "Total Printers"
+msgstr "Total Printers"
+
+msgid "Total Printed Pages"
+msgstr "Total Printed Pages"
+
+msgid "Cartridges in Stock (New)"
+msgstr "Cartridges in Stock (New)"
+
+msgid "Cartridges in Use"
+msgstr "Cartridges in Use"
+
+msgid "Printers by Model (Top 8)"
+msgstr "Printers by Model (Top 8)"
+
+msgid "Printers by Town"
+msgstr "Printers by Town"
+
+msgid "Top Printers by Printed Pages"
+msgstr "Top Printers by Printed Pages"
+
+msgid "Ink/Toner Levels"
+msgstr "Ink/Toner Levels"
+
+msgid "Global Page Counters Evolution"
+msgstr "Global Page Counters Evolution"
+
+msgid "Printers Statistics"
+msgstr "Printers Statistics"
+
+msgid "View printers dashboard"
+msgstr "View printers dashboard"
+
+msgid "Back to assets dashboard"
+msgstr "Back to assets dashboard"
+
+msgid "< 10% (Critical)"
+msgstr "< 10% (Critical)"
+
+msgid "10-30% (Low)"
+msgstr "10-30% (Low)"
+
+msgid "30-70% (Good)"
+msgstr "30-70% (Good)"
+
+msgid "> 70% (Full)"
+msgstr "> 70% (Full)"
