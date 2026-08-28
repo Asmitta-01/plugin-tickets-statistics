@@ -32,8 +32,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const modalCount = document.getElementById('ts-printers-modal-count');
     const modalBody = document.getElementById('ts-printers-modal-body');
 
-    function openPrintersModal(title, counterKey, label = '') {
-        modalTitle.textContent = title + (label ? ' : ' + label : '');
+    function openPrintersModal(title, counterKey, label = '', displayLabel = null) {
+        modalTitle.textContent = title + (label ? ' : ' + (displayLabel || label) : '');
         modalCount.textContent = '...';
         modalBody.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary" role="status"></div></div>';
         printersModal.show();
@@ -288,6 +288,16 @@ document.addEventListener('DOMContentLoaded', function () {
                 },
                 options: {
                     ...commonOptions,
+                    onClick: function (event, elements) {
+                        if (elements && elements.length > 0) {
+                            const index = elements[0].index;
+                            const keys = ['critical', 'low', 'good', 'full'];
+                            const clickedKey = keys[index];
+                            const clickedLabel = labels[index];
+                            const title = document.querySelector('[data-counter-key="ink"] .card-header').textContent.split(' (')[0];
+                            openPrintersModal(title, 'ink', clickedKey, clickedLabel);
+                        }
+                    },
                     plugins: {
                         legend: { display: true, position: 'bottom' },
                         datalabels: {

@@ -502,6 +502,69 @@ class PrintersStatistics
     }
 
     /**
+     * Get printer IDs that have at least one cartridge matching the specified ink level category.
+     */
+    public static function getPrintersByInkLevel(int $townId = 0, int $manufacturerId = 0, string $level = 'critical'): array
+    {
+        global $DB;
+
+        $where = [
+            'glpi_printers.is_deleted'  => 0,
+            'glpi_printers.is_template' => 0,
+        ] + getEntitiesRestrictCriteria('glpi_printers');
+
+        $where[] = new \QueryExpression("glpi_printers_cartridgeinfos.value >= 0 AND glpi_printers_cartridgeinfos.value <= 100");
+
+        if ($level === 'critical') {
+            $where[] = new \QueryExpression("glpi_printers_cartridgeinfos.value < 10");
+        } elseif ($level === 'low') {
+            $where[] = new \QueryExpression("glpi_printers_cartridgeinfos.value >= 10 AND glpi_printers_cartridgeinfos.value < 30");
+        } elseif ($level === 'good') {
+            $where[] = new \QueryExpression("glpi_printers_cartridgeinfos.value >= 30 AND glpi_printers_cartridgeinfos.value < 70");
+        } elseif ($level === 'full') {
+            $where[] = new \QueryExpression("glpi_printers_cartridgeinfos.value >= 70");
+        }
+
+        if ($manufacturerId > 0) {
+            $where['glpi_printers.manufacturers_id'] = $manufacturerId;
+        }
+
+        $leftJoin = [
+            'glpi_printers_cartridgeinfos' => [
+                'ON' => [
+                    'glpi_printers_cartridgeinfos' => 'printers_id',
+                    'glpi_printers'                => 'id',
+                ],
+            ]
+        ];
+
+        if ($townId > 0) {
+            $leftJoin['glpi_locations'] = [
+                'ON' => [
+                    'glpi_locations' => 'id',
+                    'glpi_printers'  => 'locations_id',
+                ],
+            ];
+            $where['glpi_locations.id'] = $townId;
+        }
+
+        $printerIds = [];
+        foreach (
+            $DB->request([
+                'SELECT'     => ['glpi_printers.id'],
+                'DISTINCT'   => true,
+                'FROM'       => 'glpi_printers',
+                'INNER JOIN' => $leftJoin,
+                'WHERE'      => $where,
+            ]) as $row
+        ) {
+            $printerIds[] = (int) $row['id'];
+        }
+
+        return $printerIds;
+    }
+
+    /**
      * Get counts of physical cartridges by status (new, in use, empty)
      */
     public static function getCartridgesStatuses(int $townId = 0, int $manufacturerId = 0): array

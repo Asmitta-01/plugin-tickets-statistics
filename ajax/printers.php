@@ -22,6 +22,9 @@ if ($counterKey === 'model' && $label !== '') {
     $printers = array_filter($printers, fn($p) => $p['town'] === $label || ($label === __('Unknown', 'ticketsstatistics') && $p['town'] === ''));
 } elseif ($counterKey === 'top_pages' && $label !== '') {
     $printers = array_filter($printers, fn($p) => $p['name'] === $label);
+} elseif ($counterKey === 'ink' && $label !== '') {
+    $inkPrinterIds = \GlpiPlugin\Ticketsstatistics\PrintersStatistics::getPrintersByInkLevel($townId, $manufacturerId, $label);
+    $printers = array_filter($printers, fn($p) => in_array($p['id'], $inkPrinterIds));
 }
 
 // Ensure array keys are reset

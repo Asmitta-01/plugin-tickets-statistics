@@ -28,6 +28,8 @@ $printersList = PrintersStatistics::getPrintersList($townId, $manufacturerId);
 $printersByModel = PrintersStatistics::getPrintersByModel($townId, $manufacturerId);
 $printersByTown = PrintersStatistics::getPrintersByTown($townId, $manufacturerId);
 $cartridgesLevels = PrintersStatistics::getCartridgesLevelDistribution($townId, $manufacturerId);
+$topPrinters = PrintersStatistics::getTopPrintersByPages($townId, $manufacturerId, 8, $period, $dateFrom, $dateTo);
+$evolution = PrintersStatistics::getPagesEvolution($townId, $manufacturerId, $period, $dateFrom, $dateTo);
 
 $pluginAssetsRoot = ($CFG_GLPI['root_doc'] ?? '') . '/plugins/ticketsstatistics/public/';
 
@@ -242,10 +244,6 @@ $pluginAssetsRoot = ($CFG_GLPI['root_doc'] ?? '') . '/plugins/ticketsstatistics/
     </div>
 </div>
 
-<?php
-$topPrinters = PrintersStatistics::getTopPrintersByPages($townId, $manufacturerId, 8, $period, $dateFrom, $dateTo);
-$evolution = PrintersStatistics::getPagesEvolution($townId, $manufacturerId, $period, $dateFrom, $dateTo);
-?>
 <div id="ts-printers-chart-data"
     data-town-id="<?= $townId ?>"
     data-manufacturer-id="<?= $manufacturerId ?>"
