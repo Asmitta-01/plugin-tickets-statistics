@@ -500,7 +500,7 @@ function applyCoverageState(payload, chartDataNode) {
 }
 
 function openSoftwareCoverageComputersModal(coverage) {
-    if (!tsAssetsComputersModal || !tsAssetsChartDataNode) {
+    if (!tsAssetsModal || !tsAssetsChartDataNode) {
         return;
     }
 
