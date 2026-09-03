@@ -572,7 +572,11 @@ function openSoftwareCoverageComputersModal(coverage) {
                 countNode.textContent = formatComputersCount(payload.count || 0);
             }
             if (downloadBtn) {
-                downloadBtn.disabled = !tsAssetsModalComputers.length;
+                if (tsAssetsModalComputers.length > 0) {
+                    downloadBtn.classList.remove('disabled');
+                } else {
+                    downloadBtn.classList.add('disabled');
+                }
                 downloadBtn.onclick = downloadCoverageComputersCsv;
             }
 
